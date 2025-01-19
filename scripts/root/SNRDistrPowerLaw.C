@@ -141,7 +141,7 @@ const char* change_ext(const char* name,const char* new_ext,char* out)
 void SNRDistrPowerLaw( const char* fname, int column=1,
                 double fit_min_x=0, double fit_max_x=500, 
                 int dofit=1, int dDbm2DbmPerHz=1,
-                double low=-1000000, double up=-1000000, int bin_no=100,
+                double low=0, double up=1000, int bin_no=100,
                 const char* szExtDesc=NULL, int shift_text=0, int channel=0,
                 int bLog=1, const char* szTitleX="Signal-to-noise ratio (SNR)", const char* szTitleY="Probability (P) of flux density", 
                 int DoBorder=1, const char* szTitle=NULL, const char* szOutFile=NULL,
@@ -232,7 +232,7 @@ void SNRDistrPowerLaw( const char* fname, int column=1,
 
    printf("low=%.2f up=%.2f bin=%d (min_val=%.2f, max_val=%.2f)\n",low,up,bin_no,min_val,max_val);
 
-
+  
    char szHistoTitle[256];
    sprintf(szHistoTitle,"Histo_%s",fname);
    int rejected=0;
@@ -242,8 +242,12 @@ void SNRDistrPowerLaw( const char* fname, int column=1,
    double start_x = 1000;
    double   border=0;
    printf("DEBUG : histo bin_no = %d, range = %.6f - %.6f",bin_no,low-border,up+border);
-   TH1F*  histo = new TH1F(szHistoTitle,szTitle,bin_no,start_x-border,up+border);        
+//   TH1F*  histo = new TH1F(szHistoTitle,szTitle,bin_no,start_x-border,up+border);        
+   TH1F*  histo = new TH1F(szHistoTitle,szTitle,bin_no,5,110);
+   histo->Sumw2(); //
+
    TH1F* h_px = histo;
+   double sum_test=0.00;
    while (1) {
       if(fgets(buff,lSize,fcd)==0)
          break;
@@ -275,11 +279,13 @@ void SNRDistrPowerLaw( const char* fname, int column=1,
             count++;
 
             histo->Fill( valx );
+            sum_test += 1.00;
    }
 
+   printf("DEBUG : sum_test = %.8f\n",sum_test);
 
    // for correct errors after normalisation:   
-   histo->Sumw2(); // https://root.cern.ch/root/roottalk/roottalk99/2843.html
+//   histo->Sumw2(); // https://root.cern.ch/root/roottalk/roottalk99/2843.html
 
    if( bNormalise > 0 ){
      Double_t integral = histo->Integral();
@@ -327,7 +333,7 @@ void SNRDistrPowerLaw( const char* fname, int column=1,
 //   histo->Sumw2();
 
    histo->Draw();
-//return; 
+// return; 
    
 
    // export data:
@@ -357,8 +363,8 @@ void SNRDistrPowerLaw( const char* fname, int column=1,
    Double_t fit_norm_err=0.00,fit_exp_err=0.00;
    if( dofit ){
       TF1* pFitFunc = new TF1("power_law_distrib",power_law_distrib,fit_min_x,fit_max_x,2);
-      par[0] = 500;
-      par[1] = -0.20;
+      par[0] = 100;
+      par[1] = -4.0;
  
       pFitFunc->SetParameters(par);
       histo->Fit("power_law_distrib","E,V","",fit_min_x,fit_max_x);
