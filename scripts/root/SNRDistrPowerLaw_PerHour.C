@@ -138,7 +138,7 @@ const char* change_ext(const char* name,const char* new_ext,char* out)
 }
 
 
-void SNRDistrPowerLaw( const char* fname, int column=0,
+void SNRDistrPowerLaw_PerHour( const char* fname, int column=0, double TotalTimeInHours=18.00,
                 double fit_min_x=0, double fit_max_x=500, 
                 int dofit=1, int dDbm2DbmPerHz=1,
                 double low=0, double up=1000, int bin_no=100,
@@ -290,10 +290,13 @@ void SNRDistrPowerLaw( const char* fname, int column=0,
    if( bNormalise > 0 ){
      Double_t integral = histo->Integral();
      printf("Integral = %.8f\n",integral);
-     if (integral > 0){
-              histo->Scale(1/integral);
-          }
+//     if (integral > 0){
+//              histo->Scale(1/integral);
+//          }
    }
+
+   // normalise to have number of pulses per hour
+   histo->Scale(1/TotalTimeInHours);
 
    printf("Number of rejected (Power > -35 dBm) = %d out of %d = %.8f \%\n",rejected,cnt,((double)rejected)/((double)cnt));
         printf("DEBUG : ok2 ???\n");
