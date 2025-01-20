@@ -21,6 +21,7 @@ def parse_options(idx):
    parser.set_usage("""parse_pulsars.py""")
    parser.add_option("--group_radius","--group_radius_timesteps",dest="group_radius_timesteps",default=1000,help="Group radius in timesteps [default: %default]",type="int")
    parser.add_option("--outfile","--out_script","--outf","-o",dest="outfile",default="merged_fredda.cand",help="Name of output file [default: %default]")
+   parser.add_option("--rfifile","--rfi_file","--rfi_ranges",dest="rfi_file",default="rfitimes.ranges",help="Name of RFI ranges file [default: %default]")
    parser.add_option("--stepfile","--step_file",dest="stepfile",default=None,help="File with steps vs. timeindex  [default: %default]")
    parser.add_option("--step_radius","--step_radius_timesteps","--stepradius",dest="step_radius_timesteps",default=10000,help="Step radius in timesteps [default: %default]",type="int")
    parser.add_option('--frbsearch_format','--frbsearch_input',action="store_true",dest="frbsearch_input",default=False, help="Format of input files, True-frb_search, False-FREDDA [default %default]")
@@ -35,7 +36,16 @@ def parse_options(idx):
 
    return (options, args)
 
-
+class cRange :
+   def __init__(self, start, end ) :
+      self.start = start
+      self.end   = end 
+   
+   def belongs( self, t ) :
+      if self.start <= t <= self.end :
+         return True
+   
+      return False   
 
 class cFreddaCandidate :
     def __init__(self, _timestep=0, _snr=0.00, _dm=-1.00, _idt=-1, _max_total_power=-1):
@@ -298,6 +308,32 @@ def read_step_file(file,verb=False,step_radius=-1) :
             i += 1
 
    return (numpy.array(timeidx_list),numpy.array(step_list))
+
+def read_range_file(file,verb=False) :
+   range_list = []
+
+   f = open(file)
+   data=f.readlines()
+
+   for line in data : 
+      words = line.split(' ')
+      if verb :
+         print("%d : %s %s" % (len(words),line,words[0+0]))
+
+      if words[0+0] == "#" :
+         continue
+
+      start = float( words[0+0] )
+      end   = float(words[1+0])
+
+      range = cRange(start,end)
+      range_list.append( copy.copy(range) )
+
+   f.close()
+
+   print("Read %d steps from file %s" % (len(range_list),file))
+   
+   return (numpy.array(range_list))
    
 
 def add( list , new_cand ) :
@@ -398,6 +434,7 @@ if __name__ == '__main__':
    (options, args) = parse_options(1)
 
    (cand_list) = read_file( file , frbsearch_input=options.frbsearch_input, presto_input=options.presto_input )
+   (range_list) = read_range_file( options.rfi_file )
    sys.exit(0)
    
    step_times = []
