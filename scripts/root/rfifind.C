@@ -336,6 +336,7 @@ void rfifind( const char* fname, double rfi_threshold=10.00, double low=0, doubl
    printf("DEBUG : bin width = %.4f vs. %.4f\n",histo->GetBinWidth(0),histo->GetBinWidth(bin_no));
 
 
+   FILE* outf = fopen("rfitimes.ranges","w");
    for(int ch=0;ch<histo->GetNbinsX();ch++){
       double val_histo = histo->GetBinContent(ch);
       printf("BIN(%d) = %.4f\n",ch,val_histo);
@@ -351,8 +352,10 @@ void rfifind( const char* fname, double rfi_threshold=10.00, double low=0, doubl
            double bin_start = histo->GetBinCenter(ch) - histo->GetBinWidth(ch)/2;
            double bin_end   = histo->GetBinCenter(ch) + histo->GetBinWidth(ch)/2;
            printf("RFI : %.2f - %.2f\n",bin_start,bin_end);
+           fprintf(outf,"%.4f %.4f\n",bin_start,bin_end);
       }
    }
+   fclose(outf);
 
 
 /*   TString szEpsName=fname;
