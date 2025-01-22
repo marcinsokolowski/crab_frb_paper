@@ -139,7 +139,7 @@ const char* change_ext(const char* name,const char* new_ext,char* out)
 
 
 void SNRDistrPowerLaw( const char* fname, int column=0,
-                double fit_min_x=0, double fit_max_x=500, 
+                double fit_min_x=5, double fit_max_x=500, 
                 int dofit=1, int dDbm2DbmPerHz=1,
                 double low=0, double up=1000, int bin_no=100,
                 const char* szExtDesc=NULL, int shift_text=0, int channel=0,
@@ -317,12 +317,12 @@ void SNRDistrPowerLaw( const char* fname, int column=0,
  
 
    // X axis 
-   histo->GetXaxis()->SetTitleOffset(1.00);
+   histo->GetXaxis()->SetTitleOffset(0.60);
    histo->GetXaxis()->SetTitleSize(0.048);
    histo->GetXaxis()->SetLabelSize(0.05);
 
    // Y axis 
-   histo->GetYaxis()->SetTitleOffset(1.00);
+   histo->GetYaxis()->SetTitleOffset(0.60);
    histo->GetYaxis()->SetTitleSize(0.05);
    histo->GetYaxis()->SetLabelSize(0.05);
    histo->SetTitle("");
@@ -363,8 +363,8 @@ void SNRDistrPowerLaw( const char* fname, int column=0,
    Double_t fit_norm_err=0.00,fit_exp_err=0.00;
    if( dofit ){
       TF1* pFitFunc = new TF1("power_law_distrib",power_law_distrib,fit_min_x,fit_max_x,2);
-      par[0] = 100;
-      par[1] = -4.0;
+      par[0] = 0;
+      par[1] = -0.0;
  
       pFitFunc->SetParameters(par);
       histo->Fit("power_law_distrib","E,V","",fit_min_x,fit_max_x);
@@ -453,13 +453,13 @@ void SNRDistrPowerLaw( const char* fname, int column=0,
    if( szTitleX && strlen(szTitleX) ){
       histo->SetXTitle( szTitleX );
       histo->GetXaxis()->SetTitleSize(0.07);
-      histo->GetXaxis()->SetTitleOffset(0.70);
+      histo->GetXaxis()->SetTitleOffset(0.60);
       histo->GetXaxis()->SetLabelSize(0.05);
    }
    if( szTitleY && strlen(szTitleY) ){
       histo->SetYTitle( szTitleY );   
       histo->GetYaxis()->SetTitleSize(0.07);
-      histo->GetYaxis()->SetTitleOffset(0.8);
+      histo->GetYaxis()->SetTitleOffset(0.6);
       histo->GetYaxis()->SetLabelSize(0.05);
    }
    

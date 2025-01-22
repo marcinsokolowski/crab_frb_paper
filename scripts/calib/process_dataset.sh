@@ -4,7 +4,7 @@ curr_path=`pwd`
 presto_dir=`ls -d ${curr_path}/J0534+2200_flagants_ch40_ch256/256/filterbank_msok_64ch/merged_channels_??????????/presto_sps_thresh5*/ | tail -1`
 
 # obs_script=doitnoweda2
-logfile=J0534+2200_40channels_3600sec_flagants_sepdada_ch256.out
+logfile=`ls J0534+2200_40channels_*sec_flagants_sepdada_ch256.out | tail -1`
 if [[ -n "$1" && "$1" != "-" ]]; then
    logfile="$1"
 fi
@@ -83,4 +83,7 @@ echo "~/github/crab_frb_paper/scripts/calib/snr2jy.sh all_crab_gps_norfi.singlep
 cp  ~/github/crab_frb_paper/scripts/root/FluDistrPowerLaw.C .
 root -l "FluDistrPowerLaw.C(\"all_crab_gps_norfi_fluxcal.singlepulse\")"
 
+cat all_crab_gps_norfi.singlepulse | awk '{if($1!="#"){print $2;}}' > all_crab_gps_norfi.snr
+cp  ~/github/crab_frb_paper/scripts/root/SNRDistrPowerLaw.C .
+root -l "SNRDistrPowerLaw.C(\"all_crab_gps_norfi.snr\")"
 
