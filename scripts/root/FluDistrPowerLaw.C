@@ -138,12 +138,13 @@ const char* change_ext(const char* name,const char* new_ext,char* out)
 }
 
 
-void FluDistrPowerLaw( const char* fname, int column=0,
+void FluDistrPowerLaw( const char* fname, double TotalTimeInHours=0.50,
+                int column=0,
                 double fit_min_x=10, double fit_max_x=2000, 
                 int dofit=1, int dDbm2DbmPerHz=1,
                 double low=90, double up=5000, int bin_no=100,
                 const char* szExtDesc=NULL, int shift_text=0, int channel=0,
-                int bLog=1, const char* szTitleX="Flu? [Jy]", const char* szTitleY="Probability (P) of flu per hour", 
+                int bLog=1, const char* szTitleX="Mean peak flux density [Jy]", const char* szTitleY="Probability (P) of flu per hour", 
                 int DoBorder=1, const char* szTitle=NULL, const char* szOutFile=NULL,
                 const char* szOutPostfix="_histo", int unix_time=0, const char* flag=NULL,
                 int bNormalise=0, int bPrintHeader=1 )
@@ -295,6 +296,9 @@ void FluDistrPowerLaw( const char* fname, int column=0,
           }
    }
 
+   // normalise to have number of pulses per hour
+//   histo->Scale(1/TotalTimeInHours);
+
    printf("Number of rejected (Power > -35 dBm) = %d out of %d = %.8f \%\n",rejected,cnt,((double)rejected)/((double)cnt));
         printf("DEBUG : ok2 ???\n");
 
@@ -317,12 +321,12 @@ void FluDistrPowerLaw( const char* fname, int column=0,
  
 
    // X axis 
-   histo->GetXaxis()->SetTitleOffset(1.00);
+   histo->GetXaxis()->SetTitleOffset(0.60);
    histo->GetXaxis()->SetTitleSize(0.048);
    histo->GetXaxis()->SetLabelSize(0.05);
 
    // Y axis 
-   histo->GetYaxis()->SetTitleOffset(1.00);
+   histo->GetYaxis()->SetTitleOffset(0.60);
    histo->GetYaxis()->SetTitleSize(0.05);
    histo->GetYaxis()->SetLabelSize(0.05);
    histo->SetTitle("");
@@ -453,13 +457,13 @@ void FluDistrPowerLaw( const char* fname, int column=0,
    if( szTitleX && strlen(szTitleX) ){
       histo->SetXTitle( szTitleX );
       histo->GetXaxis()->SetTitleSize(0.07);
-      histo->GetXaxis()->SetTitleOffset(0.70);
+      histo->GetXaxis()->SetTitleOffset(0.60);
       histo->GetXaxis()->SetLabelSize(0.05);
    }
    if( szTitleY && strlen(szTitleY) ){
       histo->SetYTitle( szTitleY );   
       histo->GetYaxis()->SetTitleSize(0.07);
-      histo->GetYaxis()->SetTitleOffset(0.8);
+      histo->GetYaxis()->SetTitleOffset(0.6);
       histo->GetYaxis()->SetLabelSize(0.05);
    }
    
@@ -516,6 +520,8 @@ void FluDistrPowerLaw( const char* fname, int column=0,
    c2->SetLogy(1);
    TF1* pPowerLawDistrib = new TF1("PowerLawDistrib","1.43526679 * (x/1000.00000000)^(-2.77212884)",1,100000000);
    pPowerLawDistrib->Draw();
+   pPowerLawDistrib->GetHistogram()->GetXaxis()->SetTitle( szTitleX );
+   pPowerLawDistrib->GetHistogram()->GetYaxis()->SetTitle( szTitleY );
 
    printf("PROBABILITIES of bright pulses are:\n");
    printf("10^6 Jy : %e\n",pPowerLawDistrib->Eval(1000000.00));

@@ -20,7 +20,7 @@ def parse_options(idx):
    parser=optparse.OptionParser()
    parser.set_usage("""parse_pulsars.py""")
    parser.add_option("--group_radius","--group_radius_timesteps",dest="group_radius_timesteps",default=1000,help="Group radius in timesteps [default: %default]",type="int")
-   parser.add_option("--outfile","--out_script","--outf","-o",dest="outfile",default="merged_fredda.cand",help="Name of output file [default: %default]")
+   parser.add_option("--outfile","--out_script","--outf","-o",dest="outfile",default="all_norfi.singlepulses",help="Name of output file [default: %default]")
    parser.add_option("--rfifile","--rfi_file","--rfi_ranges",dest="rfi_file",default="rfitimes.ranges",help="Name of RFI ranges file [default: %default]")
    parser.add_option("--stepfile","--step_file",dest="stepfile",default=None,help="File with steps vs. timeindex  [default: %default]")
    parser.add_option("--step_radius","--step_radius_timesteps","--stepradius",dest="step_radius_timesteps",default=10000,help="Step radius in timesteps [default: %default]",type="int")
@@ -48,7 +48,7 @@ class cRange :
       return False   
 
 class cFreddaCandidate :
-    def __init__(self, _timestep=0, _snr=0.00, _dm=-1.00, _idt=-1, _max_total_power=-1):
+    def __init__(self, _timestep=0, _snr=0.00, _dm=-1.00, _idt=-1, _max_total_power=-1, _sample=-1, _downfact=-1 ):
        self.timestep   = _timestep
        self.min_timestep = _timestep
        self.max_timestep = _timestep
@@ -61,6 +61,8 @@ class cFreddaCandidate :
        self.cand_list  = [] # list of candidates this one is a mean of 
        self.bad_data   = False
        self.max_total_power = _max_total_power;
+       self.sample = _sample
+       self.downfact = _downfact
 
     def __repr__(self) :
        out_str =  ("Candidate timestamp = %d, snr = %.2f , dm = %.2f (idt = %d), count = %d, added = %s" % (self.timestep,self.snr,self.dm,self.idt,self.count,self.added))
@@ -227,6 +229,8 @@ def read_file(file,verb=False,frbsearch_input=False,presto_input=False) :
       dm = 0
       idt = 0 
       max_total_power=-1
+      sample = -1
+      downfact = -1
          
       if frbsearch_input : # input as from frb_search package 
          # TIME  DM  SNR  N_PIX
@@ -259,7 +263,7 @@ def read_file(file,verb=False,frbsearch_input=False,presto_input=False) :
             max_total_power = float( words[10+0] )
 
       # print("DEBUG : DM = %.4f" % (dm))         
-      cand = cFreddaCandidate( _timestep=t, _snr=snr, _dm=dm, _idt=idt, _max_total_power=max_total_power )
+      cand = cFreddaCandidate( _timestep=t, _snr=snr, _dm=dm, _idt=idt, _max_total_power=max_total_power, _sample=sample, _downfact=downfact )
 
       cand_list.append( copy.copy(cand) )
 
@@ -426,6 +430,13 @@ def friends_of_friends( cand_list, radius=1000, debug=False ) :
 
    return (out_list)   
    
+def is_rfi( cand, rfi_ranges ):
+   for rfi_range in rfi_ranges :
+      if rfi_range.belongs( cand.timestep ) :
+         return True
+         
+   return False      
+   
 if __name__ == '__main__':   
    file="i_00000.cand"
    if len(sys.argv) > 1:
@@ -435,6 +446,17 @@ if __name__ == '__main__':
 
    (cand_list) = read_file( file , frbsearch_input=options.frbsearch_input, presto_input=options.presto_input )
    (range_list) = read_range_file( options.rfi_file )
+   
+   outf = open(options.outfile,"w")
+   outf.write("# DM      Sigma      Time (s)     Sample    Downfact\n")
+   for cand in cand_list :
+      if not is_rfi(cand,range_list) :
+#         print("NOT RFI")
+         line = ("%.2f %.2f %.6f %d %d\n" % (cand.dm,cand.snr,cand.timestep,cand.sample,cand.downfact))
+         outf.write(line)
+   outf.close()
+         
+   
    sys.exit(0)
    
    step_times = []

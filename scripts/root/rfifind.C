@@ -16,7 +16,7 @@
 
 int gVerb=0;
 
-void rfifind( const char* fname, double rfi_threshold=10.00, double low=0, double up=1800, int bin_no=180,
+void rfifind( const char* fname, double rfi_threshold=10.00, double low=0, double up=3600, int bin_no=360,
               int column=0,
                 int dofit=0,
                 int bLog=0, const char* szTitleX="", const char* szTitleY="", 
@@ -336,7 +336,7 @@ void rfifind( const char* fname, double rfi_threshold=10.00, double low=0, doubl
    printf("DEBUG : bin width = %.4f vs. %.4f\n",histo->GetBinWidth(0),histo->GetBinWidth(bin_no));
 
 
-   FILE* outf = fopen("rfitimes.ranges","w");
+   FILE* outf = fopen("rfi.ranges","w");
    for(int ch=0;ch<histo->GetNbinsX();ch++){
       double val_histo = histo->GetBinContent(ch);
       printf("BIN(%d) = %.4f\n",ch,val_histo);
