@@ -4,7 +4,7 @@ curr_path=`pwd`
 presto_dir=`ls -d ${curr_path}/J0534+2200_flagants_ch40_ch256/256/filterbank_msok_64ch/merged_channels_??????????/presto_sps_thresh5*/ | tail -1`
 
 # obs_script=doitnoweda2
-logfile=J0534+2200_40channels_1800sec_flagants_sepdada_ch256.out
+logfile=J0534+2200_40channels_3600sec_flagants_sepdada_ch256.out
 if [[ -n "$1" && "$1" != "-" ]]; then
    logfile="$1"
 fi
@@ -21,14 +21,23 @@ if [[ -n "$2" && "$2" != "-" ]]; then
    outdir="$2"
 fi
 
+calc_sefd=1
+if [[ -n "$3" && "$3" != "-" ]]; then
+   calc_sefd=$3
+fi
+
 mkdir ${outdir}
 cd ${outdir}
 
 ln -s ../${logfile}
 
 # Generate lists and execute SEFD simulations :
-# echo "~/github/station_beam/scripts/psrflux/generete_sefd_calc_list.sh ${logfile} - 1 "
-# ~/github/station_beam/scripts/psrflux/generete_sefd_calc_list.sh ${logfile} - 1 
+if [[ $calc_sefd -gt 0 ]]; then
+   echo "~/github/station_beam/scripts/psrflux/generete_sefd_calc_list.sh ${logfile} - 1 "
+   ~/github/station_beam/scripts/psrflux/generete_sefd_calc_list.sh ${logfile} - 1 
+else
+   echo "WARNING : calculation of SEFD is not required"
+fi   
 
 # listfile=`ls -tr *_startux*_*sec_startfreq256_40chan.txt | tail -1`
 # echo "~/github/station_beam/scripts/psrflux/calculate_sefd_for_pointings.sh $listfile - 300 0.78125"
