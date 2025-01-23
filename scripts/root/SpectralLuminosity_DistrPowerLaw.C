@@ -29,7 +29,7 @@ double dbm2mW( double in_dbm )
    return mW;
 }
 
-double gFlux0 = 7*1e23;
+Double_t gFlux0 = 7*1e23;
 
 Double_t power_law_distrib( Double_t* x, Double_t* y )
 {
@@ -530,15 +530,18 @@ void SpectralLuminosity_DistrPowerLaw( const char* fname, double TotalTimeInHour
    c2->SetFillStyle(0);
    c2->SetLogx(1);
    c2->SetLogy(1);
-   TF1* pPowerLawDistrib = new TF1("PowerLawDistrib","1.43526679 * (x/1000.00000000)^(-2.77212884)",1,100000000);
+   char szFuncString[128];
+   sprintf(szFuncString,"%.4f * (x/%.8f)^(%.8f)",par[0],gFlux0,par[1]);
+   printf("Plotting function : |%s|\n",szFuncString);
+   TF1* pPowerLawDistrib = new TF1("PowerLawDistrib",szFuncString,1e24,1e40);
    pPowerLawDistrib->Draw();
    pPowerLawDistrib->GetHistogram()->GetXaxis()->SetTitle( szTitleX );
    pPowerLawDistrib->GetHistogram()->GetYaxis()->SetTitle( szTitleY );
 
    printf("PROBABILITIES of bright pulses are:\n");
-   printf("10^6 Jy : %e\n",pPowerLawDistrib->Eval(1000000.00));
-   printf("10^7 Jy : %e\n",pPowerLawDistrib->Eval(10000000.00));
-   printf("10^8 Jy : %e\n",pPowerLawDistrib->Eval(100000000.00));
+//   printf("10^6 Jy : %e\n",pPowerLawDistrib->Eval(1000000.00));
+//   printf("10^7 Jy : %e\n",pPowerLawDistrib->Eval(10000000.00));
+//   printf("10^8 Jy : %e\n",pPowerLawDistrib->Eval(100000000.00));
 
    
 }
