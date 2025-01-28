@@ -91,6 +91,29 @@ cat all_crab_gps_norfi.singlepulse | awk '{if($1!="#"){print $2;}}' > all_crab_g
 cp  ~/github/crab_frb_paper/scripts/root/SNRDistrPowerLaw.C .
 root -l "SNRDistrPowerLaw.C(\"all_crab_gps_norfi.snr\")"
 
+# Analysis on merged PRESTO candidates :
+mkdir -p merged/
+cd merged/
+echo "~/github/crab_frb_paper/scripts/presto2cand.sh ../all_crab_gps_norfi.singlepulse"
+~/github/crab_frb_paper/scripts/presto2cand.sh ../all_crab_gps_norfi.singlepulse
+
+echo "~/github/crab_frb_paper/scripts/calib/snr2jy.sh presto.cand_normal $mean_sefd | awk '{print $3;}' > presto_norfi_fluxcal.cand_normal"
+~/github/crab_frb_paper/scripts/calib/snr2jy.sh presto.cand_normal $mean_sefd | awk '{print $3;}' > presto_norfi_fluxcal.cand_normal
+
+# plot distribution of calibrated mean peak flux density :
+cp  ~/github/crab_frb_paper/scripts/root/FluDistrPowerLaw.C .
+root -l "FluDistrPowerLaw.C(\"presto_norfi_fluxcal.cand_normal\")"
+
+cp ~/github/crab_frb_paper/scripts/root/SpectralLuminosity_DistrPowerLaw.C .
+root -l "SpectralLuminosity_DistrPowerLaw.C(\"presto_norfi_fluxcal.cand_normal\")"
+
+# plots SNR distribution 
+cat presto.cand_normal | awk '{if($1!="#"){print $2;}}' > presto.cand_normal_snr
+cp  ~/github/crab_frb_paper/scripts/root/SNRDistrPowerLaw.C .
+root -l "SNRDistrPowerLaw.C(\"presto.cand_normal_snr\")"
+
+
+
 
 
 # TODO :
