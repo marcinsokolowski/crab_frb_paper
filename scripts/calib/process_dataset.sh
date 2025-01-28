@@ -94,8 +94,8 @@ root -l "SNRDistrPowerLaw.C(\"all_crab_gps_norfi.snr\")"
 # Analysis on merged PRESTO candidates :
 mkdir -p merged/
 cd merged/
-echo "~/github/crab_frb_paper/scripts/presto2cand.sh ../all_crab_gps_norfi.singlepulse"
-~/github/crab_frb_paper/scripts/presto2cand.sh ../all_crab_gps_norfi.singlepulse
+echo "~/github/crab_frb_paper/scripts/calib/presto2cand.sh ../all_crab_gps_norfi.singlepulse"
+~/github/crab_frb_paper/scripts/calib/presto2cand.sh ../all_crab_gps_norfi.singlepulse
 
 echo "~/github/crab_frb_paper/scripts/calib/snr2jy.sh presto.cand_normal $mean_sefd | awk '{print $3;}' > presto_norfi_fluxcal.cand_normal"
 ~/github/crab_frb_paper/scripts/calib/snr2jy.sh presto.cand_normal $mean_sefd | awk '{print $3;}' > presto_norfi_fluxcal.cand_normal
