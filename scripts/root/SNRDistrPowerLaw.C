@@ -363,8 +363,8 @@ void SNRDistrPowerLaw( const char* fname, int column=0,
    Double_t fit_norm_err=0.00,fit_exp_err=0.00;
    if( dofit ){
       TF1* pFitFunc = new TF1("power_law_distrib",power_law_distrib,fit_min_x,fit_max_x,2);
-      par[0] = 0;
-      par[1] = -0.0;
+      par[0] = 100;
+      par[1] = -4.0;
  
       pFitFunc->SetParameters(par);
       histo->Fit("power_law_distrib","E,V","",fit_min_x,fit_max_x);
