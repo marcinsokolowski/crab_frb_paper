@@ -6,5 +6,5 @@ for fits_file in *.fits*
 do 
         echo "Processing file: $fits_file"
 #        python3 ~/Documents/git/ICRAR/File/RFI_Flagger/WORKING_FINAL/RFI_Signal_Flagger.py "$fits_file" "$DM"
-        python3 ~/github/crab_frb_paper/scripts/viewer/RFI_Signal_Flagger_Cal.py "$fits_file" "$DM"
+        python3 ~/github/crab_frb_paper/scripts/viewer/RFI_Signal_Flagger_Cal.py "$fits_file" "$DM" --calibrate
 done 

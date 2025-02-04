@@ -367,8 +367,8 @@ def plotting( time_xaxis, total_power_vs_time, pixel_data, new_pixel_data, time_
              added = False
              
        pos = pos + 1 
-    sum = sum*timeres_sec
-    print("DEBUG : Fluence (sum) = %.8f Jy ms" % (sum))
+    sum = sum*timeres_sec # *1000.00 to calculate seconds -> ms and have Jy ms (not Jy s )
+    print("DEBUG : Fluence (sum) = %.8f Jy s" % (sum))
 
     axs[3].plot(time_xaxis_signal, total_power_vs_time_signal)
 #    axs[3].axhline(y=median_signal, color='r', linestyle='--', label='Median')
@@ -392,8 +392,8 @@ def plotting( time_xaxis, total_power_vs_time, pixel_data, new_pixel_data, time_
 #    snr = (max_value - median)/IQR_rms
 #    print("SNR = %.2f" % (snr))
 #    
-#    tt=("SNR = %.2f, Fluence = %.6f Jy ms" % (snr,sum))
-    tt=("SNR = %.2f" % (snr))
+    tt=("SNR = %.2f, Fluence = %.6f Jy s" % (snr,sum))
+#    tt=("SNR = %.2f" % (snr))
     plt.text( arg_max_value, max_value*0.75, tt )        
 
     plt.suptitle(f'Candidate:{fits_file}',fontsize=16, y = 0.95, horizontalalignment='center')
