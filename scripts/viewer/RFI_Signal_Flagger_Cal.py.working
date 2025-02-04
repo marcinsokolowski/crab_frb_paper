@@ -30,8 +30,8 @@ from optparse import OptionParser,OptionGroup
 
 # %%
 #fits_file = "out_genfrb0011.fits.gz"
-# fits_file = sys.argv[1]
-# DM = float(sys.argv[2])
+fits_file = sys.argv[1]
+DM = float(sys.argv[2])
 
 # %%
 # Global Parameters 
@@ -41,7 +41,6 @@ IQR_multiplier = 5
 IQR_multiplier_signal = 5
 max_width = 50 # Max width is used in the function threshold_signal function as a parameter to characterise a RFI signal in a de-dispersed total power vs time FITS file. 
 dedis_width = 10 # This is the width that the signal spike spans across. It is used in the threshold_signal function. 
-timeres_sec = 0.00096768 # 1.08*64*14/1000000.00 seconds 
 
 def parse_options():
    usage="Usage: %prog [options]\n"
@@ -54,7 +53,7 @@ def parse_options():
 
    return (options, args)
 
-# (options, args) = parse_options()
+(options, args) = parse_options()
 
 # %%
 # Processing FITS Files
@@ -97,8 +96,8 @@ def process_fits_files(fits_file):
             
     return None, None, None, None, None, None , None, None, None, None  
 
-# x_dimension, y_dimension, delta_x, starting_frequency, delta_y, reference_x_pixel, pixel_data, delta_y, headers, data = process_fits_files(fits_file)
-# timeres_sec = delta_x/1000.00
+x_dimension, y_dimension, delta_x, starting_frequency, delta_y, reference_x_pixel, pixel_data, delta_y, headers, data = process_fits_files(fits_file)
+timeres_sec = delta_x/1000.00
 
 # %%
 # Power vs Time RFI 
@@ -122,7 +121,7 @@ def power_vs_time(delta_x,pixel_data):
     return total_power_vs_time, time_xaxis, sorted_total_power_vs_time, median
     
 
-# total_power_vs_time, time_xaxis, sorted_total_power_vs_time, median = power_vs_time(delta_x, pixel_data)
+total_power_vs_time, time_xaxis, sorted_total_power_vs_time, median = power_vs_time(delta_x, pixel_data)
 
 
 # %%
@@ -168,7 +167,7 @@ def threshold_median(time_xaxis, total_power_vs_time, IQR_multiplier):
     
     return rfi_events_spikes, rfi_events_block, rfi_threshold_median_above, rfi_threshold_median_below, median
 
-# rfi_events_spikes, rfi_events_block, rfi_threshold_median_above, rfi_threshold_median_below, median = threshold_median(time_xaxis, total_power_vs_time, IQR_multiplier)
+rfi_events_spikes, rfi_events_block, rfi_threshold_median_above, rfi_threshold_median_below, median = threshold_median(time_xaxis, total_power_vs_time, IQR_multiplier)
 
 
 # %%
@@ -176,7 +175,7 @@ def threshold_median(time_xaxis, total_power_vs_time, IQR_multiplier):
 # This blocks is used to incoherently de-disperse the same FITS for the purposes of identifying whether a signal is present in the FITS file. This is useful if the FITS
 # does not present anything obvious and could have a signal. This de-dispersing is depends on the DM of the source being detected. 
 
-# getcontext().prec = 50
+getcontext().prec = 50
 
 def dedispersing(DM):
     
@@ -207,7 +206,7 @@ def dedispersing(DM):
       
     return new_pixel_data, shift_arr, tdelay_arr, freq_arr 
     
-# new_pixel_data, shift_arr, tdelay_arr, freq_arr = dedispersing(DM) 
+new_pixel_data, shift_arr, tdelay_arr, freq_arr = dedispersing(DM) 
 
 
 # %%
@@ -228,7 +227,7 @@ def power_vs_time_signal(delta_x,new_pixel_data):
         
     return total_power_vs_time_signal, time_xaxis_signal
 
-# total_power_vs_time_signal, time_xaxis_signal = power_vs_time_signal(delta_x, new_pixel_data)
+total_power_vs_time_signal, time_xaxis_signal = power_vs_time_signal(delta_x, new_pixel_data)
 
 # %%
 # Thresholding Signal 
@@ -267,7 +266,7 @@ def threshold_signal(time_xaxis_signal, total_power_vs_time_signal, IQR_multipli
            
     return signal_event, median_signal, signal_threshold_median_above, signal_threshold_median_below, rfi_block_in_signal
 
-# signal_event, median_signal, signal_threshold_median_above, signal_threshold_median_below, rfi_block_in_signal = threshold_signal(time_xaxis_signal, total_power_vs_time_signal, IQR_multiplier_signal)
+signal_event, median_signal, signal_threshold_median_above, signal_threshold_median_below, rfi_block_in_signal = threshold_signal(time_xaxis_signal, total_power_vs_time_signal, IQR_multiplier_signal)
 
 # %%
 # Categorise RFI 
@@ -421,26 +420,6 @@ def is_there_RFI(fits_file):
 #is_there_RFI(fits_file)
 
 if __name__ == "__main__":
-    fits_file = sys.argv[1]
-    DM = float(sys.argv[2])
-    
-    (options, args) = parse_options()
-    
-    x_dimension, y_dimension, delta_x, starting_frequency, delta_y, reference_x_pixel, pixel_data, delta_y, headers, data = process_fits_files(fits_file)
-    timeres_sec = delta_x/1000.00
-    
-    total_power_vs_time, time_xaxis, sorted_total_power_vs_time, median = power_vs_time(delta_x, pixel_data)
-    
-    rfi_events_spikes, rfi_events_block, rfi_threshold_median_above, rfi_threshold_median_below, median = threshold_median(time_xaxis, total_power_vs_time, IQR_multiplier)
-    
-    getcontext().prec = 50
-    
-    new_pixel_data, shift_arr, tdelay_arr, freq_arr = dedispersing(DM)
-    
-    total_power_vs_time_signal, time_xaxis_signal = power_vs_time_signal(delta_x, new_pixel_data)
-    
-    signal_event, median_signal, signal_threshold_median_above, signal_threshold_median_below, rfi_block_in_signal = threshold_signal(time_xaxis_signal, total_power_vs_time_signal, IQR_multiplier_signal)
-
     result = is_there_RFI(fits_file)
     print(result)
 
