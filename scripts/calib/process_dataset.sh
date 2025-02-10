@@ -1,5 +1,13 @@
 #!/bin/bash
 
+
+# get log file :
+curr_dir=`pwd`
+dataset=`basename $curr_dir`
+echo "rsync -avP aavs2:/data/${dataset}/J0534+2200_40channels_*sec_flagants_sepdada_ch256.out ."
+rsync -avP aavs2:/data/${dataset}/J0534+2200_40channels_*sec_flagants_sepdada_ch256.out .
+
+
 curr_path=`pwd`
 presto_dir=`ls -d ${curr_path}/J0534+2200_flagants_ch40_ch256/256/filterbank_msok_64ch/merged_channels_??????????/presto_sps_thresh5*/ | tail -1`
 
