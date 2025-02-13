@@ -50,6 +50,14 @@ if [[ -n "$3" && "$3" != "-" ]]; then
    calc_sefd=$3
 fi
 
+TotalTimeInHours=0.998768602
+if [[ -n "$4" && "$4" != "-" ]]; then
+   TotalTimeInHours=$4
+else 
+   echo "ERROR : make sure to provide parameter 4 - Total observing time, use : readfile FILTERBANK"
+   exit;
+fi
+
 mkdir ${outdir}
 cd ${outdir}
 
@@ -109,18 +117,18 @@ echo "~/github/crab_frb_paper/scripts/calib/snr2jy.sh all_crab_gps_norfi.singlep
 # cp  ~/github/crab_frb_paper/scripts/root/FluDistrPowerLaw.C .
 # root -l "FluDistrPowerLaw.C(\"all_crab_gps_norfi_fluxcal.singlepulse\")"
 cp  ~/github/crab_frb_paper/scripts/root/FluRatePerHourPowerLaw.C .
-root -l "FluRatePerHourPowerLaw.C(\"all_crab_gps_norfi_fluxcal.singlepulse\")"
+root -l "FluRatePerHourPowerLaw.C(\"all_crab_gps_norfi_fluxcal.singlepulse\",${TotalTimeInHours})"
 
 # plots SNR distribution 
 cat all_crab_gps_norfi.singlepulse | awk '{if($1!="#"){print $2;}}' > all_crab_gps_norfi.snr
 # cp  ~/github/crab_frb_paper/scripts/root/SNRDistrPowerLaw.C .
 # root -l "SNRDistrPowerLaw.C(\"all_crab_gps_norfi.snr\")"
 cp  ~/github/crab_frb_paper/scripts/root/SNRRatePerHourPowerLaw.C .
-root -l "SNRRatePerHourPowerLaw.C(\"all_crab_gps_norfi.snr\")"
+root -l "SNRRatePerHourPowerLaw.C(\"all_crab_gps_norfi.snr\",${TotalTimeInHours})"
 
 # plot disitrbution of luminosity :
 cp ~/github/crab_frb_paper/scripts/root/SpectralLuminosity_DistrPowerLaw.C .
-root -l "SpectralLuminosity_DistrPowerLaw.C(\"all_crab_gps_norfi_fluxcal.singlepulse\")"
+root -l "SpectralLuminosity_DistrPowerLaw.C(\"all_crab_gps_norfi_fluxcal.singlepulse\",${TotalTimeInHours})"
 
 # Analysis on merged PRESTO candidates :
 mkdir -p merged/
