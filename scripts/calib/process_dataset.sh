@@ -7,6 +7,22 @@ dataset=`basename $curr_dir`
 echo "rsync -avP aavs2:/data/${dataset}/J0534+2200_40channels_*sec_flagants_sepdada_ch256.out ."
 rsync -avP aavs2:/data/${dataset}/J0534+2200_40channels_*sec_flagants_sepdada_ch256.out .
 
+count=`ls J0534+2200_40channels_*sec_flagants_sepdada_ch256.out | wc -l`
+if [[ $count -le 0 ]]; then
+   echo "WARNING : no file J0534+2200_40channels_*sec_flagants_sepdada_ch256.out found trying all locations ..."
+   dt=`echo ${dataset} | cut -b 1-11`
+   
+   echo "rsync -avP aavs2:/data/${dt}*/J0534+2200_40channels_*sec_flagants_sepdada_ch256.out ."
+   rsync -avP aavs2:/data/${dt}*/J0534+2200_40channels_*sec_flagants_sepdada_ch256.out .
+   
+   count=`ls J0534+2200_40channels_*sec_flagants_sepdada_ch256.out | wc -l`
+   if [[ $count -le 0 ]]; then
+      echo "ERROR : could not find log file J0534+2200_40channels_*sec_flagants_sepdada_ch256.out anywhere -> cannot continue, manual verification is required"
+   else 
+      echo "OK : file J0534+2200_40channels_*sec_flagants_sepdada_ch256.out found OK -> proceeding with processing"
+   fi
+fi
+
 
 curr_path=`pwd`
 presto_dir=`ls -d ${curr_path}/J0534+2200_flagants_ch40_ch256/256/filterbank_msok_64ch/merged_channels_??????????/presto_sps_thresh5*/ | tail -1`

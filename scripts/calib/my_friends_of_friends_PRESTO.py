@@ -38,7 +38,7 @@ def parse_options(idx):
 
 
 class cFreddaCandidate :
-    def __init__(self, _timestep=0, _snr=0.00, _dm=-1.00, _idt=-1, _max_total_power=-1, _t=0):
+    def __init__(self, _timestep=0, _snr=0.00, _dm=-1.00, _idt=-1, _max_total_power=-1, _t=0, _boxcar=-1):
        self.timestep   = _timestep
        self.t          = _t
        self.min_timestep = _timestep
@@ -52,6 +52,7 @@ class cFreddaCandidate :
        self.cand_list  = [] # list of candidates this one is a mean of 
        self.bad_data   = False
        self.max_total_power = _max_total_power;
+       self.boxcar = _boxcar
 
     def __repr__(self) :
        out_str =  ("Candidate timestamp = %d, snr = %.2f , dm = %.2f (idt = %d), count = %d, added = %s" % (self.timestep,self.snr,self.dm,self.idt,self.count,self.added))
@@ -109,6 +110,7 @@ class cFreddaCandidate :
              self.timestep = new_cand.timestep
              self.t        = new_cand.t
              self.max_total_power = new_cand.max_total_power
+             self.boxcar = new_cand.boxcar
              
           self.cand_list.append( copy.copy(new_cand) )   
           new_cand.added = True
@@ -148,6 +150,7 @@ class cFreddaCandidate :
        max_total_power = -1       
        peak_sample = -1
        peak_time = -1
+       boxcar = -1
        
        max_i = len(snr_sorted)
        if top_n > 0 :
@@ -184,6 +187,7 @@ class cFreddaCandidate :
              max_total_power = cand.max_total_power
              peak_sample = cand.timestep
              peak_time   = cand.t
+             boxcar = cand.boxcar
              
 #          if cand.dm > max_dm :
 #             max_dm = cand.dm
@@ -203,8 +207,8 @@ class cFreddaCandidate :
           # i = i - 1   
           i = i + 1
 
-       print("\treturn (%.4f,%.4f,%.4f,%.4f,%.4f,%d,%d,%.4f)" % (min_time,max_time,max_snr,min_dm,max_dm,min_idt,max_idt,max_total_power))             
-       return (min_time,max_time,max_snr,min_dm,max_dm,min_idt,max_idt,max_total_power,peak_sample,peak_time)
+       print("\treturn (%.4f,%.4f,%.4f,%.4f,%.4f,%d,%d,%.4f,%d)" % (min_time,max_time,max_snr,min_dm,max_dm,min_idt,max_idt,max_total_power,boxcar))             
+       return (min_time,max_time,max_snr,min_dm,max_dm,min_idt,max_idt,max_total_power,peak_sample,peak_time,boxcar)
        
 
 
@@ -243,9 +247,10 @@ def read_file(file,verb=False,frbsearch_input=False) :
          dm  = float(words[5+0])
          idt = int( float(words[4+0]) )
          max_total_power = float( words[10+0] )
+         boxcar = int(words[3+0])
 
       # print("DEBUG : DM = %.4f" % (dm))         
-      cand = cFreddaCandidate( _timestep=s, _snr=snr, _dm=dm, _idt=idt, _max_total_power=max_total_power, _t=t )
+      cand = cFreddaCandidate( _timestep=s, _snr=snr, _dm=dm, _idt=idt, _max_total_power=max_total_power, _t=t, _boxcar=boxcar )
 
       cand_list.append( copy.copy(cand) )
 
@@ -448,18 +453,19 @@ if __name__ == '__main__':
       max_total_power = -1
       peak_time = -1
       peak_sample = -1
+      boxcar = -1
       if options.print_as_is :
          min_time = cand.min_timestep
          max_time = cand.max_timestep
-         (a,b,max_snr,min_dm,max_dm,min_idt,max_idt,max_total_power,peak_sample,peak_time) = cand.get_maxsnr_range()
+         (a,b,max_snr,min_dm,max_dm,min_idt,max_idt,max_total_power,peak_sample,peak_time,boxcar) = cand.get_maxsnr_range()
       else :
-         (min_time,max_time,max_snr,min_dm,max_dm,min_idt,max_idt,max_total_power,peak_sample,peak_time) = cand.get_maxsnr_range()   
+         (min_time,max_time,max_snr,min_dm,max_dm,min_idt,max_idt,max_total_power,peak_sample,peak_time,boxcar) = cand.get_maxsnr_range()   
 #      line = ("%05d : %06.2f %08.2f %012.4f  |%012.4f - %012.4f|   %s" % (i,cand.snr,cand.dm,(cand.max_timestep+cand.min_timestep)/2.00,cand.min_timestep,cand.max_timestep,file))
       line = ("%05d : %06.2f %08.2f %012.4f  |%012.4f - %012.4f|   %s %08.2f %08.2f %04d %04d %.4f" % (i,max_snr,max_dm,(cand.max_timestep+cand.min_timestep)/2.00,min_time,max_time,file,min_dm,max_dm,min_idt,max_idt,max_total_power))
       print("%s" % (line))
       out_f.write( line + "\n" )
       
-      line = ("%05.2f %.2f %.6f %d 0" % (max_dm,max_snr,peak_time,peak_sample))
+      line = ("%05.2f %.2f %.6f %d %d" % (max_dm,max_snr,peak_time,peak_sample,boxcar))
       out_f2.write( line + "\n" )
             
    out_f.close()
