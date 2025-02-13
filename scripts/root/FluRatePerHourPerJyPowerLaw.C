@@ -29,7 +29,7 @@ double dbm2mW( double in_dbm )
    return mW;
 }
 
-Double_t gFlux0 = 7*1e23;
+double gFlux0 = 1000.00;
 
 Double_t power_law_distrib( Double_t* x, Double_t* y )
 {
@@ -138,13 +138,14 @@ const char* change_ext(const char* name,const char* new_ext,char* out)
 }
 
 
-void SpectralLuminosity_DistrPowerLaw( const char* fname, double TotalTimeInHours=0.998768602,
-                double low=1e23, double up=2e25, int bin_no=100,
-                double fit_min_x=1e24, double fit_max_x=2e25,
+// differential distribution /bin_width in Jy :
+void FluRatePerHourPerJyPowerLaw( const char* fname, double TotalTimeInHours=1.00,
                 int column=0,
+                double fit_min_x=10, double fit_max_x=2000, 
                 int dofit=1, int dDbm2DbmPerHz=1,
+                double low=90, double up=5000, int bin_no=100,
                 const char* szExtDesc=NULL, int shift_text=0, int channel=0,
-                int bLog=1, const char* szTitleX="Spectral luminosity [erg/s/Hz]", const char* szTitleY="Rate of events / hour", 
+                int bLog=1, const char* szTitleX="Mean peak flux density [Jy]", const char* szTitleY="Rate / hour", 
                 int DoBorder=1, const char* szTitle=NULL, const char* szOutFile=NULL,
                 const char* szOutPostfix="_histo", int unix_time=0, const char* flag=NULL,
                 int bNormalise=0, int bPrintHeader=1 )
@@ -180,8 +181,6 @@ void SpectralLuminosity_DistrPowerLaw( const char* fname, double TotalTimeInHour
    double min_val = 1000000;
    double max_val = -100000;
 
-   // Crab pulsar parameters : 
-   double jy2erg = 4.31941*1e21;   
    
    while (1) {
          if(fgets(buff,lSize,fcd)==0)
@@ -211,9 +210,6 @@ void SpectralLuminosity_DistrPowerLaw( const char* fname, double TotalTimeInHour
             }
             col++;
          }
-
-         // convert to spectral luminosity in erg/s/Hz 
-         valx = valx*jy2erg;
 
 //         printf("%.2f\n",valx);
 
@@ -247,7 +243,8 @@ void SpectralLuminosity_DistrPowerLaw( const char* fname, double TotalTimeInHour
 //   if( DoBorder <= 0 )
    double start_x = 1;
    double   border=0;
-   printf("DEBUG : histo bin_no = %d, range = %.6f - %.6f",bin_no,low-border,up+border);
+   double bin_width = (up-low); // Jy 
+   printf("DEBUG : histo bin_no = %d, range = %.6f - %.6f , bin_width = %.6f [Jy]\n",bin_no,low-border,up+border,bin_width);
    TH1F*  histo = new TH1F(szHistoTitle,szTitle,bin_no,low-border,up+border);        
 //   TH1F*  histo = new TH1F(szHistoTitle,szTitle,bin_no,5,110);
    histo->Sumw2(); //
@@ -280,9 +277,6 @@ void SpectralLuminosity_DistrPowerLaw( const char* fname, double TotalTimeInHour
                col++;
             }
 
-            // convert to spectral luminosity in erg/s/Hz 
-            valx = valx*jy2erg;
-
             sum += valx;
             sum2 += valx*valx;
             count++;
@@ -290,9 +284,6 @@ void SpectralLuminosity_DistrPowerLaw( const char* fname, double TotalTimeInHour
             histo->Fill( valx );
             sum_test += 1.00;
    }
-
-   sum *= jy2erg;
-   sum2 *= (jy2erg*jy2erg);
 
    printf("DEBUG : sum_test = %.8f\n",sum_test);
 
@@ -307,8 +298,14 @@ void SpectralLuminosity_DistrPowerLaw( const char* fname, double TotalTimeInHour
           }
    }
 
-// normalise to have number of pulses per hour
+   // normalise to have number of pulses per hour
    histo->Scale(1/TotalTimeInHours);
+
+   // normalise by bin width in Jy to have differential distribution (numbers not depending on bin width !)
+//   histo->Scale(1/bin_width);
+
+   double integral =  histo->Integral();
+   printf("Integral = %.6f\n",integral);
 
    printf("Number of rejected (Power > -35 dBm) = %d out of %d = %.8f \%\n",rejected,cnt,((double)rejected)/((double)cnt));
         printf("DEBUG : ok2 ???\n");
@@ -376,9 +373,8 @@ void SpectralLuminosity_DistrPowerLaw( const char* fname, double TotalTimeInHour
    Double_t fit_norm_err=0.00,fit_exp_err=0.00;
    if( dofit ){
       TF1* pFitFunc = new TF1("power_law_distrib",power_law_distrib,fit_min_x,fit_max_x,2);
-//      par[0] = 1;
-      par[1] = -4.0;
-      par[0] = 100;
+      par[0] = 1;
+      par[1] = -1.0;
  
       pFitFunc->SetParameters(par);
       histo->Fit("power_law_distrib","E,V","",fit_min_x,fit_max_x);
@@ -530,18 +526,15 @@ void SpectralLuminosity_DistrPowerLaw( const char* fname, double TotalTimeInHour
    c2->SetFillStyle(0);
    c2->SetLogx(1);
    c2->SetLogy(1);
-   char szFuncString[128];
-   sprintf(szFuncString,"%.4f * (x/%.8f)^(%.8f)",par[0],gFlux0,par[1]);
-   printf("Plotting function : |%s|\n",szFuncString);
-   TF1* pPowerLawDistrib = new TF1("PowerLawDistrib",szFuncString,1e24,1e40);
+   TF1* pPowerLawDistrib = new TF1("PowerLawDistrib","1.43526679 * (x/1000.00000000)^(-2.77212884)",1,100000000);
    pPowerLawDistrib->Draw();
    pPowerLawDistrib->GetHistogram()->GetXaxis()->SetTitle( szTitleX );
    pPowerLawDistrib->GetHistogram()->GetYaxis()->SetTitle( szTitleY );
 
    printf("PROBABILITIES of bright pulses are:\n");
-//   printf("10^6 Jy : %e\n",pPowerLawDistrib->Eval(1000000.00));
-//   printf("10^7 Jy : %e\n",pPowerLawDistrib->Eval(10000000.00));
-//   printf("10^8 Jy : %e\n",pPowerLawDistrib->Eval(100000000.00));
+   printf("10^6 Jy : %e\n",pPowerLawDistrib->Eval(1000000.00));
+   printf("10^7 Jy : %e\n",pPowerLawDistrib->Eval(10000000.00));
+   printf("10^8 Jy : %e\n",pPowerLawDistrib->Eval(100000000.00));
 
    
 }

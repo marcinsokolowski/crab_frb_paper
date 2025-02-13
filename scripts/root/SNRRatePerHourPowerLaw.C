@@ -29,7 +29,7 @@ double dbm2mW( double in_dbm )
    return mW;
 }
 
-Double_t gFlux0 = 7*1e23;
+double gFlux0 = 100000.00;
 
 Double_t power_law_distrib( Double_t* x, Double_t* y )
 {
@@ -138,13 +138,12 @@ const char* change_ext(const char* name,const char* new_ext,char* out)
 }
 
 
-void SpectralLuminosity_DistrPowerLaw( const char* fname, double TotalTimeInHours=0.998768602,
-                double low=1e23, double up=2e25, int bin_no=100,
-                double fit_min_x=1e24, double fit_max_x=2e25,
-                int column=0,
+void SNRRatePerHourPowerLaw( const char* fname, double TotalTimeInHours=0.998768602, int column=0,
+                double fit_min_x=5, double fit_max_x=500, 
                 int dofit=1, int dDbm2DbmPerHz=1,
+                double low=0, double up=1000, int bin_no=100,
                 const char* szExtDesc=NULL, int shift_text=0, int channel=0,
-                int bLog=1, const char* szTitleX="Spectral luminosity [erg/s/Hz]", const char* szTitleY="Rate of events / hour", 
+                int bLog=1, const char* szTitleX="Signal-to-noise ratio (SNR)", const char* szTitleY="Probability (P) of flux density", 
                 int DoBorder=1, const char* szTitle=NULL, const char* szOutFile=NULL,
                 const char* szOutPostfix="_histo", int unix_time=0, const char* flag=NULL,
                 int bNormalise=0, int bPrintHeader=1 )
@@ -180,8 +179,6 @@ void SpectralLuminosity_DistrPowerLaw( const char* fname, double TotalTimeInHour
    double min_val = 1000000;
    double max_val = -100000;
 
-   // Crab pulsar parameters : 
-   double jy2erg = 4.31941*1e21;   
    
    while (1) {
          if(fgets(buff,lSize,fcd)==0)
@@ -211,9 +208,6 @@ void SpectralLuminosity_DistrPowerLaw( const char* fname, double TotalTimeInHour
             }
             col++;
          }
-
-         // convert to spectral luminosity in erg/s/Hz 
-         valx = valx*jy2erg;
 
 //         printf("%.2f\n",valx);
 
@@ -245,11 +239,11 @@ void SpectralLuminosity_DistrPowerLaw( const char* fname, double TotalTimeInHour
 
 //   double border=(up-low)/10.00;
 //   if( DoBorder <= 0 )
-   double start_x = 1;
+   double start_x = 1000;
    double   border=0;
    printf("DEBUG : histo bin_no = %d, range = %.6f - %.6f",bin_no,low-border,up+border);
-   TH1F*  histo = new TH1F(szHistoTitle,szTitle,bin_no,low-border,up+border);        
-//   TH1F*  histo = new TH1F(szHistoTitle,szTitle,bin_no,5,110);
+//   TH1F*  histo = new TH1F(szHistoTitle,szTitle,bin_no,start_x-border,up+border);        
+   TH1F*  histo = new TH1F(szHistoTitle,szTitle,bin_no,5,110);
    histo->Sumw2(); //
 
    TH1F* h_px = histo;
@@ -280,9 +274,6 @@ void SpectralLuminosity_DistrPowerLaw( const char* fname, double TotalTimeInHour
                col++;
             }
 
-            // convert to spectral luminosity in erg/s/Hz 
-            valx = valx*jy2erg;
-
             sum += valx;
             sum2 += valx*valx;
             count++;
@@ -290,9 +281,6 @@ void SpectralLuminosity_DistrPowerLaw( const char* fname, double TotalTimeInHour
             histo->Fill( valx );
             sum_test += 1.00;
    }
-
-   sum *= jy2erg;
-   sum2 *= (jy2erg*jy2erg);
 
    printf("DEBUG : sum_test = %.8f\n",sum_test);
 
@@ -348,6 +336,8 @@ void SpectralLuminosity_DistrPowerLaw( const char* fname, double TotalTimeInHour
 //   histo->Sumw2();
 
    histo->Draw();
+// return; 
+   
 
    // export data:
    Double_t* x_values = new Double_t[histo->GetNbinsX()];
@@ -376,9 +366,8 @@ void SpectralLuminosity_DistrPowerLaw( const char* fname, double TotalTimeInHour
    Double_t fit_norm_err=0.00,fit_exp_err=0.00;
    if( dofit ){
       TF1* pFitFunc = new TF1("power_law_distrib",power_law_distrib,fit_min_x,fit_max_x,2);
-//      par[0] = 1;
-      par[1] = -4.0;
       par[0] = 100;
+      par[1] = -4.0;
  
       pFitFunc->SetParameters(par);
       histo->Fit("power_law_distrib","E,V","",fit_min_x,fit_max_x);
@@ -388,8 +377,6 @@ void SpectralLuminosity_DistrPowerLaw( const char* fname, double TotalTimeInHour
 //      parerrors=histo->GetFunction("power_law_distrib")->GetParErrors();
       fit_norm_err = histo->GetFunction("power_law_distrib")->GetParError(0);
       fit_exp_err  = histo->GetFunction("power_law_distrib")->GetParError(1);            
- 
-      printf("FITTED POWER LAW = %.8f * (f/%.8f)^(%.8f)\n",par[0],gFlux0,par[1]);
    
       TLatex lat;
       lat.SetTextAlign(23);
@@ -524,25 +511,5 @@ void SpectralLuminosity_DistrPowerLaw( const char* fname, double TotalTimeInHour
    szPngName += szOutPostfix;
    szPngName += ".png";
    c1->Print(szPngName.Data());
-
-   TCanvas* c2 = new TCanvas("c2","plot",200,10,700,500);
-   c2->SetFillColor(0);
-   c2->SetFillStyle(0);
-   c2->SetLogx(1);
-   c2->SetLogy(1);
-   char szFuncString[128];
-   sprintf(szFuncString,"%.4f * (x/%.8f)^(%.8f)",par[0],gFlux0,par[1]);
-   printf("Plotting function : |%s|\n",szFuncString);
-   TF1* pPowerLawDistrib = new TF1("PowerLawDistrib",szFuncString,1e24,1e40);
-   pPowerLawDistrib->Draw();
-   pPowerLawDistrib->GetHistogram()->GetXaxis()->SetTitle( szTitleX );
-   pPowerLawDistrib->GetHistogram()->GetYaxis()->SetTitle( szTitleY );
-
-   printf("PROBABILITIES of bright pulses are:\n");
-//   printf("10^6 Jy : %e\n",pPowerLawDistrib->Eval(1000000.00));
-//   printf("10^7 Jy : %e\n",pPowerLawDistrib->Eval(10000000.00));
-//   printf("10^8 Jy : %e\n",pPowerLawDistrib->Eval(100000000.00));
-
-   
 }
 

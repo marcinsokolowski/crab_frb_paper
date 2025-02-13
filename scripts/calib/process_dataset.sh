@@ -106,13 +106,17 @@ echo "~/github/crab_frb_paper/scripts/calib/snr2jy.sh all_crab_gps_norfi.singlep
 
 
 # plot distribution of calibrated mean peak flux density :
-cp  ~/github/crab_frb_paper/scripts/root/FluDistrPowerLaw.C .
-root -l "FluDistrPowerLaw.C(\"all_crab_gps_norfi_fluxcal.singlepulse\")"
+# cp  ~/github/crab_frb_paper/scripts/root/FluDistrPowerLaw.C .
+# root -l "FluDistrPowerLaw.C(\"all_crab_gps_norfi_fluxcal.singlepulse\")"
+cp  ~/github/crab_frb_paper/scripts/root/FluRatePerHourPowerLaw.C .
+root -l "FluRatePerHourPowerLaw.C(\"all_crab_gps_norfi_fluxcal.singlepulse\")"
 
 # plots SNR distribution 
 cat all_crab_gps_norfi.singlepulse | awk '{if($1!="#"){print $2;}}' > all_crab_gps_norfi.snr
-cp  ~/github/crab_frb_paper/scripts/root/SNRDistrPowerLaw.C .
-root -l "SNRDistrPowerLaw.C(\"all_crab_gps_norfi.snr\")"
+# cp  ~/github/crab_frb_paper/scripts/root/SNRDistrPowerLaw.C .
+# root -l "SNRDistrPowerLaw.C(\"all_crab_gps_norfi.snr\")"
+cp  ~/github/crab_frb_paper/scripts/root/SNRRatePerHourPowerLaw.C .
+root -l "SNRRatePerHourPowerLaw.C(\"all_crab_gps_norfi.snr\")"
 
 # plot disitrbution of luminosity :
 cp ~/github/crab_frb_paper/scripts/root/SpectralLuminosity_DistrPowerLaw.C .
