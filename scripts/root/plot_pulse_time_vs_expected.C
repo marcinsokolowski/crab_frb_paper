@@ -546,7 +546,7 @@ void plot_pulse_time_vs_expected( const char* basename="sigmaG1_vs_lapSigmaG1_fo
                           double max_y=-10000 , double min_allowed_value=-1e20,
                           int sleep_time=-1,
                 int bLog=0,
-      const char* szDescX="Time [seconds]",const char* szDescY="Flux density [Jy]", const char* szTitle="", const char* szOutDir="images/",
+      const char* szDescX="Time [ms]",const char* szDescY="SNR", const char* szTitle="", const char* szOutDir="images/",
       double fit_min_x=-100000, double fit_max_x=-100000,
       int x_col=0, int y_col=1, double norm_freq=55.7 )
 //  double min_x=-1e20, double max_x=1e20 )
