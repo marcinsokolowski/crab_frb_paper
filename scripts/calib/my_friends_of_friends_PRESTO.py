@@ -26,9 +26,11 @@ def parse_options(idx):
    parser.add_option("--step_radius","--step_radius_timesteps","--stepradius",dest="step_radius_timesteps",default=10000,help="Step radius in timesteps [default: %default]",type="int")
    parser.add_option('--frbsearch_format','--frbsearch_input',action="store_true",dest="frbsearch_input",default=False, help="Format of input files, True-frb_search, False-FREDDA [default %default]")
    parser.add_option('-d','--debug','--verbose',action="store_true",dest="debug",default=False, help="Debug mode [default %default]")
+   parser.add_option('-q','--quality','--quality_check',action="store_true",dest="quality_check",default=False, help="To debug/verify quality of merging [default %default]")
    parser.add_option('--print_max_snr_range',action="store_false",dest="print_as_is",default=True, help="For each merged candidate print time range of top 10 SNR candidates in this range [default %default]")
    parser.add_option("--pulse_list_file","--pulse_list",'-p',dest="pulse_list_file",default=None,help="File with list of known pulses to check for FREDDA false-positives [default: %default]")
    parser.add_option("--time_res","--time_res_sec","--timeres_sec",dest="timeres_sec",default=0.001,help="Time resolution in seconds  [default: %default]",type="float")
+   parser.add_option("-r","--radius","--merge_radius","--radius_ms",dest="merge_radius",default=15,help="Merge radius in [ms]  [default: %default half Crab's period to allow for separate pulses from main and inter-pulse]",type="float")
 #   parser.add_option("--station","-s",dest="station",default="aavs2",help="Station name [default: %default]")
 #   parser.add_option("--max_sun_elev","--max_sun","--sun_max",dest="max_sun_elev",default=20,help="Max Sun elevation [default: %default]",type="float")
    (options,args)=parser.parse_args(sys.argv[idx:])
@@ -61,11 +63,21 @@ class cFreddaCandidate :
     def __str__(self) :
        return "member of cFreddaCandidate"
 
-    def belongs( self, check_cand, t_radius=30 ) : # 33ms is Crab's period
-       if check_cand.timestep >= ( self.min_timestep-t_radius) and check_cand.timestep <= ( self.max_timestep+t_radius) and  math.fabs(check_cand.dm - self.dm) <= 10 : 
-          return True
+    def belongs( self, check_cand, t_radius=30, dm_radius=5 ) : # 33ms is Crab's period
+#       if check_cand.timestep >= ( self.min_timestep-t_radius) and check_cand.timestep <= ( self.max_timestep+t_radius) and  math.fabs(check_cand.dm - self.dm) <= dm_radius : 
+#          return True
+      if math.fabs(check_cand.dm - self.dm) <= dm_radius :
+         # either time of the candidate is between MIN and MAX times of this group
+         # or the event is outside MIN-MAX range but after adding it MIN-MAX range will still be <= t_radius
+         if (self.min_timestep <= check_cand.timestep <= self.max_timestep) or (math.fabs(self.min_timestep-check_cand.timestep)<=t_radius and math.fabs(self.max_timestep-check_cand.timestep)<=t_radius) :
+            return True
+
+# TOO SLOW:
+#       for cand in cand_list :
+#          if math.fabs( cand.timestep - check_cand.timestep ) > t_radius :
+#             return False 
        
-       return False
+      return False
    
 #    def is_added( self, check_cand ) :
 #       for cand in self.cand_list :
@@ -307,7 +319,7 @@ def add( list , new_cand ) :
    list[l-1].add( new_cand )
    
 
-def friends_of_friends( cand_list, radius=1000, debug=False ) :
+def friends_of_friends( cand_list, options, radius=1000, debug=False ) :
    print("INFO : friends_of_friends , radius = %.1f" % (radius))
    print_modulo=100
    if debug :
@@ -359,7 +371,7 @@ def friends_of_friends( cand_list, radius=1000, debug=False ) :
             
             if not cand.added : 
                for out_cand in out_list :
-                  if out_cand.belongs( cand , t_radius=radius ) :
+                  if out_cand.belongs( cand , t_radius=options.merge_radius ) :
                      out_cand.add( cand )
                      added += 1
             
@@ -429,7 +441,7 @@ if __name__ == '__main__':
             
    
    print("PROGRESS : finding Friends-of-Friends:")
-   (out_list)  = friends_of_friends( cand_list, radius=options.group_radius_timesteps, debug=options.debug )
+   (out_list)  = friends_of_friends( cand_list, options, radius=options.group_radius_timesteps, debug=options.debug )
 
    # TODO : output center , time range etc 
    out_f = open( options.outfile , "w" )   
@@ -441,6 +453,7 @@ if __name__ == '__main__':
    out_f2.write( line + "\n" )
    
 #   for cand in out_list :
+   print("PROGRESS : writing output list to .cand_merged file")
    for i in range(0,len(out_list)) :   
       cand = out_list[i]
       
@@ -461,9 +474,30 @@ if __name__ == '__main__':
       else :
          (min_time,max_time,max_snr,min_dm,max_dm,min_idt,max_idt,max_total_power,peak_sample,peak_time,boxcar) = cand.get_maxsnr_range()   
 #      line = ("%05d : %06.2f %08.2f %012.4f  |%012.4f - %012.4f|   %s" % (i,cand.snr,cand.dm,(cand.max_timestep+cand.min_timestep)/2.00,cand.min_timestep,cand.max_timestep,file))
-      line = ("%05d : %06.2f %08.2f %012.4f  |%012.4f - %012.4f|   %s %08.2f %08.2f %04d %04d %.4f" % (i,max_snr,max_dm,(cand.max_timestep+cand.min_timestep)/2.00,min_time,max_time,file,min_dm,max_dm,min_idt,max_idt,max_total_power))
+      line = ("%05d : %06.2f %08.2f %012.4f  |%012.4f - %012.4f|   %s %08.2f %08.2f %04d %04d %.4f" % (i,max_snr,max_dm,peak_time,min_time,max_time,file,min_dm,max_dm,min_idt,max_idt,max_total_power))
       print("%s" % (line))
       out_f.write( line + "\n" )
+      
+      if options.quality_check :
+         # save list of candidates from which is was merged : 
+         # test         
+         for subcand in cand.cand_list :
+            line = ("        %06.2f %08.2f %012.4f %08.2f\n" % (subcand.snr,subcand.dm,subcand.timestep,subcand.t))
+            out_f.write( line )
+         
+         time_range = cand.max_timestep - cand.min_timestep
+#         max_time_diff = 0
+#         for l in range(0,len(cand.cand_list)) :   
+#            subcand1 = cand.cand_list[l]
+#            for m in range(0,len(cand.cand_list)) :
+#               subcand2 = cand.cand_list[m]
+#               if l != m :
+#                  time_diff = math.fabs( subcand1.timestep - subcand2.timestep )
+#                  if time_diff > max_time_diff :
+#                     max_time_diff = time_diff
+         line = ("        max_time_diff = %08.2f\n\n" % (time_range))
+         out_f.write( line )
+                  
       
       line = ("%05.2f %.2f %.6f %d %d" % (max_dm,max_snr,peak_time,peak_sample,boxcar))
       out_f2.write( line + "\n" )
