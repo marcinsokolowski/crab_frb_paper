@@ -70,6 +70,8 @@ echo "ANALYSIS DATA FROM $TotalTimeInHours [hours] observation"
 
 mkdir ${outdir}
 cd ${outdir}
+echo "cp ${curr_path}/J0534+2200_flagants_ch40_ch256/256/filterbank_msok_64ch/merged_channels_??????????/updated.hdr ."
+cp ${curr_path}/J0534+2200_flagants_ch40_ch256/256/filterbank_msok_64ch/merged_channels_??????????/updated.hdr .
 
 ln -s ../${logfile}
 
