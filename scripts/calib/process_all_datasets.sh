@@ -2,9 +2,16 @@
 
 # cd /media/msok/5508b34c-040a-4dce-a8ff-2c4510a5d1a3/eda2/
 
+echo "List of observations:"
+ls -ald 202?_??_??_pulsars_msok/analysis/updated.hdr
+sleep 5
+
 # calculate total time :
 total_time_sec=`grep "Time per file" 202?_??_??_pulsars_msok/analysis/updated.hdr | awk -v sum=0.00 '{sum+=$7;}END{print sum;}'`
 total_time_hour=`grep "Time per file" 202?_??_??_pulsars_msok/analysis/updated.hdr | awk -v sum=0.00 '{sum+=$7;}END{print sum/3600.00;}'`
+
+echo "Total observing time = $total_time_hour [hours]"
+sleep 5
 
 outdir=crab_full_analysis
 

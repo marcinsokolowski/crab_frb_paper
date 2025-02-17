@@ -140,7 +140,7 @@ const char* change_ext(const char* name,const char* new_ext,char* out)
 
 void FluRatePerHourPowerLaw( const char* fname, double TotalTimeInHours=0.998768602,
                 int column=0,
-                double fit_min_x=10, double fit_max_x=2000, 
+                double fit_min_x=200, double fit_max_x=10000, 
                 int dofit=1, int dDbm2DbmPerHz=1,
                 double low=90, double up=5000, int bin_no=100,
                 const char* szExtDesc=NULL, int shift_text=0, int channel=0,
