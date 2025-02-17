@@ -50,13 +50,23 @@ if [[ -n "$3" && "$3" != "-" ]]; then
    calc_sefd=$3
 fi
 
-TotalTimeInHours=0.998768602
-if [[ -n "$4" && "$4" != "-" ]]; then
-   TotalTimeInHours=$4
-else 
-   echo "ERROR : make sure to provide parameter 4 - Total observing time, use : readfile FILTERBANK"
+header_file=`ls ${curr_path}/J0534+2200_flagants_ch40_ch256/256/filterbank_msok_64ch/merged_channels_??????????/updated.hdr`
+if [[ ! -s ${header_file} ]]; then
+   echo "ERROR : make sure to copy updated.hdr file from aavs2-server (generate with : readfile updated.fil > updated.hdr)"
    exit;
 fi
+
+# TotalTimeInHours=0.998768602
+echo "cat ${curr_path}/J0534+2200_flagants_ch40_ch256/256/filterbank_msok_64ch/merged_channels_??????????/updated.hdr"
+TotalTimeInHours=`cat ${curr_path}/J0534+2200_flagants_ch40_ch256/256/filterbank_msok_64ch/merged_channels_??????????/updated.hdr | grep "Time per file" | awk '{print $6/3600.00}'`
+if [[ -n "$4" && "$4" != "-" ]]; then
+   TotalTimeInHours=$4
+#else 
+#   echo "ERROR : make sure to provide parameter 4 - Total observing time, use : readfile FILTERBANK"
+#   exit;
+fi
+
+echo "ANALYSIS DATA FROM $TotalTimeInHours [hours] observation"
 
 mkdir ${outdir}
 cd ${outdir}

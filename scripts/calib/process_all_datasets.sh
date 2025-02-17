@@ -55,8 +55,8 @@ cp ~/github/crab_frb_paper/scripts/root/SpectralLuminosity_DistrPowerLaw.C .
 root -l "SpectralLuminosity_DistrPowerLaw.C(\"all_crab_gps_norfi_fluxcal.singlepulse\",${total_time_hour})"
 
 # plot N GPs vs. time :
-cp ~/github/crab_frb_paper/scripts/root/plot_ngps_vs_time.C .
-root -l "plot_ngps_vs_time.C(\"ngps_vs_uxtime.txt\")"
+cp ~/github/crab_frb_paper/scripts/root/plot_ngps_vs_time_error.C .
+root -l "plot_ngps_vs_time_error.C(\"ngps_vs_uxtime.txt\")"
 
 
 # PLOTTING MERGED :
@@ -74,6 +74,6 @@ root -l "SNRRatePerHourPowerLaw.C(\"presto.cand_normal_snr\",${total_time_hour})
 
 
 # plot N GPs vs. time :
-cp ~/github/crab_frb_paper/scripts/root/plot_ngps_vs_time.C .
-root -l "plot_ngps_vs_time.C(\"merged-ngps_vs_uxtime.txt\")"
+cp ~/github/crab_frb_paper/scripts/root/plot_ngps_vs_time_error.C .
+root -l "plot_ngps_vs_time_error.C(\"merged-ngps_vs_uxtime.txt\")"
 
