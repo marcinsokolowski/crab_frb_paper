@@ -143,7 +143,7 @@ void SNRRatePerHourPowerLaw( const char* fname, double TotalTimeInHours=0.998768
                 int dofit=1, int dDbm2DbmPerHz=1,
                 double low=0, double up=1000, int bin_no=100,
                 const char* szExtDesc=NULL, int shift_text=0, int channel=0,
-                int bLog=1, const char* szTitleX="Signal-to-noise ratio (SNR)", const char* szTitleY="Probability (P) of flux density", 
+                int bLog=1, const char* szTitleX="Signal-to-noise ratio (SNR)", const char* szTitleY="Rate / hour ", 
                 int DoBorder=1, const char* szTitle=NULL, const char* szOutFile=NULL,
                 const char* szOutPostfix="_histo", int unix_time=0, const char* flag=NULL,
                 int bNormalise=0, int bPrintHeader=1 )
