@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # template="_DM*.singlepulse"
-template="_DM5?.00.singlepulse"
+template="_DM5[6,7,8].00.singlepulse"
 if [[ -n "$1" && "$1" != "-" ]]; then
    template="$1"
 fi
@@ -30,6 +30,6 @@ sort +2 -n ${tmp_file1} >> ${tmp_file}
 # path=`which my_friends_of_friends.py`
 path="/home/msok/github/crab_frb_paper/scripts/calib/my_friends_of_friends_PRESTO.py"
 outfile=${tmp_file%%cand}cand_merged
-echo "python $path ${tmp_file} --outfile=${outfile}"
-python $path ${tmp_file} --outfile=${outfile}
+echo "python $path ${tmp_file} --outfile=${outfile} --radius=45"
+python $path ${tmp_file} --outfile=${outfile} --radius=45
 
