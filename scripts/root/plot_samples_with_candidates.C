@@ -545,8 +545,8 @@ void plot_samples_with_candidates( const char* basename="sigmaG1_vs_lapSigmaG1_f
                           const char* basename4=NULL, // "dm58_cand_vs_time.txt",
                           const char* cand_file=NULL, // 1369650000_20230601101942_ch120_02_sorted.cand                          
                           double min_x=-1e20, double max_x=1e20, const char* oper=NULL,
-                          const char* fit_func_name=NULL, double min_y=-10000, 
-                          double max_y=-10000 , double min_allowed_value=-1e20,
+                          const char* fit_func_name=NULL, double min_y=-6, 
+                          double max_y=50, double min_allowed_value=-1e20,
                           int sleep_time=-1,
                 int bLog=0,
       const char* szDescX="Time [ms]",const char* szDescY="SNR", const char* szTitle="", const char* szOutDir="images/",
@@ -621,9 +621,9 @@ void plot_samples_with_candidates( const char* basename="sigmaG1_vs_lapSigmaG1_f
       mg->SetMaximum( max_y );
    }
 
-   TLegend *legend = new TLegend(.35,0.8,0.65,0.95);
+   TLegend *legend = new TLegend(.85,0.2,0.98,0.95);
    legend->SetTextFont(72);
-   legend->SetTextSize(0.08); // 0.05 - large for eps-es to papers 
+   legend->SetTextSize(0.02); // 0.05 - large for eps-es to papers 
    legend->SetFillStyle(1001);
 
 
@@ -637,7 +637,7 @@ void plot_samples_with_candidates( const char* basename="sigmaG1_vs_lapSigmaG1_f
 //   pGraph1->GetYaxis()->SetTitleOffset(-0.7);
 //   pGraph1->GetYaxis()->SetLabelOffset(-0.03);
    mg->Add(pGraph1);
-   legend->AddEntry(pGraph1,"J0837-4135 no pulse","P");// basename
+   legend->AddEntry(pGraph1,basename,"P");// basename
 
 
    szTitleFinal = basename;
@@ -651,6 +651,8 @@ void plot_samples_with_candidates( const char* basename="sigmaG1_vs_lapSigmaG1_f
               fit_func_name, min_y, max_y, szTitleFinal.Data(),
             basename, bLog, szDescX, szDescY, fit_min_x,
             fit_max_x );
+   legend->AddEntry(pGraph2,basename2,"P");// basename
+
 
    lq3 = ReadResultsFile( basename3, x_value3, y_value3, -1, -1, x_col, y_col );
    printf("Read %d points from file %s\n",lq3,basename3);
@@ -659,6 +661,7 @@ void plot_samples_with_candidates( const char* basename="sigmaG1_vs_lapSigmaG1_f
               fit_func_name, min_y, max_y, szTitleFinal.Data(),
             basename, bLog, szDescX, szDescY, fit_min_x,
             fit_max_x );
+   legend->AddEntry(pGraph3,basename3,"P");// basename
 
    lq4 = ReadResultsFile( basename4, x_value4, y_value4, -1, -1, x_col, y_col );
    printf("Read %d points from file %s\n",lq4,basename4);
@@ -667,6 +670,7 @@ void plot_samples_with_candidates( const char* basename="sigmaG1_vs_lapSigmaG1_f
               fit_func_name, min_y, max_y, szTitleFinal.Data(),
             basename, bLog, szDescX, szDescY, fit_min_x,
             fit_max_x );
+   legend->AddEntry(pGraph4,basename4,"P");// basename
 
 
 
@@ -686,8 +690,10 @@ void plot_samples_with_candidates( const char* basename="sigmaG1_vs_lapSigmaG1_f
               fit_func_name, min_y, max_y, szTitleFinal.Data(),
             basename, bLog, szDescX, szDescY, fit_min_x,
             fit_max_x );
+   legend->AddEntry(pGraphCand,cand_file,"P");// basename
+   
 
-
+   legend->Draw();
    c1->Update();
 
    TString szEpsName1=szOutDir;
