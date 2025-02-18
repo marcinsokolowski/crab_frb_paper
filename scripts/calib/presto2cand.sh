@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# template="_DM*.singlepulse"
-template="_DM5[6,7,8].00.singlepulse"
+template="_DM*.singlepulse"
+# template="_DM5[6,7,8].00.singlepulse"
 if [[ -n "$1" && "$1" != "-" ]]; then
    template="$1"
 fi

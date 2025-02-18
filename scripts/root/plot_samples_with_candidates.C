@@ -657,7 +657,7 @@ void plot_samples_with_candidates( const char* basename="sigmaG1_vs_lapSigmaG1_f
    lq3 = ReadResultsFile( basename3, x_value3, y_value3, -1, -1, x_col, y_col );
    printf("Read %d points from file %s\n",lq3,basename3);
 
-   TGraph* pGraph3 = DrawGraph( x_value3, y_value3, lq2, 1, NULL, kBlue, "P,same", 3, kOpenCircle, // 5, kFullDiamond, // kFullTriangleDown,
+   TGraph* pGraph3 = DrawGraph( x_value3, y_value3, lq3, 1, NULL, kBlue, "P,same", 3, kOpenCircle, // 5, kFullDiamond, // kFullTriangleDown,
               fit_func_name, min_y, max_y, szTitleFinal.Data(),
             basename, bLog, szDescX, szDescY, fit_min_x,
             fit_max_x );

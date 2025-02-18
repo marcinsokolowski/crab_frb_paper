@@ -113,6 +113,7 @@ cat presto_5sigma_pulses/_DM*.singlepulse | grep -v "#" | awk '{if($1>=55 && $1<
 echo "Number of single pulses in DM range : 55 - 59 pc/cm^3 - BEFORE RFI excision:"
 cat all_crab_gps.singlepulse |wc
 
+# TODO : calculate time after excluding some parts of data !!!
 echo "python ~/github/crab_frb_paper/scripts/python/exclude_ranges.py all_crab_gps.singlepulse --rfi_file=rfi.ranges --presto --outfile=all_crab_gps_norfi.singlepulse"
 python ~/github/crab_frb_paper/scripts/python/exclude_ranges.py all_crab_gps.singlepulse --rfi_file=rfi.ranges --presto --outfile=all_crab_gps_norfi.singlepulse
 
