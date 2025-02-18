@@ -21,7 +21,7 @@ int gVerb=0;
 int gDb2Num=0;
 
 // frequency range :
-double gMinFreq=-100.00;
+double gMinFreq=-1e20;
 double gMaxFreq=1e20;
 
 double gMinAllowedValue=-1e20;
@@ -312,7 +312,7 @@ TGraph* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
 }
 
 int ReadResultsFile( const char* fname, Double_t* x_values, Double_t* y_values,
-                     int CondCol=-1, int CondValue=-1, int x_col=0, int y_col=0 )
+                     int CondCol=-1, int CondValue=-1, int x_col=0, int y_col=0, double min_x=-1e20, double max_x=+1e20 )
 {
    const int lSize=1000;
    char buff[1000];
@@ -399,12 +399,13 @@ int ReadResultsFile( const char* fname, Double_t* x_values, Double_t* y_values,
      // printf("%s\n",buff);
 
      if( x_val < gMinFreq || x_val > gMaxFreq ){
-        if( gVerb > 0 || 1 ){
+        if( gVerb > 0 ){
            printf("Frequency %.2f outside range %e - %e\n",x_val,gMinFreq,gMaxFreq);
         }
         continue;
      }
      
+
      x_values[all] = x_val;
      y_values[all] = y_val;
 
@@ -541,8 +542,9 @@ double find_freq( Double_t* x_value, Double_t* y_value, int count, double norm_f
 void plot_samples_with_candidates( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", 
                           const char* basename2="dm57_cand_vs_time.txt",         
                           const char* basename3=NULL, // "dm56_cand_vs_time.txt",
+                          const char* basename4=NULL, // "dm58_cand_vs_time.txt",
                           const char* cand_file=NULL, // 1369650000_20230601101942_ch120_02_sorted.cand                          
-                          const char* oper=NULL, double min_x=-1e20, double max_x=1e20,
+                          double min_x=-1e20, double max_x=1e20, const char* oper=NULL,
                           const char* fit_func_name=NULL, double min_y=-10000, 
                           double max_y=-10000 , double min_allowed_value=-1e20,
                           int sleep_time=-1,
@@ -586,16 +588,18 @@ void plot_samples_with_candidates( const char* basename="sigmaG1_vs_lapSigmaG1_f
    Double_t* x_value1 = new Double_t[MAX_ROWS];
    Double_t* x_value2 = new Double_t[MAX_ROWS];
    Double_t* x_value3 = new Double_t[MAX_ROWS];
+   Double_t* x_value4 = new Double_t[MAX_ROWS];
    Double_t* x_value_cand = new Double_t[MAX_ROWS];
    Double_t* y_value1 = new Double_t[MAX_ROWS];
    Double_t* y_value2 = new Double_t[MAX_ROWS];
    Double_t* y_value3 = new Double_t[MAX_ROWS];
+   Double_t* y_value4 = new Double_t[MAX_ROWS];
    Double_t* y_value_cand = new Double_t[MAX_ROWS];
    Double_t maxX=-100000,maxY=-100000;   
    Double_t minX=100000,minY=100000;
 
    Int_t ncols;
-   Int_t lq1=0,lq2=0,lq3=0,lq5=0,lq9=0,lq25=0;
+   Int_t lq1=0,lq2=0,lq3=0,lq4=0,lq9=0,lq25=0;
 
 
 
@@ -656,6 +660,15 @@ void plot_samples_with_candidates( const char* basename="sigmaG1_vs_lapSigmaG1_f
             basename, bLog, szDescX, szDescY, fit_min_x,
             fit_max_x );
 
+   lq4 = ReadResultsFile( basename4, x_value4, y_value4, -1, -1, x_col, y_col );
+   printf("Read %d points from file %s\n",lq4,basename4);
+
+   TGraph* pGraph4 = DrawGraph( x_value4, y_value4, lq4, 1, NULL, kBlack, "P,same", 3, kOpenSquare, // 5, kFullDiamond, // kFullTriangleDown,
+              fit_func_name, min_y, max_y, szTitleFinal.Data(),
+            basename, bLog, szDescX, szDescY, fit_min_x,
+            fit_max_x );
+
+
 
    int cand_count = 0;
    if( cand_file ){
@@ -669,7 +682,7 @@ void plot_samples_with_candidates( const char* basename="sigmaG1_vs_lapSigmaG1_f
    // count detected pulses :
    // int count_detected_pulses( Double_t* x_value, Double_t* y_value, int count, Double_t* pulse_arrival_times, int pulse_count, double threshold=5.00 )
 //   int pulse_count = count_detected_pulses( x_value1, y_value1, lq1, x_value2, lq2, 5.00, x_value_cand, y_value_cand, cand_count );
-   TGraph* pGraph4 = DrawGraph( x_value_cand, y_value_cand, cand_count, 1, NULL, kGreen, "P,same", 3, kMultiply, // 5, kFullDiamond, // kFullTriangleDown,
+   TGraph* pGraphCand = DrawGraph( x_value_cand, y_value_cand, cand_count, 1, NULL, kGreen, "P,same", 3, kMultiply, // 5, kFullDiamond, // kFullTriangleDown,
               fit_func_name, min_y, max_y, szTitleFinal.Data(),
             basename, bLog, szDescX, szDescY, fit_min_x,
             fit_max_x );
