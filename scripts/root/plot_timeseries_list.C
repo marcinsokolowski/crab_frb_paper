@@ -930,11 +930,7 @@ void plot_timeseries_list( const char* basename="list.txt",
          
       TString szLegend=comment;
       mg->Add(pNewGraph);
-      if( i == 0 || i>=2 ){
-         legend->AddEntry(pNewGraph,szLegend.Data(),"L");// basename 
-      }else{
-         legend->AddEntry(pNewGraph,szLegend.Data(),"P");
-      }
+      legend->AddEntry(pNewGraph,szLegend.Data(),"L");
 
       szTitleFinal = filename;
       kolor+=2;
