@@ -33,3 +33,5 @@ outfile=${tmp_file%%cand}cand_merged
 echo "python $path ${tmp_file} --outfile=${outfile} --radius=45"
 python $path ${tmp_file} --outfile=${outfile} --radius=45
 
+echo "sort -n +2 presto.cand_normal > presto.cand_normal.sorted"
+sort -n +2 presto.cand_normal > presto.cand_normal.sorted

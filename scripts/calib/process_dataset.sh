@@ -1,5 +1,6 @@
 #!/bin/bash
 
+export PATH=~/github/crab_frb_paper/scripts/calib/:$PATH
 
 # get log file :
 curr_dir=`pwd`
@@ -40,7 +41,7 @@ else
    exit;
 fi
 
-outdir=analysis
+outdir=analysis_final
 if [[ -n "$2" && "$2" != "-" ]]; then
    outdir="$2"
 fi
@@ -49,6 +50,26 @@ calc_sefd=1
 if [[ -n "$3" && "$3" != "-" ]]; then
    calc_sefd=$3
 fi
+
+prev_analysis="../analysis"
+if [[ -n "$4" && "$4" != "-" ]]; then
+   prev_analysis="$4"
+fi
+
+force_calc_sefd=0
+if [[ -n "$5" && "$5" != "-" ]]; then
+   force_calc_sefd=$5
+fi
+
+echo "###################################################"
+echo "PARAMETERS:"
+echo "###################################################"
+echo "outdir = $outdir"
+echo "prev_analysis = $prev_analysis"
+echo "calc_sefd = $calc_sefd"
+echo "force_calc_sefd = $force_calc_sefd"
+echo "###################################################"
+
 
 header_file=`ls ${curr_path}/J0534+2200_flagants_ch40_ch256/256/filterbank_msok_64ch/merged_channels_??????????/updated.hdr`
 if [[ ! -s ${header_file} ]]; then
@@ -59,8 +80,10 @@ fi
 # TotalTimeInHours=0.998768602
 echo "cat ${curr_path}/J0534+2200_flagants_ch40_ch256/256/filterbank_msok_64ch/merged_channels_??????????/updated.hdr"
 TotalTimeInHours=`cat ${curr_path}/J0534+2200_flagants_ch40_ch256/256/filterbank_msok_64ch/merged_channels_??????????/updated.hdr | grep "Time per file" | awk '{print $6/3600.00}'`
+TotalTimeInSeconds=`cat ${curr_path}/J0534+2200_flagants_ch40_ch256/256/filterbank_msok_64ch/merged_channels_??????????/updated.hdr | grep "Time per file" | awk '{print $6}'`
 if [[ -n "$4" && "$4" != "-" ]]; then
    TotalTimeInHours=$4
+   TotalTimeInSeconds=`echo $TotalTimeInHours | awk '{print $1*3600;}'`
 #else 
 #   echo "ERROR : make sure to provide parameter 4 - Total observing time, use : readfile FILTERBANK"
 #   exit;
@@ -75,13 +98,22 @@ cp ${curr_path}/J0534+2200_flagants_ch40_ch256/256/filterbank_msok_64ch/merged_c
 
 ln -s ../${logfile}
 
-# Generate lists and execute SEFD simulations :
-if [[ $calc_sefd -gt 0 ]]; then
-   echo "~/github/station_beam/scripts/psrflux/generete_sefd_calc_list.sh ${logfile} - 1 "
-   ~/github/station_beam/scripts/psrflux/generete_sefd_calc_list.sh ${logfile} - 1 
+if [[ -d ${prev_analysis} && $force_calc_sefd -le 0 ]]; then
+   # SEFDs were already generated and can be re-used if no set force_calc_sefd=1 (5th parameter)
+
+   echo "Creating symbolic links to SEFD files ${prev_analysis}/*.sefd"
+#   for file in `ls ${prev_analysis}/*.out`; do    ln -s $file; done
+#   for file in `ls ${prev_analysis}/*.txt`; do    ln -s $file; done
+   for file in `ls ${prev_analysis}/*.sefd`; do    ln -s $file; done
 else
-   echo "WARNING : calculation of SEFD is not required"
-fi   
+   # Generate lists and execute SEFD simulations :
+   if [[ $calc_sefd -gt 0 ]]; then
+      echo "~/github/station_beam/scripts/psrflux/generete_sefd_calc_list.sh ${logfile} - 1 "
+      ~/github/station_beam/scripts/psrflux/generete_sefd_calc_list.sh ${logfile} - 1 
+   else
+      echo "WARNING : calculation of SEFD is not required"
+   fi   
+fi
 
 # listfile=`ls -tr *_startux*_*sec_startfreq256_40chan.txt | tail -1`
 # echo "~/github/station_beam/scripts/psrflux/calculate_sefd_for_pointings.sh $listfile - 300 0.78125"
@@ -105,8 +137,23 @@ ln -s ${presto_dir} presto_5sigma_pulses
 cat presto_5sigma_pulses/_DM*.singlepulse | grep -v "#" | awk '{if($1<20){print $3;}}' > rfitimes.txt
 cat presto_5sigma_pulses/_DM*.singlepulse | grep -v "#" | awk '{if($1>=55 && $1<=59){print $3;}}' > gptimes.txt
 cp ~/github/crab_frb_paper/scripts/root/rfifind.C .
-root -l "rfifind.C(\"gptimes.txt\",100000000000000.00)" # do not save RFI ranges (that's why such a high RFI threshold)
-root -l "rfifind.C(\"rfitimes.txt\")"
+
+# 
+time_rounded_to_ten=`echo $TotalTimeInSeconds | awk '{print int($1/10.00)*10.00+10}'`
+n_bins=`echo $time_rounded_to_ten | awk '{print $1/10;}'`
+
+root -l "rfifind.C(\"gptimes.txt\",100000000000000.00,0,${time_rounded_to_ten},${n_bins})" # do not save RFI ranges (that's why such a high RFI threshold)
+
+# 
+root -l "rfifind.C(\"rfitimes.txt\",10,0,${time_rounded_to_ten},${n_bins})"
+
+if [[ -s TotalGoodTimeInSec.txt ]]; then
+   TotalTimeInHours=`cat TotalGoodTimeInSec.txt | awk '{print $1/3600.00}'`
+   echo "INFO : TotalTimeInHours updated to $TotalTimeInHours [hours] after RFI flagging"
+else
+   echo "ERROR : script rfifind.C should produce local file TotalGoodTimeInSec.txt with number of seconds after RFI excision -> cannot reliably continue, please verify"
+   exit;
+fi
 
 # exclude RFI 
 cat presto_5sigma_pulses/_DM*.singlepulse | grep -v "#" | awk '{if($1>=55 && $1<=59){print $1" "$2" "$3" "$4" "$5;}}' > all_crab_gps.singlepulse
@@ -124,11 +171,20 @@ cat all_crab_gps_norfi.singlepulse|wc
 echo "~/github/crab_frb_paper/scripts/calib/snr2jy.sh all_crab_gps_norfi.singlepulse $mean_sefd | awk '{print $3;}' > all_crab_gps_norfi_fluxcal.singlepulse"
 ~/github/crab_frb_paper/scripts/calib/snr2jy.sh all_crab_gps_norfi.singlepulse $mean_sefd | awk '{print $3;}' > all_crab_gps_norfi_fluxcal.singlepulse
 
-
+# dump timeseries from DM57.dat file:
+if [[ -s presto_5sigma_pulses/_DM57.00.dat ]]; then
+   ln -s presto_5sigma_pulses/_DM57.00.dat
+   echo "~/github/crab_frb_paper/scripts/calib/process_presto_candidates.sh _DM57.00.dat \"-U 1\""
+   ~/github/crab_frb_paper/scripts/calib/process_presto_candidates.sh _DM57.00.dat "-U 1"
+else
+   echo "WARNING : file presto_5sigma_pulses/_DM57.00.dat not found - cannot dump timeseries -> please verify"
+   sleep 10
+fi
 
 # plot distribution of calibrated mean peak flux density :
 # cp  ~/github/crab_frb_paper/scripts/root/FluDistrPowerLaw.C .
 # root -l "FluDistrPowerLaw.C(\"all_crab_gps_norfi_fluxcal.singlepulse\")"
+mkdir -p images/
 cp  ~/github/crab_frb_paper/scripts/root/FluRatePerHourPowerLaw.C .
 root -l "FluRatePerHourPowerLaw.C(\"all_crab_gps_norfi_fluxcal.singlepulse\",${TotalTimeInHours})"
 
@@ -152,6 +208,7 @@ echo "~/github/crab_frb_paper/scripts/calib/presto2cand.sh ../all_crab_gps_norfi
 echo "~/github/crab_frb_paper/scripts/calib/snr2jy.sh presto.cand_normal $mean_sefd | awk '{print $3;}' > presto_norfi_fluxcal.cand_normal"
 ~/github/crab_frb_paper/scripts/calib/snr2jy.sh presto.cand_normal $mean_sefd | awk '{print $3;}' > presto_norfi_fluxcal.cand_normal
 
+mkdir -p images/
 # plot distribution of calibrated mean peak flux density :
 cp  ~/github/crab_frb_paper/scripts/root/FluRatePerHourPowerLaw.C .
 root -l "FluRatePerHourPowerLaw.C(\"presto_norfi_fluxcal.cand_normal\",${TotalTimeInHours})"
@@ -165,7 +222,18 @@ cp  ~/github/crab_frb_paper/scripts/root/SNRRatePerHourPowerLaw.C .
 root -l "SNRRatePerHourPowerLaw.C(\"presto.cand_normal_snr\",${TotalTimeInHours})"
 
 
-
+if [[ -s ../detrended_normalised__DM57.00.txt ]]; then
+   ln -s ../detrended_normalised__DM57.00.txt
+   
+   
+   cp ~/github/crab_frb_paper/scripts/root/plot_samples_with_candidates.C .
+   awk '{if($1!="#"){print $3" "$1;}}' presto.cand > presto.txt
+   awk '{if($1!="#"){print $3" "$2;}}' presto.cand_normal.sorted > presto_merged_sorted.txt
+   
+   root -l "plot_samples_with_candidates.C(\"detrended_normalised__DM57.00.txt\",\"presto.txt\",NULL,NULL,\"presto_merged_sorted.txt\")"   
+else
+   echo "WARNING : file ../timeseries__DM57.00.txt not found -> cannot overplot time series and PRESTO candidates and merged candidates"
+fi   
 
 
 # TODO :
