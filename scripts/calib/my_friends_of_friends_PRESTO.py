@@ -1,4 +1,4 @@
-# import pdb
+import pdb
 
 import copy
 import math
@@ -69,11 +69,18 @@ class cFreddaCandidate :
       if math.fabs(check_cand.dm - self.dm) <= dm_radius :
          # either time of the candidate is between MIN and MAX times of this group
          # or the event is outside MIN-MAX range but after adding it MIN-MAX range will still be <= t_radius
-         if (self.min_timestep <= check_cand.timestep <= self.max_timestep) or (math.fabs(self.min_timestep-check_cand.timestep)<=t_radius and math.fabs(self.max_timestep-check_cand.timestep)<=t_radius) :
-            return True
 
-# TOO SLOW:
-#       for cand in cand_list :
+# WARNING : this may miss some widely spread candidates, which should in fact be merged:
+#         if (self.min_timestep <= check_cand.timestep <= self.max_timestep) or (math.fabs(check_cand.timestep-self.min_timestep)<=t_radius and math.fabs(self.max_timestep-check_cand.timestep)<=t_radius) :
+#            return True
+
+# Allow to be close to at least one of the candidates in the list - it's very permissive and I wonder if it won't start merging candidates from separate pulses ...
+         for cand in self.cand_list :
+            if math.fabs( cand.timestep - check_cand.timestep ) <= t_radius :
+               return True
+
+# check if close to any candidate already added to the list :
+#      for cand in self.cand_list :
 #          if math.fabs( cand.timestep - check_cand.timestep ) > t_radius :
 #             return False 
        
@@ -123,13 +130,14 @@ class cFreddaCandidate :
              self.t        = new_cand.t
              self.max_total_power = new_cand.max_total_power
              self.boxcar = new_cand.boxcar
-             
+
+          new_cand.added = True             
           self.cand_list.append( copy.copy(new_cand) )   
-          new_cand.added = True
+          # WAS : new_cand.added = True
           
           len_test=len(self.cand_list)
           
-          print("DEBUG : candidate time range updated to %.1f - %.1f , added candidate (SNR=%.2f, DM=%.4f vs. added SNR=%.2f, DM=%.4f) at time = %.1f" % (self.min_timestep,self.max_timestep,new_cand.snr,new_cand.dm,self.cand_list[len_test-1].snr,self.cand_list[len_test-1].dm,new_cand.timestep))
+          print("DEBUG : candidate time range updated to %.1f - %.1f , added candidate (SNR=%.2f, DM=%.4f vs. added SNR=%.2f, DM=%.4f) at time = %.1f to candidate %.2f - %.2f snr = %.3f" % (self.min_timestep,self.max_timestep,new_cand.snr,new_cand.dm,self.cand_list[len_test-1].snr,self.cand_list[len_test-1].dm,new_cand.timestep,self.min_timestep,self.max_timestep,self.snr))
           
           return True
           
@@ -371,9 +379,13 @@ def friends_of_friends( cand_list, options, radius=1000, debug=False ) :
             
             if not cand.added : 
                for out_cand in out_list :
+                  answer="no"
                   if out_cand.belongs( cand , t_radius=options.merge_radius ) :
                      out_cand.add( cand )
                      added += 1
+                     answer="yes"
+                  print("DEBUG2 : does candidate %.6f/snr=%.3f belongs to candidate %.6f - %.6f : %s" % (cand.timestep,cand.snr,out_cand.min_timestep,out_cand.max_timestep,answer))
+   
             
             if ( j %  print_modulo ) == 0 and debug : # was 100
                print("DEBUG : i = %d (t = %d) , j = %d , added = %d, len(out_list) = %d" % (i,cand_list[i].timestep,j,added,len(out_list)))
@@ -402,6 +414,59 @@ def friends_of_friends( cand_list, options, radius=1000, debug=False ) :
    print("Final list has %d merged candidates" % (len(out_list)))         
 
    return (out_list)   
+
+def friends_of_friends_by_snr( cand_list, options, radius=1000, debug=False, snr_step=1 ) :
+   print("INFO : friends_of_friends , radius = %.1f" % (radius))
+   print_modulo=100
+   if debug :
+      print_modulo=1
+      
+   iter = 0
+   out_list = []
+   i=0
+   l = len(cand_list)
+   
+   continue_working = True
+   min_snr = 50 # only consider candidates with SNR >= min_snr (very high SNR candidates)
+   i=0   
+   while min_snr > 0 : # end when i is at the last candidate on the list 
+      print("\tprogress iter=%d , i = %d / %d , number of output candidates %d" % (iter,i,len(cand_list),len(out_list)))
+      # group_radius_timesteps
+      
+      added_count = 0
+      snr_count = 0 
+      for i in range(0,len(cand_list)) :
+         cand = cand_list[i]
+         if cand.snr >= min_snr and not cand.added :         
+            snr_count += 1
+            added = False
+            for out_cand in out_list :
+               answer="no"
+               if out_cand.belongs( cand , t_radius=options.merge_radius ) :
+                  if added :
+                     print("ERROR in code ??? why candidate %d / snr = %.4f can be added to more than one ROOT candidate %d / snr = %.4f" % (cand.timestep,cand.snr,out_cand.timestep,out_cand.snr))
+                  out_cand.add( cand )
+                  print("Candidate %d / snr = %.4f added to candidate %d / snr = %.4f" % (cand.timestep,cand.snr,out_cand.timestep,out_cand.snr))
+                  added_count += 1
+                  answer="yes"
+                  added = True
+                  
+                  
+#               print("DEBUG2 : does candidate %.6f/snr=%.3f belongs to candidate %.6f - %.6f : %s" % (cand.timestep,cand.snr,out_cand.min_timestep,out_cand.max_timestep,answer))
+
+            if not added :
+               # add new ROOT candidate 
+               add( out_list, cand ) 
+               added_count += 1
+
+      print("Processed %d new candidates with snr >= %.3f, added %d" % (snr_count,min_snr,added_count))
+      min_snr = min_snr - snr_step;      
+            
+   print("Final list has %d merged candidates" % (len(out_list)))         
+
+   return (out_list)   
+
+
    
 if __name__ == '__main__':   
    file="i_00000.cand"
@@ -412,36 +477,9 @@ if __name__ == '__main__':
 
    (cand_list) = read_file( file , frbsearch_input=options.frbsearch_input )
    
-   step_times = []
-   step_steps = []
-   if options.stepfile is not None and len(options.stepfile)>0 :
-      (step_times,step_steps) = read_step_file( options.stepfile, step_radius = options.step_radius_timesteps )
-      print("PROGRESS : read %d/%d elements from file %s" % (len(step_times),len(step_steps),options.stepfile))
-      
-      if len(step_steps) > 0 :
-         for i in range(0,len(cand_list)) :
-            cand = cand_list[i]
-            if cand.timestep < len(step_steps) :
-               if step_steps[cand.timestep] > 0 :
-                  print("DEBUG : candidate at time index = %d flagged due to step" % (cand.timestep))
-                  cand.bad_data = True
-            else :
-               print("ERROR : timestep = %d outside range %d" % (cand.timestep,len(step_steps)))
-         
-         print("DEBUG : before flagging : %d candidates" % (len(cand_list)))      
-         new_cand_list = []
-         for i in range(0,len(cand_list)) :
-            cand = cand_list[i]
-            if not cand.bad_data :
-               new_cand_list.append( copy.copy(cand) )
-         
-         cand_list = new_cand_list
-         print("DEBUG : after flagging : %d candidates" % (len(cand_list))) 
-         
-            
-   
    print("PROGRESS : finding Friends-of-Friends:")
-   (out_list)  = friends_of_friends( cand_list, options, radius=options.group_radius_timesteps, debug=options.debug )
+#   (out_list)  = friends_of_friends( cand_list, options, radius=options.group_radius_timesteps, debug=options.debug )
+   (out_list)  = friends_of_friends_by_snr( cand_list, options, radius=options.group_radius_timesteps, debug=options.debug )
 
    # TODO : output center , time range etc 
    out_f = open( options.outfile , "w" )   
