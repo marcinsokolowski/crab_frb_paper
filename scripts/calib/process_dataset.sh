@@ -171,6 +171,17 @@ cat all_crab_gps_norfi.singlepulse|wc
 echo "~/github/crab_frb_paper/scripts/calib/snr2jy.sh all_crab_gps_norfi.singlepulse $mean_sefd | awk '{print $3;}' > all_crab_gps_norfi_fluxcal.singlepulse"
 ~/github/crab_frb_paper/scripts/calib/snr2jy.sh all_crab_gps_norfi.singlepulse $mean_sefd | awk '{print $3;}' > all_crab_gps_norfi_fluxcal.singlepulse
 
+# 
+if [[ -s presto_5sigma_pulses/_DM57.00.dat ]]; then
+   echo "File presto_5sigma_pulses/_DM57.00.dat already exists"
+else
+   echo "File presto_5sigma_pulses/_DM57.00.dat not found -> copying :"
+   echo "rsync -avP aavs2:/data/${dataset}/J0534+2200_flagants_ch40_ch256/256/filterbank_msok_64ch/merged_channels_??????????/presto_sps_thresh5*/_DM57.00.dat presto_5sigma_pulses/"
+   rsync -avP aavs2:/data/${dataset}/J0534+2200_flagants_ch40_ch256/256/filterbank_msok_64ch/merged_channels_??????????/presto_sps_thresh5*/_DM57.00.dat presto_5sigma_pulses/
+   
+   sleep 5 
+fi   
+
 # dump timeseries from DM57.dat file:
 if [[ -s presto_5sigma_pulses/_DM57.00.dat ]]; then
    ln -s presto_5sigma_pulses/_DM57.00.dat
