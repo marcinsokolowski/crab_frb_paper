@@ -61,6 +61,12 @@ if [[ -n "$5" && "$5" != "-" ]]; then
    force_calc_sefd=$5
 fi
 
+sefds_only=0
+if [[ -n "$6" && "$6" != "-" ]]; then
+   sefds_only=$6
+fi
+
+
 echo "###################################################"
 echo "PARAMETERS:"
 echo "###################################################"
@@ -68,6 +74,7 @@ echo "outdir = $outdir"
 echo "prev_analysis = $prev_analysis"
 echo "calc_sefd = $calc_sefd"
 echo "force_calc_sefd = $force_calc_sefd"
+echo "sefds_only = $sefds_only"
 echo "###################################################"
 
 
@@ -108,23 +115,35 @@ if [[ -d ${prev_analysis} && $force_calc_sefd -le 0 ]]; then
 else
    # Generate lists and execute SEFD simulations :
    if [[ $calc_sefd -gt 0 ]]; then
-      echo "~/github/station_beam/scripts/psrflux/generete_sefd_calc_list.sh ${logfile} - 1 "
-      ~/github/station_beam/scripts/psrflux/generete_sefd_calc_list.sh ${logfile} - 1 
+      if [[ ! -s MEAN_SEFD.txt || $force_calc_sefd -gt 0 ]]; then
+         echo "~/github/station_beam/scripts/psrflux/generete_sefd_calc_list.sh ${logfile} - 1 "
+         ~/github/station_beam/scripts/psrflux/generete_sefd_calc_list.sh ${logfile} - 1 
+      
+         # listfile=`ls -tr *_startux*_*sec_startfreq256_40chan.txt | tail -1`
+         # echo "~/github/station_beam/scripts/psrflux/calculate_sefd_for_pointings.sh $listfile - 300 0.78125"
+         # ~/github/station_beam/scripts/psrflux/calculate_sefd_for_pointings.sh $listfile - 300 0.78125
+
+         # SEFD in the centre of the band :
+         grep "215.625" *.sefd | awk -v start_ux=-1 '{if(start_ux < 0){start_ux=$4;}print ($4-start_ux)" "$8;}' > sefd_vs_time.txt
+         # echo "SEFD AT THE CENTRE CHANNEL = $sefd_centre_ch [Jy]"
+      
+         mean_sefd=`awk -v sum=0 -v cnt=0 '{sum+=$2;cnt+=1;}END{print sum/cnt;}' sefd_vs_time.txt`
+         echo "$mean_sefd" > MEAN_SEFD.txt
+      else
+         echo "INFO : SEFDs already generated earlier"
+      fi
    else
       echo "WARNING : calculation of SEFD is not required"
    fi   
 fi
 
-# listfile=`ls -tr *_startux*_*sec_startfreq256_40chan.txt | tail -1`
-# echo "~/github/station_beam/scripts/psrflux/calculate_sefd_for_pointings.sh $listfile - 300 0.78125"
-# ~/github/station_beam/scripts/psrflux/calculate_sefd_for_pointings.sh $listfile - 300 0.78125
-
-# SEFD in the centre of the band :
-grep "215.625" *.sefd | awk -v start_ux=-1 '{if(start_ux < 0){start_ux=$4;}print ($4-start_ux)" "$8;}' > sefd_vs_time.txt
-# echo "SEFD AT THE CENTRE CHANNEL = $sefd_centre_ch [Jy]"
-
 mean_sefd=`awk -v sum=0 -v cnt=0 '{sum+=$2;cnt+=1;}END{print sum/cnt;}' sefd_vs_time.txt`
 echo "MEAN SEFD OVER TIME = $mean_sefd [Jy]"
+
+if [[ $sefds_only -gt 0 ]]; then
+   echo "WARNING : only generation of SEFDs has been requested exiting now"
+   exit
+fi
 
 # fit to SEFD over time :
 # cat *.sefd | awk -v start_ux=-1 '{if($1!="#"){if(start_ux < 0){start_ux=$4;}print ($4-start_ux)" "$8;}}' > sefd_vs_time.txt
