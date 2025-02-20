@@ -29,7 +29,7 @@ double dbm2mW( double in_dbm )
    return mW;
 }
 
-double gFlux0 = 100000.00;
+double gFlux0 = 10.00; // better to have normalisation at SNR=10 than 100000.00 ...
 
 Double_t power_law_distrib( Double_t* x, Double_t* y )
 {
@@ -302,7 +302,7 @@ void SNRRatePerHourPowerLaw( const char* fname, double TotalTimeInHours=0.998768
         printf("DEBUG : ok2 ???\n");
 
 
-   TCanvas* c1 = new TCanvas("c1","plot",200,10,700,500);
+   TCanvas* c1 = new TCanvas("c1","plot",10,10,3500,1200);
    c1->SetFillColor(0);
    c1->SetFillStyle(0);
    gStyle->SetPadTopMargin(0.03);
@@ -493,11 +493,6 @@ void SNRRatePerHourPowerLaw( const char* fname, double TotalTimeInHours=0.998768
    // gSystem->Sleep(5000);
 
 
-/*   TCanvas* c2 = new TCanvas("c2","plot",200,10,700,500);
-   c2->SetFillColor(0);
-   c2->SetFillStyle(0);*/
-   
-
    
 
 //   TString szPngName=fname;
@@ -508,7 +503,7 @@ void SNRRatePerHourPowerLaw( const char* fname, double TotalTimeInHours=0.998768
    TString szPngName;
    szPngName="images/";
    szPngName += fname;
-   szPngName += szOutPostfix;
+   szPngName += "_SNRRatePerHourPowerLaw";
    szPngName += ".png";
    c1->Print(szPngName.Data());
 }

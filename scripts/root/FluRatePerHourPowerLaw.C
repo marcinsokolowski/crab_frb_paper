@@ -303,7 +303,7 @@ void FluRatePerHourPowerLaw( const char* fname, double TotalTimeInHours=0.998768
         printf("DEBUG : ok2 ???\n");
 
 
-   TCanvas* c1 = new TCanvas("c1","plot",200,10,700,500);
+   TCanvas* c1 = new TCanvas("c1","plot",10,10,3500,1200);
    c1->SetFillColor(0);
    c1->SetFillStyle(0);
    gStyle->SetPadTopMargin(0.03);
@@ -491,13 +491,8 @@ void FluRatePerHourPowerLaw( const char* fname, double TotalTimeInHours=0.998768
 
 
    c1->Update();
-   // gSystem->Sleep(5000);
+   gSystem->Sleep(1);
 
-
-/*   TCanvas* c2 = new TCanvas("c2","plot",200,10,700,500);
-   c2->SetFillColor(0);
-   c2->SetFillStyle(0);*/
-   
 
    
 
@@ -509,19 +504,32 @@ void FluRatePerHourPowerLaw( const char* fname, double TotalTimeInHours=0.998768
    TString szPngName;
    szPngName="images/";
    szPngName += fname;
-   szPngName += szOutPostfix;
+   szPngName += "_FluRatePerHourPowerLaw";
    szPngName += ".png";
    c1->Print(szPngName.Data());
 
-   TCanvas* c2 = new TCanvas("c2","plot",200,10,700,500);
+   char szFunc[128];
+   sprintf(szFunc,"%.8f*(x/%.8f)^(%.8f)",fit_norm,gFlux0,fit_exp);
+
+   TCanvas* c2 = new TCanvas("c2","plot",10,10,3500,1200);
    c2->SetFillColor(0);
    c2->SetFillStyle(0);
    c2->SetLogx(1);
    c2->SetLogy(1);
-   TF1* pPowerLawDistrib = new TF1("PowerLawDistrib","1.43526679 * (x/1000.00000000)^(-2.77212884)",1,100000000);
+//   TF1* pPowerLawDistrib = new TF1("PowerLawDistrib","1.43526679 * (x/1000.00000000)^(-2.77212884)",1,100000000);
+   TF1* pPowerLawDistrib = new TF1("PowerLawDistrib",szFunc,1,100000000);
    pPowerLawDistrib->Draw();
    pPowerLawDistrib->GetHistogram()->GetXaxis()->SetTitle( szTitleX );
    pPowerLawDistrib->GetHistogram()->GetYaxis()->SetTitle( szTitleY );
+
+   c2->Update();
+   gSystem->Sleep(1);
+   szPngName="images/";
+   szPngName += fname;
+   szPngName += "_FluRatePerHourPowerLawFittedDistrib";
+   szPngName += ".png";
+   c2->Print(szPngName.Data());
+
 
    printf("PROBABILITIES of bright pulses are:\n");
    printf("10^6 Jy : %e\n",pPowerLawDistrib->Eval(1000000.00));

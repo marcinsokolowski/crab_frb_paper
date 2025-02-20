@@ -314,7 +314,7 @@ void SpectralLuminosity_DistrPowerLaw( const char* fname, double TotalTimeInHour
         printf("DEBUG : ok2 ???\n");
 
 
-   TCanvas* c1 = new TCanvas("c1","plot",200,10,700,500);
+   TCanvas* c1 = new TCanvas("c1","plot",10,10,3500,1200);
    c1->SetFillColor(0);
    c1->SetFillStyle(0);
    gStyle->SetPadTopMargin(0.03);
@@ -506,12 +506,6 @@ void SpectralLuminosity_DistrPowerLaw( const char* fname, double TotalTimeInHour
    // gSystem->Sleep(5000);
 
 
-/*   TCanvas* c2 = new TCanvas("c2","plot",200,10,700,500);
-   c2->SetFillColor(0);
-   c2->SetFillStyle(0);*/
-   
-
-   
 
 //   TString szPngName=fname;
 //   szPngName += szOutPostfix;
@@ -521,11 +515,11 @@ void SpectralLuminosity_DistrPowerLaw( const char* fname, double TotalTimeInHour
    TString szPngName;
    szPngName="images/";
    szPngName += fname;
-   szPngName += szOutPostfix;
+   szPngName += "_SpectralLuminosity_DistrPowerLaw";
    szPngName += ".png";
    c1->Print(szPngName.Data());
 
-   TCanvas* c2 = new TCanvas("c2","plot",200,10,700,500);
+   TCanvas* c2 = new TCanvas("c2","plot",10,10,3500,1200);
    c2->SetFillColor(0);
    c2->SetFillStyle(0);
    c2->SetLogx(1);
@@ -537,6 +531,14 @@ void SpectralLuminosity_DistrPowerLaw( const char* fname, double TotalTimeInHour
    pPowerLawDistrib->Draw();
    pPowerLawDistrib->GetHistogram()->GetXaxis()->SetTitle( szTitleX );
    pPowerLawDistrib->GetHistogram()->GetYaxis()->SetTitle( szTitleY );
+
+   szPngName="images/";
+   szPngName += fname;
+   szPngName += "_SpectralLuminosity_DistrPowerLaw_Fitted";
+   szPngName += ".png";
+   c2->Print(szPngName.Data());
+
+
 
    printf("PROBABILITIES of bright pulses are:\n");
 //   printf("10^6 Jy : %e\n",pPowerLawDistrib->Eval(1000000.00));
