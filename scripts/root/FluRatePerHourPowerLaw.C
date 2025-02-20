@@ -417,7 +417,7 @@ void FluRatePerHourPowerLaw( const char* fname, double TotalTimeInHours=0.998768
       double mean2 = (sum2/count);
       double rms = sqrt( mean2 - mean*mean );
 
-      FILE* out = fopen("fit_results.txt","a+");
+      FILE* out = fopen("flux_fit_results.txt","a+");
       // filename SIGMA MEAN NORMALIZATION AVG RMS
 //    if( bPrintHeader > 0 ){
 //       fprintf(out,"# FILE FIT_SIGMA FIT_MEAN FIT_NORM MEAN RMS\n");

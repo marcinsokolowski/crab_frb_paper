@@ -164,7 +164,7 @@ root -l "plotsefd_vs_time.C(\"sefd_vs_time.txt\")"
 echo "ln -s ${presto_dir} presto_5sigma_pulses"
 ln -s ${presto_dir} presto_5sigma_pulses
 cat presto_5sigma_pulses/_DM*.singlepulse | grep -v "#" | awk '{if($1<20){print $3;}}' > rfitimes.txt
-cat presto_5sigma_pulses/_DM*.singlepulse | grep -v "#" | awk '{if($1>=55 && $1<=59){print $3;}}' > gptimes.txt
+cat presto_5sigma_pulses/_DM*.singlepulse | grep -v "#" | awk '{if($1=="56.73"){print $3;}}' > gptimes.txt
 cp ~/github/crab_frb_paper/scripts/root/rfifind.C .
 
 # 
@@ -185,8 +185,8 @@ else
 fi
 
 # exclude RFI 
-cat presto_5sigma_pulses/_DM*.singlepulse | grep -v "#" | awk '{if($1>=55 && $1<=59){print $1" "$2" "$3" "$4" "$5;}}' > all_crab_gps.singlepulse
-echo "Number of single pulses in DM range : 55 - 59 pc/cm^3 - BEFORE RFI excision:"
+cat presto_5sigma_pulses/_DM*.singlepulse | grep -v "#" | awk '{if($1=="56.73"){print $1" "$2" "$3" "$4" "$5;}}' > all_crab_gps.singlepulse
+echo "Number of single pulses in DM range : 56.73 pc/cm^3 - BEFORE RFI excision:"
 cat all_crab_gps.singlepulse |wc
 
 # TODO : calculate time after excluding some parts of data !!!
