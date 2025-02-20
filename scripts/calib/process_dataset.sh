@@ -67,13 +67,18 @@ if [[ -n "$6" && "$6" != "-" ]]; then
 fi
 
 # presto_sps_thresh5_numdms100_dmstep1
-presto_dir_template="presto_sps_thresh5*"
+presto_dir_template="presto_sps_thresh5_numdms100_dmstep1"
 if [[ -n "$7" && "$7" != "-" ]]; then
    presto_dir_template="$7"
 fi
 presto_dir=`ls -d ${curr_path}/J0534+2200_flagants_ch40_ch256/256/filterbank_msok_64ch/merged_channels_??????????/${presto_dir_template}/ | tail -1`
 echo "DEBUG : presto_dir = $presto_dir"
-sleep 20
+if [[ ! -d $presto_dir ]]; then
+   presto_dir_template="presto_sps_thresh5_numdms???_dmstep1"
+   presto_dir=`ls -d ${curr_path}/J0534+2200_flagants_ch40_ch256/256/filterbank_msok_64ch/merged_channels_??????????/${presto_dir_template}/ | tail -1`
+   echo "DEBUG2 : presto_dir = $presto_dir" 
+fi
+# sleep 20
 
 echo "###################################################"
 echo "PARAMETERS:"
