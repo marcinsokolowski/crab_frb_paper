@@ -12,8 +12,8 @@ do
    cd ${dataset}/
    echo 
    echo "Processing dataset $dataset ..."
-   echo "process_dataset.sh - - 1 analysis 0 1 > analysis.out 2>&1"
-   process_dataset.sh - - 1 analysis 0 1 > analysis.out 2>&1
+   echo "process_dataset.sh - - 1 - 0 1 > analysis.out 2>&1"
+   process_dataset.sh - - 1 - 0 1 > analysis.out 2>&1
    
    cd ..
 done
