@@ -126,6 +126,7 @@ if [[ -d ${prev_analysis} && $force_calc_sefd -le 0 ]]; then
 #   for file in `ls ${prev_analysis}/*.txt`; do    ln -s $file; done
    ln -s ${prev_analysis}/sefd_vs_time.txt .
    for file in `ls ${prev_analysis}/*.sefd`; do    ln -s $file; done
+   for txt in `ls ../analysis/uxtime*txt`; do     ln -s $txt; done
 else
    # Generate lists and execute SEFD simulations :
    if [[ $calc_sefd -gt 0 ]]; then

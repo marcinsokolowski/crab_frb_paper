@@ -52,7 +52,8 @@ Double_t Line( Double_t* x, Double_t* y )
 	// return (x[0]*y[0]);
 }
 
-TGraph* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal, 
+TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, Double_t* x_values_err, Double_t* y_values_err,
+                   int numVal, 
 		   long q, TPad* pPad, const char* fit_func_name=NULL, 
 			double min_y=-10000, double max_y=-10000,
 			const char* szStarName="", const char* fname="default",
@@ -83,14 +84,14 @@ TGraph* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
     }
 
 
-    TGraph* pGraph = new TGraph(q);
+    TGraphErrors* pGraph = new TGraphErrors(q);
     for(int i=0;i<numVal;i++){
 	if( gPercent ){
 		y_values[i] = ( y_values[i] / maxY );
 	}
 
-	if( gVerb ){
-           printf("q=%d %f %f\n",q, x_values[i], y_values[i] );
+	if( gVerb || 1 ){
+           printf("q=%d %f %f +/- %f\n",q, x_values[i], y_values[i], y_values_err[i] );
         }	
 
         pGraph->SetPoint( i, x_values[i], y_values[i] );
@@ -104,6 +105,9 @@ TGraph* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
             minX = x_values[i];
         if(y_values[i]<minY)
             minY = y_values[i];
+
+//        pGraph->SetPointError( i, (0.5/24.00) , sqrt(y_values[i]) ); // 1/2 hour observation error.
+        pGraph->SetPointError( i, 0.00 , y_values_err[i] );
     }
 	 printf("Found min_x=%.2f , max_x=%.2f\n",minX,maxX);
 	 printf("Found min_y=%.2f , max_y=%.2f\n",minY,maxY);
@@ -466,13 +470,15 @@ int ReadResultsFile( const char* fname, Double_t* x_values, Double_t* y_values,
    return all;
 }  
 
-void plot_ngps_vs_time( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", int min_local_time=-1e6, int max_local_time=1e6,
-					const char* fit_func_name=NULL, double min_y=200, 
-					double max_y=5000, int bLog=0,
-		const char* szDescX="Local Time",const char* szDescY="Number of GPs per hour", const char* szTitle=NULL,
+void plot_plidx_vs_time_error( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", double min_y=-6, double max_y=0,
+                              const char* szDescY="SNR : fitted power law index vs. time",
+                              int x_col=0, int y_col=2, int y_col_err=4,
+                                        int min_local_time=-1e6, int max_local_time=1e6,
+					const char* fit_func_name=NULL,
+					int bLog=0,
+		const char* szDescX="Local Time", const char* szTitle=NULL,
 		int b_percent=0,
 		double fit_min_x=-100000, double fit_max_x=-100000,
-		int x_col=0, int y_col=1, 
       double min_uxtime=-10000, double max_uxtime=-10000, const char* outdir="images/" )
 {
 	gPercent = b_percent;
@@ -515,6 +521,8 @@ void plot_ngps_vs_time( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", i
 
    Double_t* x_value1 = new Double_t[MAX_ROWS];
    Double_t* y_value1 = new Double_t[MAX_ROWS];
+   Double_t* x_value_err1 = new Double_t[MAX_ROWS];
+   Double_t* y_value_err1 = new Double_t[MAX_ROWS];
    Double_t maxX=-100000,maxY=-100000;	
    Double_t minX=100000,minY=100000;
 	Double_t first_value;
@@ -523,6 +531,7 @@ void plot_ngps_vs_time( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", i
    Int_t lq1=0,lq2=0,lq3=0,lq5=0,lq9=0,lq25=0;
 
    lq1 = ReadResultsFile( basename, x_value1, y_value1, -1, -1, x_col, y_col ); 
+   Int_t lq1_err = ReadResultsFile( basename, x_value_err1, y_value_err1, -1, -1, x_col, y_col_err ); 
 
 	time_t ut_start_time = (time_t)gStartTime;
    if( !(gmtime_tm = gmtime( &ut_start_time )) ){
@@ -539,7 +548,7 @@ void plot_ngps_vs_time( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", i
 
    
    // drawing background graphs here :
-   TGraph* pGraph1 = DrawGraph( x_value1, y_value1, lq1, 1, NULL, 
+   TGraph* pGraph1 = DrawGraph( x_value1, y_value1, NULL, y_value_err1, lq1, 1, NULL, 
 				  fit_func_name, min_y, max_y, szTitle,
 				basename, bLog, szDescX, szDescY, fit_min_x,
 				fit_max_x );
