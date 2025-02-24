@@ -286,5 +286,8 @@ fi
 # - plot Fluence distribution
 # - plot Luminosity distribution , use distance to Crab and fluence to calculate this one 
 
+echo "In order to plot all the results vs. time execute:"
+echo "cd /media/msok/5508b34c-040a-4dce-a8ff-2c4510a5d1a3/eda2/"
+echo "~/github/crab_frb_paper/scripts/calib/process_all_datasets.sh"
 
 
