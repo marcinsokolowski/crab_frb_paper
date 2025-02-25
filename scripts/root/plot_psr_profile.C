@@ -206,7 +206,9 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
          const char* szStarName="", const char* fname="default",
          int bLog=0, const char* szDescX=NULL, const char* szDescY=NULL,
          double fit_min_x=-100000, double fit_max_x=-100000, 
-         Double_t* y_values_errors=NULL )
+         Double_t* y_values_errors=NULL,
+         Double_t* init_params=NULL,
+         double bIgnorePeak=0.2 )
 {
     int MarkerType = 20;
     int ColorNum = kRed;
@@ -346,6 +348,14 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
          par[4] = 0.1; // very long decay ... - 10 for MWA fit 
          par[5] = 0.1; // tau 
 
+         if( init_params ){
+            par[0] = init_params[0];
+            par[1] = init_params[1];
+            par[2] = init_params[2];
+            par[3] = init_params[3];
+            par[4] = init_params[4];
+         }
+
          line->SetParName(0,"SNR offset");
          line->SetParName(1,"t_{peak}");
          line->SetParName(2,"f_{peak}");
@@ -456,31 +466,21 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
          gFittedParametersErrors[3] = line->GetParError(3);
          gFittedParametersErrors[4] = line->GetParError(4);
 
-         if( gNormaliseInputData > 0 ){
-            double scattering_time_sec = par[4]*gXaxisNormFactor;
-            gScatteringTimeTauMS = scattering_time_sec*1000.00;
-            printf("Scattering time par[4] = %.8f -> re-scaled back = %.8f [sec] = %.8f [ms]\n",par[4],scattering_time_sec,gScatteringTimeTauMS);
-
-            double pulse_width_sec = par[3]*gXaxisNormFactor; 
-            gPulseWidthMS = pulse_width_sec*1000.00;
-            printf("Pulse width par[3] = %.8f -> re-scaled back = %.8f [sec] = %.8f [ms]\n",par[3],pulse_width_sec,gPulseWidthMS);
-         }
       }
 
 
       double sum_resid=0.00;
       double sum_resid2=0.00;
       int count_resid=0;
-      bool bIgnorePeak=true;
       FILE* out_f = fopen("fit.txt","w"); 
       for(int i=0;i<numVal;i++){
          bool bInclude=true;
          double x = x_values[i];
          double y = y_values[i];
 
-         if( bIgnorePeak ){
+         if( bIgnorePeak>0 ){
             double dist_from_peak = fabs( x - par[1] );
-            if( dist_from_peak <= 0.2 ){
+            if( dist_from_peak <= bIgnorePeak ){
                printf("WARNING : ignoring phase bin %.8f - too close to the peak at %.8f\n",x,par[1]);
                bInclude=false;
             }
@@ -1028,6 +1028,16 @@ void plot_psr_profile( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", in
    TGraphErrors* pGraph1 = DrawGraph( x_value1, y_value1, lq1, 1, NULL, fit_func_name, min_y, max_y, szTitle,
                                       basename, bLog, szDescX, szDescY, fit_min_x, fit_max_x, y_value1_err );
    
+   if( gNormaliseInputData > 0 ){
+      double scattering_time_sec = gFittedParameters[4]*gXaxisNormFactor;
+      gScatteringTimeTauMS = scattering_time_sec*1000.00;
+      printf("Scattering time par[4] = %.8f -> re-scaled back = %.8f [sec] = %.8f [ms]\n",gFittedParameters[4],scattering_time_sec,gScatteringTimeTauMS);
+
+      double pulse_width_sec = gFittedParameters[3]*gXaxisNormFactor; 
+      gPulseWidthMS = pulse_width_sec*1000.00;
+      printf("Pulse width par[3] = %.8f -> re-scaled back = %.8f [sec] = %.8f [ms]\n",gFittedParameters[3],pulse_width_sec,gPulseWidthMS);
+   }
+
    c1->Update();
 
    char szFittedFile[128];
@@ -1041,7 +1051,7 @@ void plot_psr_profile( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", in
 
    gFittedParametersOriginalScaling[0] = gFittedParameters[0]*gYaxisNormFactor; // + gYaxisOffset;
    gFittedParametersOriginalScaling[1] = gFittedParameters[1]*gXaxisNormFactor + gXaxisOffset;
-   gFittedParametersOriginalScaling[2] = gFittedParameters[2]*gYaxisNormFactor;
+   gFittedParametersOriginalScaling[2] = gFittedParameters[2]*gYaxisNormFactor/5;
    gFittedParametersOriginalScaling[3] = gFittedParameters[3]*gXaxisNormFactor;
    gFittedParametersOriginalScaling[4] = gFittedParameters[4]*gXaxisNormFactor;
 
@@ -1082,8 +1092,8 @@ void plot_psr_profile( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", in
          y_value1_original[i] = y_value1_original[i] - gYaxisOffset;
       }
 
-      TGraphErrors* pGraph2 = DrawGraph( x_value1_original, y_value1_original, lq1, 1, NULL, NULL, 0.00, max_y, szTitle,
-                                         basename, bLog, szDescX, szDescY, fit_min_x, fit_max_x);
+      TGraphErrors* pGraph2 = DrawGraph( x_value1_original, y_value1_original, lq1, 1, NULL, fit_func_name, 0.00, max_y, szTitle,
+                                         basename, bLog, szDescX, szDescY, fit_min_x, fit_max_x, NULL, gFittedParametersOriginalScaling, 0.01/2.00 ); // gFittedParametersOriginalScaling[4]*2.00 );
 
       TF1* line_original_data = new TF1("fit_func_test",Pulse_with_gauss_onset_original,gMinX,gMaxX,gFittedParametersN);
 //   TF1* line_original_data = new TF1("fit_func_test",Pulse_with_gauss_onset_original,0,1,gFittedParametersN);
@@ -1091,6 +1101,11 @@ void plot_psr_profile( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", in
       printf("DEBUG : %.8f\n",line_original_data->Eval( x_value1_original[0] ));
       line_original_data->Draw("same");
       c2->Update();
+
+      sprintf(szFittedFile,"%s.refit",basename);
+      outf = fopen(szFittedFile,"w");
+      fprintf(outf,"%.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f\n",gFittedParameters[0],gFittedParametersErrors[0],gFittedParameters[1],gFittedParametersErrors[1],gFittedParameters[2],gFittedParametersErrors[2],gFittedParameters[3],gFittedParametersErrors[3],gFittedParameters[4],gFittedParametersErrors[4]);
+      fclose(outf);
    }
 
 
