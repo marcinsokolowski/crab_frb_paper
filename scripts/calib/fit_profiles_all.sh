@@ -1,0 +1,65 @@
+#!/bin/bash
+
+curr_path=`pwd`
+
+template="20??_??_??_pulsars_msok/J0534+2200_flagants_ch40_ch256/256/filterbank_msok_64ch/merged_channels_??????????/presto_sps_thresh5_numdms1000_dmstep0.01/"
+if [[ -n "$1" && "$1" != "-" ]]; then
+   template="$1"
+fi
+
+SNR_THRESHOLD=40
+if [[ -n "$2" && "$2" != "-" ]]; then
+   SNR_THRESHOLD=$2
+fi
+
+
+datfile=_DM56.72.dat
+if [[ -n "$3" && "$3" != "-" ]]; then
+   datfile="$3"
+fi
+b=${datfile%%.dat}
+
+
+
+for path in `ls -d ${template}`
+do
+   cd ${template}
+   pwd
+   if [[ -s $datfile ]]; then     
+      echo ""~/github/crab_frb_paper/scripts/calib/process_presto_candidates.sh $datfile
+      ~/github/crab_frb_paper/scripts/calib/process_presto_candidates.sh $datfile
+      
+      cat _DM56.72.singlepulse | grep -v "#" | awk '{if($1>=55 && $1<=59){print $1" "$2" "$3" "$4" "$5;}}' > all_crab_gps.singlepulse
+      
+      echo "cp ../../../../../analysis_final/rfi.ranges ."
+      cp ../../../../../analysis_final/rfi.ranges .
+      
+      echo "python ~/github/crab_frb_paper/scripts/python/exclude_ranges.py all_crab_gps.singlepulse --rfi_file=rfi.ranges --presto --outfile=all_crab_gps_norfi.singlepulse"
+      python ~/github/crab_frb_paper/scripts/python/exclude_ranges.py all_crab_gps.singlepulse --rfi_file=rfi.ranges --presto --outfile=all_crab_gps_norfi.singlepulse
+      
+      mkdir merged
+      cd merged
+      echo "~/github/crab_frb_paper/scripts/calib/presto2cand.sh ../all_crab_gps_norfi.singlepulse"
+      ~/github/crab_frb_paper/scripts/calib/presto2cand.sh ../all_crab_gps_norfi.singlepulse
+
+      echo "ln -s ../detrended_normalised_${b}.txt"
+      ln -s ../detrended_normalised_${b}.txt
+      
+      cp ~/github/crab_frb_paper/scripts/root/plot_samples_with_candidates.C .
+      
+      awk '{if($1!="#"){print $3" "$1;}}' presto.cand > presto.txt
+      mkdir -p images/
+      root -l "plot_samples_with_candidates.C(\"detrended_normalised_${b}.txt\",\"presto.txt\",NULL,NULL,\"presto_merged_sorted.txt\")"
+      
+      MEAN_SEFD=`cat ../../../../../analysis*/MEAN_SEFD.txt | tail -1`
+      
+      echo "~/github/crab_frb_paper/scripts/calib/fit_profiles.sh ${MEAN_SEFD} ${SNR_THRESHOLD}"
+      ~/github/crab_frb_paper/scripts/calib/fit_profiles.sh ${MEAN_SEFD} ${SNR_THRESHOLD}
+      
+      cd ..
+   else
+      echo "WARNING/ERROR : data file $datfile does not exist in:"
+      pwd
+   fi
+   cd ${curr_path}
+done
