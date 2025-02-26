@@ -5,8 +5,11 @@ if [[ -n "$1" && "$1" != "-" ]]; then
    sefd=$1
 fi
 
-snr_threshold=40
-if [[ -n "$2" && "$2" != "-" ]]; then
+max_snr=`awk -v maxsnr=-1 '{if($2>maxsnr){maxsnr=$2;}}END{print maxsnr-0.01;}' presto.txt`
+
+# just do max snr one 
+snr_threshold=$max_snr
+if [[ -n "$2" && "$2" != "-" && $2 -gt 0 ]]; then
    snr_threshold=$2
 fi
 

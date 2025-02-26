@@ -7,7 +7,7 @@ if [[ -n "$1" && "$1" != "-" ]]; then
    template="$1"
 fi
 
-SNR_THRESHOLD=40
+SNR_THRESHOLD=-40 # <40 -> use the max SNR one 
 if [[ -n "$2" && "$2" != "-" ]]; then
    SNR_THRESHOLD=$2
 fi
@@ -50,11 +50,14 @@ do
       awk '{if($1!="#"){print $3" "$1;}}' presto.cand > presto.txt
       mkdir -p images/
       root -l "plot_samples_with_candidates.C(\"detrended_normalised_${b}.txt\",\"presto.txt\",NULL,NULL,\"presto_merged_sorted.txt\")"
+
+      pwd
+      echo "cat ../../../../../../analysis*/MEAN_SEFD.txt | tail -1"      
+      MEAN_SEFD=`cat ../../../../../../analysis*/MEAN_SEFD.txt | tail -1`
       
-      MEAN_SEFD=`cat ../../../../../analysis*/MEAN_SEFD.txt | tail -1`
-      
-      echo "~/github/crab_frb_paper/scripts/calib/fit_profiles.sh ${MEAN_SEFD} ${SNR_THRESHOLD}"
-      ~/github/crab_frb_paper/scripts/calib/fit_profiles.sh ${MEAN_SEFD} ${SNR_THRESHOLD}
+      # use maximum SNR 
+      echo "~/github/crab_frb_paper/scripts/calib/fit_profiles.sh ${MEAN_SEFD} # ${SNR_THRESHOLD}"
+      ~/github/crab_frb_paper/scripts/calib/fit_profiles.sh ${MEAN_SEFD} # ${SNR_THRESHOLD}
       
       cd ..
    else
