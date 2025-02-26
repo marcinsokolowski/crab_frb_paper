@@ -18,4 +18,9 @@ if [[ ! -s plot_scattau_vs_time.C ]]; then
 fi
 
 mkdir -p images/
-root -l "plot_scattau_vs_time.C(\"crab_taufit_vs_time.txt\")"
+
+if [[ -s arfiles.txt ]]; then
+   root -l "plot_scattau_vs_time.C(\"crab_taufit_vs_time.txt\",\"arfiles.txt\")"
+else
+   root -l "plot_scattau_vs_time.C(\"crab_taufit_vs_time.txt\")"
+fi   

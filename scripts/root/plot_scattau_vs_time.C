@@ -58,11 +58,8 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
          const char* szStarName="", const char* fname="default",
          int bLog=0, const char* szDescX=NULL, const char* szDescY=NULL,
          double fit_min_x=-100000, double fit_max_x=-100000,
-                        Double_t* y_values_err=NULL )
+                        Double_t* y_values_err=NULL, const char* szOPT="AP", int MarkerType = 20, int ColorNum = kBlack )
 {
-    int MarkerType = 20;
-    int ColorNum = kBlack;
-
     Double_t z,sigma_z,const_part;
     TF1 *line = NULL;
     TF1 *line_draw = NULL;
@@ -165,7 +162,7 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
 //    pGraph->SetMinimum( -90 );
 //    pGraph->SetMaximum( 90 );
     pGraph->SetTitle( szStarName );
-    pGraph->Draw("AP");
+    pGraph->Draw( szOPT );
 
 //    pGraph->GetXaxis()->SetTimeDisplay(1);
 //    pGraph->GetXaxis()->SetTimeFormat("%d\/%m\/%y %H:%M:%S");
@@ -442,7 +439,9 @@ int ReadResultsFile( const char* fname, Double_t* x_values, Double_t* y_values,
    return all;
 }  
 
-void plot_scattau_vs_time( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", int min_local_time=-1e6, int max_local_time=1e6,
+void plot_scattau_vs_time( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", 
+                           const char* basename2=NULL,
+                           int min_local_time=-1e6, int max_local_time=1e6,
                const char* fit_func_name=NULL, double min_y=0.5, 
                double max_y=5, int bLog=0,
       const char* szDescX="Local Time",const char* szDescY="Scattering time [ms]", const char* szTitle=NULL,
@@ -524,6 +523,27 @@ void plot_scattau_vs_time( const char* basename="sigmaG1_vs_lapSigmaG1_for_root"
             fit_max_x, y_value1_err );
 
    printf("DEBUG : err[0] = %.8f\n",y_value1_err[0]);
+
+   TLegend *legend = new TLegend(.35,0.8,0.65,0.95);
+   legend->SetTextFont(72);
+   legend->SetTextSize(0.08); // 0.05 - large for eps-es to papers 
+   legend->SetFillStyle(1001);
+   legend->AddEntry(pGraph1,basename,"P");
+
+
+   if( basename2 ){
+      Double_t* x_value2 = new Double_t[MAX_ROWS];
+      Double_t* y_value2 = new Double_t[MAX_ROWS];
+      Double_t* x_value2_err = new Double_t[MAX_ROWS];
+      Double_t* y_value2_err = new Double_t[MAX_ROWS];
+
+      int lq2 = ReadResultsFile( basename2, x_value2, y_value2, -1, -1, 0, 2 ); 
+      int lq2_err = ReadResultsFile( basename2, x_value2_err, y_value2_err, -1, -1, 1, 3 ); 
+
+      TGraphErrors* pGraph2 = DrawGraph( x_value2, y_value2, lq2, 1, NULL, fit_func_name, min_y, max_y, szTitle, basename, bLog, szDescX, szDescY, fit_min_x, fit_max_x, y_value2_err, "P,same", 34 , kRed );
+
+      legend->AddEntry(pGraph2,"Coherent (.ar files)","P");     
+   }
    
    c1->Update();
 
