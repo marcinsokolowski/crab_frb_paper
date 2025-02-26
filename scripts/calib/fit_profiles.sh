@@ -19,9 +19,16 @@ if [[ -n "$3" && "$3" != "-" ]]; then
    datfile=$3
 fi
 
+root_options="-l"
+if [[ -n "$4" && "$4" != "-" ]]; then
+   root_options="$4"
+fi
 
-echo "~/github/presto_tools/build/extract_pulses ${datfile} presto.txt -X 7937.64 -C -t $snr_threshold -P pulses_snr${snr_threshold}_calibrated/ -r 100 -U 1"
-~/github/presto_tools/build/extract_pulses ${datfile} presto.txt -X 7937.64 -C -t $snr_threshold -P pulses_snr${snr_threshold}_calibrated/ -r 100 -U 1
+
+if [[ ! -d pulses_snr${snr_threshold}_calibrated/ ]]; then
+   echo "~/github/presto_tools/build/extract_pulses ${datfile} presto.txt -X 7937.64 -C -t $snr_threshold -P pulses_snr${snr_threshold}_calibrated/ -r 100 -U 1"
+   ~/github/presto_tools/build/extract_pulses ${datfile} presto.txt -X 7937.64 -C -t $snr_threshold -P pulses_snr${snr_threshold}_calibrated/ -r 100 -U 1
+fi   
 
 cd pulses_snr${snr_threshold}_calibrated/
 
@@ -30,8 +37,9 @@ cp ~/github/crab_frb_paper/scripts/root/plot_psr_profile.C .
 mkdir -p images
 for file in `ls pulse*.txt`
 do
-   root -l "plot_psr_profile.C(\"${file}\",2,1)"   
+   root ${root_options} "plot_psr_profile.C(\"${file}\",2,1)"   
 done
 
+cp ~/github/crab_frb_paper/scripts/root/histotau.C .
 cat *.refit | awk '{print $9;}' > tau.txt
-root -l "histofile.C(\"tau.txt\",0,1,0,0.01)"
+root ${root_options} "histotau.C(\"tau.txt\",0,1,0,0.01)"

@@ -11,6 +11,10 @@ if [[ -n "$2" && "$2" != "-" ]]; then
 fi
 
 root_options="-l"
+if [[ -n "$3" && "$3" != "-" ]]; then
+   root_options="$3"
+fi
+
 
 b=${datfile%%.dat}
 
