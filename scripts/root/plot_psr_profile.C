@@ -809,11 +809,41 @@ double calc_rms( Double_t* x_values, Double_t* y_values, int cnt, double start=-
 
    double rms = sqrt( sum2/count - (sum/count)*(sum/count) );
    double mean = (sum/count);
-   printf("MEAN = %e\n",mean);
+   printf("MEAN = %e = %e/%d\n",mean,sum,count);
    printf("RMS  = %e\n",rms);
   
    return rms;
 }
+
+double calc_rms_bins( Double_t* x_values, Double_t* y_values, int cnt, int start_bin=0, int end_bin=10 )
+{
+   double sum=0,sum2=0;
+   double maxX=-1000000000;
+   int count=0;
+
+   for(int i=0;i<cnt;i++){
+      double x_val = x_values[i];
+
+      if( i>=start_bin && i<=end_bin ){
+         sum += y_values[i];
+         sum2 += (y_values[i])*(y_values[i]);
+         count++;
+      }
+
+      if( x_val > maxX ){
+         maxX = x_val;
+      }
+   }
+
+   double rms = sqrt( sum2/count - (sum/count)*(sum/count) );
+   double mean = (sum/count);
+   printf("MEAN = %e = %e/%d\n",mean,sum,count);
+   printf("RMS  = %e\n",rms);
+  
+   return rms;
+}
+
+
 
 void normalise_x( Double_t* x_values, int cnt )
 {
@@ -997,7 +1027,8 @@ void plot_psr_profile( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", in
    
    int n_bins = lq1;
    printf("DEBUG : number of bins = %d\n",n_bins);     
-   double rms = -1.00;
+   double rms = calc_rms_bins( x_value1, y_value1, lq1, 0 , 12 );
+   double rms_original = rms;
 
    // normalisation of X-axis to [0,1] range is required always to make it
    // easier to find peak of the flux (~0.5)
@@ -1092,8 +1123,13 @@ void plot_psr_profile( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", in
          y_value1_original[i] = y_value1_original[i] - gYaxisOffset;
       }
 
+      for(int i=0;i<lq1;i++){
+         y_value1_err[i] = rms_original;
+      }
+
+      printf("DEBUG : using rms_original = %.8f\n",rms_original);
       TGraphErrors* pGraph2 = DrawGraph( x_value1_original, y_value1_original, lq1, 1, NULL, fit_func_name, 0.00, max_y, szTitle,
-                                         basename, bLog, szDescX, szDescY, fit_min_x, fit_max_x, NULL, gFittedParametersOriginalScaling, 0.01/2.00 ); // gFittedParametersOriginalScaling[4]*2.00 );
+                                         basename, bLog, szDescX, szDescY, fit_min_x, fit_max_x, y_value1_err, gFittedParametersOriginalScaling, 0.01/2.00 ); // gFittedParametersOriginalScaling[4]*2.00 );
 
       TF1* line_original_data = new TF1("fit_func_test",Pulse_with_gauss_onset_original,gMinX,gMaxX,gFittedParametersN);
 //   TF1* line_original_data = new TF1("fit_func_test",Pulse_with_gauss_onset_original,0,1,gFittedParametersN);
