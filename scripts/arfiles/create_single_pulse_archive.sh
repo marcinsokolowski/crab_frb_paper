@@ -28,7 +28,7 @@ psrcat -e ${object} > ${object}.eph
 
 arcount=`ls -d channel_0_?_*/*.ar | wc -l`
 
-if [[ $arcount -gt 0 && $force -le 0 ]]; then
+if [[ $arcount -ge 40 && $force -le 0 ]]; then
    echo "INFO : $arcount .ar files already exist -> no need to re-create (unless force option used)"
 else
    echo "INFO : creating single pulse archives:"
@@ -67,8 +67,13 @@ do
    
    if [[ $arcount -ge 40 ]]; then
       outfile=${base_arfile%%.ar}_sum.ar
-      echo "psradd -E J0534+2200.eph -R -o ${outfile} ${arlist} ${arlist2}"
-      psradd -E J0534+2200.eph -R -o ${outfile} ${arlist} ${arlist2}
+      
+      if [[ -s ${outfile} ]]; then
+         echo "File $outfile already exists -> skipped"
+      else
+         echo "psradd -E J0534+2200.eph -R -o ${outfile} ${arlist} ${arlist2}"
+         psradd -E J0534+2200.eph -R -o ${outfile} ${arlist} ${arlist2}
+      fi
    else
       echo "Non-full band pulse $base_arfile skipped"
    fi

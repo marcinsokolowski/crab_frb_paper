@@ -22,11 +22,7 @@ do
          pulse_time=`cat MAX_SNR_LINE.txt | awk '{print $3;}'`
          
          echo "~/github/crab_frb_paper/scripts/arfiles/create_single_pulse_archive.sh $pulse_time 1.5"
-         ~/github/crab_frb_paper/scripts/arfiles/create_single_pulse_archive.sh $pulse_time 1.5
-         
-         # find .ar file with the actual pulse :
-         echo "~/github/crab_frb_paper/scripts/arfiles/find_pulse_amongst_arfiles.sh 0.001"
-         ~/github/crab_frb_paper/scripts/arfiles/find_pulse_amongst_arfiles.sh 0.001
+         ~/github/crab_frb_paper/scripts/arfiles/create_single_pulse_archive.sh $pulse_time 1.5         
       else
          echo "WARNING : no file MAX_SNR_LINE.txt in $datadir or in :"
          pwd
@@ -35,6 +31,10 @@ do
    else
       echo "WARNING : no .dada files in $datadir"
    fi
+   
+   # find .ar file with the actual pulse :
+   echo "~/github/crab_frb_paper/scripts/arfiles/find_pulse_amongst_arfiles.sh 0.001"
+   ~/github/crab_frb_paper/scripts/arfiles/find_pulse_amongst_arfiles.sh 0.001
    
    cd $curr_dir
 done

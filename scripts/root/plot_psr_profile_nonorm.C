@@ -220,6 +220,7 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
    TF1 *part2 = NULL;
     Double_t maxX=-100000,maxY=-100000;
     Double_t minX=100000,minY=100000;
+    Double_t maxY_arg=-10000;
 
 
     TGraphErrors* pGraph = new TGraphErrors(q);
@@ -236,8 +237,11 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
 
         if(x_values[i]>maxX)
             maxX = x_values[i];
-        if(y_values[i]>maxY)
-            maxY = y_values[i];
+
+        if(y_values[i]>maxY){
+           maxY = y_values[i];
+           maxY_arg = x_values[i];
+        }
       
         if(x_values[i]<minX)
             minX = x_values[i];
@@ -342,7 +346,7 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
          local_func=1;
 
          par[0] = 0.00; // offset (mean off-pulse)
-         par[1] = 17.00; // t_peak  0.53 for the MWA data
+         par[1] = maxY_arg; // t_peak  0.53 for the MWA data
          par[2] = 1; // peak flux 
          par[3] = 0.1; // sigma 
          par[4] = 0.1; // very long decay ... - 10 for MWA fit 
