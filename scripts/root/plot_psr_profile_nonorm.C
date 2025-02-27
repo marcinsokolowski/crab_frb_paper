@@ -962,7 +962,7 @@ void plot_psr_profile_nonorm( const char* basename="sigmaG1_vs_lapSigmaG1_for_ro
                        bool bIsSigmaSimulPerPhaseBin=false, // if this is true no need to multiply sigma_simulated by sqrt(n_bins)
                        bool bUseFitResidualsRMS=false, // use residuals of the FIT to calculate Sigma_obs which may be slightly different than 1.00 (after normalisation)
                        double min_y=-1000000,  double max_y=-1000000, int bLog=0,
-      const char* szDescX="Phase",
+      const char* szDescX="Time [ms]",
       const char* szDescY="Signal to Noise Ratio (SNR)", 
       const char* szTitle=NULL,
       double fit_min_x=-100000, double fit_max_x=-100000,

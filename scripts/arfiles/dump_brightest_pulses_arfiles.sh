@@ -5,12 +5,18 @@ if [[ -n "$1" && "$1" != "-" ]]; then
    do_scp=$1
 fi
 
+template="/media/msok/5508b34c-040a-4dce-a8ff-2c4510a5d1a3/eda2/20??_??_??_pulsars_msok/J0534+2200_flagants_ch40_ch256/256/filterbank_msok_64ch/merged_channels_??????????/presto_sps_thresh5_numdms100_dmstep0.01/"
+if [[ -n "$2" && "$2" != "-" ]]; then
+   template="$2"
+fi
+
+
 # was presto.txt in merged/
 presto_pulse_file=_DM56.72.singlepulse
 
 export PATH=~/github/crab_frb_paper/scripts/arfiles:$PATH
 
-for merged_dir in `ls -d /media/msok/5508b34c-040a-4dce-a8ff-2c4510a5d1a3/eda2/20??_??_??_pulsars_msok/J0534+2200_flagants_ch40_ch256/256/filterbank_msok_64ch/merged_channels_??????????/presto_sps_thresh5_numdms100_dmstep0.01/`
+for merged_dir in `ls -d ${template}`
 do
    uxtime=`echo $merged_dir | awk '{i=index($1,"merged_channels");print substr($1,i+16,10);}'`
 
@@ -51,6 +57,9 @@ do
          if [[ $do_scp -gt 0 ]]; then
             echo "rsync -avP MAX_SNR_LINE*txt aavs@nimbus4:/data_archive/${subdir}/"
             rsync -avP MAX_SNR_LINE*txt aavs@nimbus4:/data_archive/${subdir}/
+            
+            echo "sleep 30"
+            sleep 30
          else
             echo "INFO : copying to nimubs4 is not required"
          fi
