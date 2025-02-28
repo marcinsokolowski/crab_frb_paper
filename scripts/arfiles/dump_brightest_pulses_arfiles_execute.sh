@@ -5,6 +5,23 @@ if [[ -n "$1" && "$1" != "-" ]]; then
    template="$1"
 fi
 
+pulse_time_external=""
+if [[ -n "$2" && "$2" != "-" ]]; then
+   pulse_time_external=$2
+fi
+
+dspsr_options=""
+if [[ -n "$3" && "$3" != "-" ]]; then
+   dspsr_options="$3"
+fi
+
+
+time_radius=2 # was 1.5
+if [[ -n "$4" && "$4" != "-" ]]; then
+   time_radius=$4
+fi
+
+
 curr_dir=`pwd`
 
 for datadir in `ls -d ${template}`
@@ -21,8 +38,13 @@ do
       if [[ -s MAX_SNR_LINE.txt ]]; then   
          pulse_time=`cat MAX_SNR_LINE.txt | awk '{print $3;}'`
          
-         echo "~/github/crab_frb_paper/scripts/arfiles/create_single_pulse_archive.sh $pulse_time 1.5"
-         ~/github/crab_frb_paper/scripts/arfiles/create_single_pulse_archive.sh $pulse_time 1.5         
+         if [[ -n "${pulse_time_external}" ]]; then
+            echo "Using externally provided pulse time = $pulse_time_external"
+            pulse_time=$pulse_time_external
+         fi
+         
+         echo "~/github/crab_frb_paper/scripts/arfiles/create_single_pulse_archive.sh $pulse_time $time_radius - \"${dspsr_options}\""
+         ~/github/crab_frb_paper/scripts/arfiles/create_single_pulse_archive.sh $pulse_time $time_radius - "${dspsr_options}"
       else
          echo "WARNING : no file MAX_SNR_LINE.txt in $datadir or in :"
          pwd

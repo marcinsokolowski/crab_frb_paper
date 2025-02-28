@@ -5,7 +5,7 @@ if [[ -n "$1" && "$1" != "-" ]]; then
    threshold=$1
 fi
 
-for arfile in `ls -r *.ar | head -5`
+for arfile in `ls -r *.ar`
 do
    txtfile=${arfile%%ar}txt
    

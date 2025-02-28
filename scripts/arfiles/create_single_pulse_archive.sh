@@ -22,6 +22,11 @@ if [[ -n "$3" && "$3" != "-" ]]; then
    outdir=$3
 fi
 
+dspsr_options=""
+if [[ -n "$4" && "$4" != "-" ]]; then
+   dspsr_options="$4"
+fi
+
 mkdir ${outdir}/
 cd ${outdir}/
 psrcat -e ${object} > ${object}.eph
@@ -48,8 +53,8 @@ else
 
       # use -cuda 0 when there is GPU     
       # -S 3000 -T 2000 - time range 
-      echo "dspsr -F1024:D -b1024 -E ${object}.eph -turns 1 -a PSRFITS -minram=256 -B 0.925925926 -S ${start_time} -T ${interval} ${dada_file}"
-      dspsr -F1024:D -b1024 -E ${object}.eph -turns 1 -a PSRFITS -minram=256 -B 0.925925926 -S ${start_time} -T ${interval} ${dada_file} 
+      echo "dspsr -F1024:D -b1024 -E ${object}.eph -turns 1 -a PSRFITS -minram=256 -B 0.925925926 -S ${start_time} -T ${interval} ${dspsr_options} ${dada_file}"
+      dspsr -F1024:D -b1024 -E ${object}.eph -turns 1 -a PSRFITS -minram=256 -B 0.925925926 -S ${start_time} -T ${interval} ${dspsr_options} ${dada_file} 
    
       cd ..
     done

@@ -38,7 +38,7 @@ do
          vap -c "name nbin mjd freq period length bw" -n ${pulse_arfile}
          
          length_ms=`vap -c "name nbin mjd freq period length bw" -n ${pulse_arfile} | awk '{print $7*1000;}'`
-         echo "Length = $length [ms]"
+         echo "Length = $length_ms [ms]"
          
          cat ${pulse_arfile_base}.txt | grep -v File | awk -v length_ms=${length_ms} '{print $3*(length_ms/1024)" "$4;}'  > ${pulse_arfile_base}_2col.txt
          
