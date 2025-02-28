@@ -42,12 +42,15 @@ do
          
          cat ${pulse_arfile_base}.txt | grep -v File | awk -v length_ms=${length_ms} '{print $3*(length_ms/1024)" "$4;}'  > ${pulse_arfile_base}_2col.txt
          
+         echo "ssh aavs@nimbus4 \"ls -d ${remote_dir}/channel_0_1_*\""
+         ssh aavs@nimbus4 "ls -d ${remote_dir}/channel_0_1_*"
+                  
          echo "root -l plot_psr_profile_nonorm.C(\"${pulse_arfile_base}_2col.txt\")"
          root -l "plot_psr_profile_nonorm.C(\"${pulse_arfile_base}_2col.txt\")"
       else
          echo "ERROR : file PULSE_ARFILES.txt not found -> dataset skipped ( $remote_dir )"
       fi
-      
+ 
       cd ${local_dir}
    fi
 done

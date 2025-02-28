@@ -56,7 +56,7 @@ else
 fi
 
 # sum only last 5 from channel 0 this is where the pulse will seat :
-for first_arfile in `ls channel_0_?_*/*.ar | tail -5`
+for first_arfile in `ls channel_0_?_*/*.ar`
 do
    base_arfile=`basename $first_arfile`
    
@@ -78,3 +78,8 @@ do
       echo "Non-full band pulse $base_arfile skipped"
    fi
 done
+
+
+# find .ar file with the actual pulse :
+echo "~/github/crab_frb_paper/scripts/arfiles/find_pulse_amongst_arfiles.sh 0.001"
+~/github/crab_frb_paper/scripts/arfiles/find_pulse_amongst_arfiles.sh 0.001

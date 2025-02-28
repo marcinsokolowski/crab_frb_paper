@@ -9,7 +9,7 @@ curr_dir=`pwd`
 
 for datadir in `ls -d ${template}`
 do
-   if [[ $datadir == "2024_12_24_pulsars_msok/J0534+2200_flagants_ch40_ch256/256" ||$datadir == "2024_12_14_pulsars_msok/J0534+2200_flagants_ch40_ch256/256" ]]; then
+   if [[ $datadir == "2024_12_24_pulsars_msok/J0534+2200_flagants_ch40_ch256/256" || $datadir == "2024_12_14_pulsars_msok/J0534+2200_flagants_ch40_ch256/256" ]]; then
       echo "$datadir : already processed -> skipped"
       continue
    fi
@@ -33,8 +33,8 @@ do
    fi
    
    # find .ar file with the actual pulse :
-   echo "~/github/crab_frb_paper/scripts/arfiles/find_pulse_amongst_arfiles.sh 0.001"
-   ~/github/crab_frb_paper/scripts/arfiles/find_pulse_amongst_arfiles.sh 0.001
+#   echo "~/github/crab_frb_paper/scripts/arfiles/find_pulse_amongst_arfiles.sh 0.001"
+#   ~/github/crab_frb_paper/scripts/arfiles/find_pulse_amongst_arfiles.sh 0.001
    
    cd $curr_dir
 done

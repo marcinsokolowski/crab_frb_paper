@@ -450,11 +450,9 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
          line_draw->SetLineColor(kBlack);
 
          printf("Fitted paramaters:\n");
-         printf("\tpar[0] = %.8f\n",par[0]);
-         printf("\tpar[1] = %.8f\n",par[1]);
-         printf("\tpar[2] = %.8f\n",par[2]);
-         printf("\tpar[3] = %.8f\n",par[3]);
-         printf("\tpar[4] = %.8f\n",par[4]);
+         for(int i=0;i<5;i++){
+            printf("\tpar[i] = %.8f +/- %.8f\n",par[i],line->GetParError(i));
+         }
          printf("TEST VALUE = %.8f vs. %.8f\n",line->Eval(0.5),line_draw->Eval(0.5));
 
          gFittedParametersN = 5;
@@ -774,7 +772,7 @@ int ReadResultsFile( const char* fname, Double_t* x_values, Double_t* y_values,
      if( x_val < min_x ){
         min_x = x_val;
      }
-     if( gVerb || 0 ){
+     if( gVerb ){
         printf("values : %f %f\n",x_val,y_val);
      }
 
