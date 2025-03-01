@@ -58,8 +58,8 @@ do
             echo "rsync -avP MAX_SNR_LINE*txt aavs@nimbus4:/data_archive/${subdir}/"
             rsync -avP MAX_SNR_LINE*txt aavs@nimbus4:/data_archive/${subdir}/
             
-            echo "sleep 30"
-            sleep 30
+            echo "sleep 10"
+            sleep 10
          else
             echo "INFO : copying to nimubs4 is not required"
          fi

@@ -26,11 +26,11 @@ fi
 
 
 if [[ ! -d pulses_snr${snr_threshold}_calibrated/ ]]; then
-   echo "~/github/presto_tools/build/extract_pulses ${datfile} presto.txt -X ${sefd} -C -t $snr_threshold -P pulses_snr${snr_threshold}_calibrated/ -r 100 -U 1"
-   ~/github/presto_tools/build/extract_pulses ${datfile} presto.txt -X ${sefd} -C -t $snr_threshold -P pulses_snr${snr_threshold}_calibrated/ -r 100 -U 1
+   echo "~/github/presto_tools/build/extract_pulses ${datfile} presto.txt -X ${sefd} -C -t $snr_threshold -P pulses_snr${snr_threshold}_calibrated_fluence/ -r 100 -U 1"
+   ~/github/presto_tools/build/extract_pulses ${datfile} presto.txt -X ${sefd} -C -t $snr_threshold -P pulses_snr${snr_threshold}_calibrated_fluence/ -r 100 -U 1
 fi   
 
-cd pulses_snr${snr_threshold}_calibrated/
+cd pulses_snr${snr_threshold}_calibrated_fluence/
 
 cp ~/github/crab_frb_paper/scripts/root/plot_psr_profile.C .
 
