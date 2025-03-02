@@ -10,11 +10,19 @@ if [[ -n "$2" && "$2" != "-" ]]; then
    outdir="$2"
 fi
 
+min_good_time=2000 # or perhaps should be 3000 seconds ?
+# TotalGoodTimeInSec.txt
+if [[ -n "$3" && "$3" != "-" ]]; then
+   min_good_time="$3"
+fi
+
+
 echo "###################################"
 echo "PARAMETERS:"
 echo "###################################"
 echo "analysis_dir = $analysis_dir"
 echo "outdir    = $outdir"
+echo "min_good_time = $min_good_time"
 echo "###################################"
 
 
@@ -61,36 +69,42 @@ for snrfile in `ls 202?_??_??_pulsars_msok/${analysis_dir}/all_crab_gps_norfi.sn
 do
    dir=`dirname $snrfile`
    dataset=`dirname $dir`
-   echo 
-   echo "Processing dataset = $dataset, dir = $dir"
-   obsduration_hours=`cat ${dir}/updated.hdr | grep "Time per file" | awk '{print $6/3600.00;}'`
+   total_good_time=`cat ${dir}/TotalGoodTimeInSec.txt | awk '{print int($1);}'`
    
-   cd $dir
-   ux=`ls uxtime*txt | awk -v sum=0 -v count=0 '{ux=substr($1,7,10);sum+=ux;count+=1;}END{print sum/count;}'`
-   cd -
+   if [[ $total_good_time -gt $min_good_time ]]; then   
+      echo 
+      echo "Processing dataset = $dataset, dir = $dir"
+      obsduration_hours=`cat ${dir}/updated.hdr | grep "Time per file" | awk '{print $6/3600.00;}'`
+   
+      cd $dir
+      ux=`ls uxtime*txt | awk -v sum=0 -v count=0 '{ux=substr($1,7,10);sum+=ux;count+=1;}END{print sum/count;}'`
+      cd -
 
-   count=`cat $snrfile | awk '{if($1!="#"){print $0;}}' | wc -l`
-   count_merged=`cat $dir/merged/presto.cand_normal_snr | awk '{if($1!="#"){print $0;}}' | wc -l`
-   flux_fit_line=`cat $dir/flux_fit_results.txt | tail -1`
-   lumin_fit_line=`cat $dir/lumin_fit_results.txt | tail -1`
-   snr_fit_line=`cat $dir/snr_fit_results.txt | tail -1`
+      count=`cat $snrfile | awk '{if($1!="#"){print $0;}}' | wc -l`
+      count_merged=`cat $dir/merged/presto.cand_normal_snr | awk '{if($1!="#"){print $0;}}' | wc -l`
+      flux_fit_line=`cat $dir/flux_fit_results.txt | tail -1`
+      lumin_fit_line=`cat $dir/lumin_fit_results.txt | tail -1`
+      snr_fit_line=`cat $dir/snr_fit_results.txt | tail -1`
 
-   # original (before merging):
-   echo "$ux $count" | awk -v obsduration=${obsduration_hours} '{print $1" "$2/obsduration;}' >> ${outdir}/ngps_vs_uxtime.txt
-   echo "$ux $flux_fit_line" | awk -v obsduration=${obsduration_hours} '{print $0" "obsduration;}' >> ${outdir}/flux_vs_time.txt
-   echo "$ux $snr_fit_line" | awk -v obsduration=${obsduration_hours} '{print $0" "obsduration;}' >> ${outdir}/snr_vs_time.txt
-   echo "$ux $lumin_fit_line" | awk -v obsduration=${obsduration_hours} '{print $0" "obsduration;}' >> ${outdir}/lumin_vs_time.txt
+      # original (before merging):
+      echo "$ux $count" | awk -v obsduration=${obsduration_hours} '{print $1" "$2/obsduration;}' >> ${outdir}/ngps_vs_uxtime.txt
+      echo "$ux $flux_fit_line" | awk -v obsduration=${obsduration_hours} '{print $0" "obsduration;}' >> ${outdir}/flux_vs_time.txt
+      echo "$ux $snr_fit_line" | awk -v obsduration=${obsduration_hours} '{print $0" "obsduration;}' >> ${outdir}/snr_vs_time.txt
+      echo "$ux $lumin_fit_line" | awk -v obsduration=${obsduration_hours} '{print $0" "obsduration;}' >> ${outdir}/lumin_vs_time.txt
    
-   echo "DEBUG : $ux $snr_fit_line" 
+      echo "DEBUG : $ux $snr_fit_line" 
    
-   # after merging :
-   flux_fit_line=`cat $dir/merged/flux_fit_results.txt | tail -1`
-   lumin_fit_line=`cat $dir/merged/lumin_fit_results.txt | tail -1`
-   snr_fit_line=`cat $dir/merged/snr_fit_results.txt | tail -1`
-   echo "$ux $count_merged" | awk -v obsduration=${obsduration_hours} '{print $1" "$2/obsduration;}' >> ${outdir}/merged/merged-ngps_vs_uxtime.txt
-   echo "$ux $flux_fit_line" | awk -v obsduration=${obsduration_hours} '{print $0" "obsduration;}' >> ${outdir}/merged/flux_vs_time.txt
-   echo "$ux $snr_fit_line" | awk -v obsduration=${obsduration_hours} '{print $0" "obsduration;}' >> ${outdir}/merged/snr_vs_time.txt
-   echo "$ux $lumin_fit_line" | awk -v obsduration=${obsduration_hours} '{print $0" "obsduration;}' >> ${outdir}/merged/lumin_vs_time.txt
+      # after merging :
+      flux_fit_line=`cat $dir/merged/flux_fit_results.txt | tail -1`
+      lumin_fit_line=`cat $dir/merged/lumin_fit_results.txt | tail -1`
+      snr_fit_line=`cat $dir/merged/snr_fit_results.txt | tail -1`
+      echo "$ux $count_merged" | awk -v obsduration=${obsduration_hours} '{print $1" "$2/obsduration;}' >> ${outdir}/merged/merged-ngps_vs_uxtime.txt
+      echo "$ux $flux_fit_line" | awk -v obsduration=${obsduration_hours} '{print $0" "obsduration;}' >> ${outdir}/merged/flux_vs_time.txt
+      echo "$ux $snr_fit_line" | awk -v obsduration=${obsduration_hours} '{print $0" "obsduration;}' >> ${outdir}/merged/snr_vs_time.txt
+      echo "$ux $lumin_fit_line" | awk -v obsduration=${obsduration_hours} '{print $0" "obsduration;}' >> ${outdir}/merged/lumin_vs_time.txt
+   else
+      echo "WARNING : dataset $dir skipped. Total good time = $total_good_time < minimum required good time $min_good_time"
+   fi
 done
 
 # PLOTTING :
