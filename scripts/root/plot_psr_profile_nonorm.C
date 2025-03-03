@@ -455,6 +455,10 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
          }
          printf("TEST VALUE = %.8f vs. %.8f\n",line->Eval(0.5),line_draw->Eval(0.5));
 
+         FILE* outf = fopen("point.txt","a+");
+         fprintf(outf," %.8f %.8f\n",par[4],line->GetParError(4));
+         fclose(outf);
+
          gFittedParametersN = 5;
          gFittedParameters[0] = par[0];
          gFittedParameters[1] = par[1];

@@ -43,10 +43,15 @@ do
          cat ${pulse_arfile_base}.txt | grep -v File | awk -v length_ms=${length_ms} '{print $3*(length_ms/1024)" "$4;}'  > ${pulse_arfile_base}_2col.txt
          
          echo "ssh aavs@nimbus4 \"ls -d ${remote_dir}/channel_0_1_*\""
-         ssh aavs@nimbus4 "ls -d ${remote_dir}/channel_0_1_*"
+         chdir=`ssh aavs@nimbus4 "ls -d ${remote_dir}/channel_0_1_*"`
+         outline=`echo $chdir | awk '{i=index($0,"channel_0_1");print substr($1,i+12)" "180;}'`
+         
+         echo -n $outline > point.txt
                   
          echo "root -l plot_psr_profile_nonorm.C(\"${pulse_arfile_base}_2col.txt\")"
          root -l "plot_psr_profile_nonorm.C(\"${pulse_arfile_base}_2col.txt\")"
+         
+         cat point.txt >> ../../../../new_arfiles.txt	
       else
          echo "ERROR : file PULSE_ARFILES.txt not found -> dataset skipped ( $remote_dir )"
       fi
