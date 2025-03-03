@@ -1,14 +1,17 @@
 #!/bin/bash
 
-start=0
+pulse_time=31.68087552 
 if [[ -n "$1" && "$1" != "-" ]]; then
-   start=$1
+   pulse_time=$1
 fi
 
-end=0
+radius=1
 if [[ -n "$2" && "$2" != "-" ]]; then
-   end=$2
+   radius=$2
 fi
+
+start=`echo $pulse_time" "$radius | awk '{print $1-$2;}'`
+end=`echo $pulse_time" "$radius | awk '{print $1+$2;}'`
 
 outfile=timeseries_${start}sec-${end}sec.txt
 

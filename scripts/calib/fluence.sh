@@ -42,18 +42,29 @@ if [[ ! -d pulses_snr${snr_threshold}_calibrated/ ]]; then
    timeseries_file=timeseries.txt
    echo "~/github/presto_tools/build/presto_data_reader $datfile -o ${outdir}/${timeseries_file} ${options}"
    ~/github/presto_tools/build/presto_data_reader $datfile -o ${outdir}/${timeseries_file} ${options}
+   
+   if [[ ! -s presto_merged.txt ]]; then
+      awk '{if($1!="#"){print $3" "$2;}}' presto.cand_normal > presto_merged.txt
+   fi
 
-   echo "~/github/presto_tools/build/extract_pulses ${datfile} presto.txt -X ${sefd} -C -t $snr_threshold -P pulses_snr${snr_threshold}_calibrated/ -r 100 -U 1 -R ${outdir}/${running_median_file} -I ${outdir}/${rmqiqr_file} -o ${outdir}/${detrendnorm_file} -O ${outdir}/${calibrated_pulses_file}"
-   ~/github/presto_tools/build/extract_pulses ${datfile} presto.txt -X ${sefd} -C -t $snr_threshold -P pulses_snr${snr_threshold}_calibrated/ -r 100 -U 1 -R ${outdir}/${running_median_file} -I ${outdir}/${rmqiqr_file} -o ${outdir}/${detrendnorm_file} -O ${outdir}/${calibrated_pulses_file}
+   echo "~/github/presto_tools/build/extract_pulses ${datfile} presto_merged.txt -X ${sefd} -C -t $snr_threshold -P pulses_snr${snr_threshold}_calibrated/ -r 100 -U 1 -R ${outdir}/${running_median_file} -I ${outdir}/${rmqiqr_file} -o ${outdir}/${detrendnorm_file} -O ${outdir}/${calibrated_pulses_file}"
+   ~/github/presto_tools/build/extract_pulses ${datfile} presto_merged.txt -X ${sefd} -C -t $snr_threshold -P pulses_snr${snr_threshold}_calibrated/ -r 100 -U 1 -R ${outdir}/${running_median_file} -I ${outdir}/${rmqiqr_file} -o ${outdir}/${detrendnorm_file} -O ${outdir}/${calibrated_pulses_file}
    
    cd ${outdir}/
    awk '{if($1!="#"){print $2;}}' calibrated_pulses.txt > calibrated_flux.txt
    awk '{if($1!="#"){print $3;}}' calibrated_pulses.txt > calibrated_fluence.txt
    awk '{if($1!="#"){print $4;}}' calibrated_pulses.txt > calibrated_snr.txt
+
+   TotalTimeHours=`cat ../../../../../../../analysis_final/TotalGoodTimeInSec.txt | awk '{print $1/3600.00}'`
+   
+   cp ~/github/crab_frb_paper/scripts/root/FluenceRatePerHourPowerLaw.C .
+   root ${root_options} "FluenceRatePerHourPowerLaw.C(\"calibrated_fluence.txt\",${TotalTimeHours},0,600,10000)"
    cd -
 else
    echo "INFO : Pulses already dumped"
 fi   
+
+exit;
 
 if [[ $do_fitting -gt 0 ]]; then
    cd pulses_snr${snr_threshold}_calibrated/
