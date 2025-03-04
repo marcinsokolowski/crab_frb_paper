@@ -46,8 +46,8 @@ if [[ ! -d pulses_snr${snr_threshold}_calibrated/ ]]; then
       awk '{if($1!="#"){print $3" "$2;}}' presto.cand_normal > presto_merged.txt
    fi
 
-   echo "~/github/presto_tools/build/extract_pulses_new ${datfile} presto_merged.txt -X ${sefd} -C -t $snr_threshold -P pulses_snr${snr_threshold}_calibrated/ -r 100 -U 1 -R ${outdir}/${running_median_file} -I ${outdir}/${rmqiqr_file} -o ${outdir}/${detrendnorm_file} -O ${outdir}/${calibrated_pulses_file}"
-   ~/github/presto_tools/build/extract_pulses_new ${datfile} presto_merged.txt -X ${sefd} -C -t $snr_threshold -P pulses_snr${snr_threshold}_calibrated/ -r 100 -U 1 -R ${outdir}/${running_median_file} -I ${outdir}/${rmqiqr_file} -o ${outdir}/${detrendnorm_file} -O ${outdir}/${calibrated_pulses_file}
+   echo "~/github/presto_tools/build/extract_pulses_new ${datfile} presto_merged.txt -X ${sefd} -C -t $snr_threshold -P pulses_snr${snr_threshold}_calibrated/ -r 100 -U 1 -R ${outdir}/${running_median_file} -I ${outdir}/${rmqiqr_file} -o ${outdir}/${detrendnorm_file} -O ${outdir}/${calibrated_pulses_file} > extract_pulses_new.out 2>&1"
+   ~/github/presto_tools/build/extract_pulses_new ${datfile} presto_merged.txt -X ${sefd} -C -t $snr_threshold -P pulses_snr${snr_threshold}_calibrated/ -r 100 -U 1 -R ${outdir}/${running_median_file} -I ${outdir}/${rmqiqr_file} -o ${outdir}/${detrendnorm_file} -O ${outdir}/${calibrated_pulses_file} > extract_pulses_new.out 2>&1
    
    cd ${outdir}/
    awk '{if($1!="#"){print $2;}}' calibrated_pulses.txt > calibrated_flux.txt

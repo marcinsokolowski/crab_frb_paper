@@ -25,6 +25,7 @@
 #include <TFile.h>
 
 
+double gCalConstant = 33.03678886; // Jy 
 int gLog=0;
 int gVerb=0;
 int gNormaliseInputData=1;
@@ -497,15 +498,25 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
          }
       }
       fclose(out_f);     
-
-      double integral = line_draw->Integral( minX, maxX, 1e-18 ); // - par[0]*(maxX-minX);
-      printf("Integral = %.8f -> fluence = %.8f [Jy ms] (par[0] offset = %.8f -> subtracted %.8f )\n",integral,integral*1000.00,par[0],par[0]*(maxX-minX));
+      
+      double integral = line_draw->Integral( minX, maxX, 1e-18 ) - par[0]*(maxX-minX);
+      double fluence = integral*gCalConstant*1000.00; // calibration constant and 1000 to make Jy ms 
+      printf("Integral = %.8f -> fluence = %.8f [Jy ms] (par[0] offset = %.8f -> subtracted %.8f  )\n",integral,fluence,par[0],par[0]*(maxX-minX));
 
       TF1* line_int = new TF1("fit_func2",Pulse_with_gauss_onset,minX,maxX,5);
       par[0] = 0.00;
       line_int->SetParameters(par);
       double integral2 = line_int->Integral( minX, maxX, 1e-18 );
       printf("Integral2 = %.8f\n",integral2);
+
+      double sum=0.00;
+      for(int i=0;i<numVal;i++){
+          if( x_values[i]>=minX && x_values[i]<=maxX ){
+             printf("DEBUG2 : %d %.8f %.8f\n",i,x_values[i],y_values[i]);
+             sum += y_values[i];
+          }
+      }
+      printf("Manual integration in DrawGraph (sum) = %.8f in range [%.8f -  %.8f]\n",sum,minX,maxX);
 
    pGraph->GetXaxis()->SetTitleOffset(1.00);
    pGraph->GetYaxis()->SetTitleOffset(0.60);
@@ -548,7 +559,7 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
       double max_flux = -1000;
       double phase=0.00;
       double delta_phase=(1.00/n_bins); // 0.001;
-      double fluence = 0.00;
+      fluence = 0.00;
       double sum_profile = 0.00; // fit 
       int n_bins_fit=0;
       while( phase < 1.00 ){ // was 2.0
@@ -704,6 +715,7 @@ int ReadResultsFile( const char* fname, Double_t* x_values, Double_t* y_values,
 
    all=0;
    int ncols=-1;
+   double sum = 0.00;
    while (1) {
       if(fgets(buff,lSize,fcd)==0)
          break;
@@ -765,7 +777,10 @@ int ReadResultsFile( const char* fname, Double_t* x_values, Double_t* y_values,
 //     printf("%s\n",buff);
      
      x_values[all] = x_val;
-     y_values[all] = y_val;
+     y_values[all] = y_val;     
+     sum += y_val;
+ 
+
      if( y_val > max_val ){
         max_val = y_val;
      }
@@ -778,7 +793,7 @@ int ReadResultsFile( const char* fname, Double_t* x_values, Double_t* y_values,
      if( x_val < min_x ){
         min_x = x_val;
      }
-     if( gVerb || 0 ){
+     if( gVerb || 1 ){
         printf("values : %f %f\n",x_val,y_val);
      }
 
@@ -792,6 +807,7 @@ int ReadResultsFile( const char* fname, Double_t* x_values, Double_t* y_values,
 
  
    printf("max_val = %.4f\n",max_val);
+   printf("Manual integration in ReadResults (sum) = %.8f\n",sum);
    return all;
 }  
 
@@ -963,7 +979,8 @@ double normalise_y_minmax( Double_t* x_values, Double_t* y_values, int cnt, doub
 
 
 
-void plot_psr_snr( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", int bNormaliseInputData=2, bool bShowOriginalDataWithFit=true,
+void plot_psr_snr( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", double cal_constant=33.03678886,
+                   int bNormaliseInputData=2, bool bShowOriginalDataWithFit=true,
                        const char* fit_func_name="pulse_gauss", // pulse, pulse_gauss, pulse_gauss_only
                        double noise_start=0, double noise_end=0.4, 
                        double sigma_simulated=0.1120, // simulated sigma of noise in Jy , sigma_Stokes_I - for the entire duration of the observation !!!
@@ -979,6 +996,7 @@ void plot_psr_snr( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", int bN
    if( !szTitle){
       szTitle = basename;
    }
+   gCalConstant = cal_constant;
    gLog = bLog;
    gNormaliseInputData = bNormaliseInputData;
    gNoiseStart = noise_start;
@@ -1127,9 +1145,9 @@ void plot_psr_snr( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", int bN
          c2->SetLogy(1);
       }
       // just subtract baselines :
-      for(int i=0;i<lq1;i++){
+/*      for(int i=0;i<lq1;i++){
          y_value1_original[i] = y_value1_original[i] - gYaxisOffset;
-      }
+      }*/
 
       for(int i=0;i<lq1;i++){
          y_value1_err[i] = rms_original;
