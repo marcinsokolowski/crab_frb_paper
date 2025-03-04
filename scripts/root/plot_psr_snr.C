@@ -24,7 +24,7 @@
 #include <TComplex.h>
 #include <TFile.h>
 
-double gUnixTime=-1;
+
 int gLog=0;
 int gVerb=0;
 int gNormaliseInputData=1;
@@ -220,7 +220,6 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
    TF1 *part2 = NULL;
     Double_t maxX=-100000,maxY=-100000;
     Double_t minX=100000,minY=100000;
-    Double_t maxY_arg=-10000;
 
 
     TGraphErrors* pGraph = new TGraphErrors(q);
@@ -237,11 +236,8 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
 
         if(x_values[i]>maxX)
             maxX = x_values[i];
-
-        if(y_values[i]>maxY){
-           maxY = y_values[i];
-           maxY_arg = x_values[i];
-        }
+        if(y_values[i]>maxY)
+            maxY = y_values[i];
       
         if(x_values[i]<minX)
             minX = x_values[i];
@@ -346,7 +342,7 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
          local_func=1;
 
          par[0] = 0.00; // offset (mean off-pulse)
-         par[1] = maxY_arg; // t_peak  0.53 for the MWA data
+         par[1] = 0.5; // t_peak  0.53 for the MWA data
          par[2] = 1; // peak flux 
          par[3] = 0.1; // sigma 
          par[4] = 0.1; // very long decay ... - 10 for MWA fit 
@@ -450,15 +446,12 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
          line_draw->SetLineColor(kBlack);
 
          printf("Fitted paramaters:\n");
-         for(int i=0;i<5;i++){
-            printf("\tpar[i] = %.8f +/- %.8f\n",par[i],line->GetParError(i));
-         }
+         printf("\tpar[0] = %.8f\n",par[0]);
+         printf("\tpar[1] = %.8f\n",par[1]);
+         printf("\tpar[2] = %.8f\n",par[2]);
+         printf("\tpar[3] = %.8f\n",par[3]);
+         printf("\tpar[4] = %.8f\n",par[4]);
          printf("TEST VALUE = %.8f vs. %.8f\n",line->Eval(0.5),line_draw->Eval(0.5));
-
-         FILE* outf = fopen("point.txt","w");
-         fprintf(outf,"%.8f 1800 %.8f %.8f\n",gUnixTime,par[4],line->GetParError(4));
-         printf("FITTED TAU POINT : %.8f 1800 %.8f %.8f\n",gUnixTime,par[4],line->GetParError(4));
-         fclose(outf);
 
          gFittedParametersN = 5;
          gFittedParameters[0] = par[0];
@@ -505,6 +498,14 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
       }
       fclose(out_f);     
 
+      double integral = line_draw->Integral( minX, maxX, 1e-18 ); // - par[0]*(maxX-minX);
+      printf("Integral = %.8f -> fluence = %.8f [Jy ms] (par[0] offset = %.8f -> subtracted %.8f )\n",integral,integral*1000.00,par[0],par[0]*(maxX-minX));
+
+      TF1* line_int = new TF1("fit_func2",Pulse_with_gauss_onset,minX,maxX,5);
+      par[0] = 0.00;
+      line_int->SetParameters(par);
+      double integral2 = line_int->Integral( minX, maxX, 1e-18 );
+      printf("Integral2 = %.8f\n",integral2);
 
    pGraph->GetXaxis()->SetTitleOffset(1.00);
    pGraph->GetYaxis()->SetTitleOffset(0.60);
@@ -777,7 +778,7 @@ int ReadResultsFile( const char* fname, Double_t* x_values, Double_t* y_values,
      if( x_val < min_x ){
         min_x = x_val;
      }
-     if( gVerb ){
+     if( gVerb || 0 ){
         printf("values : %f %f\n",x_val,y_val);
      }
 
@@ -962,15 +963,14 @@ double normalise_y_minmax( Double_t* x_values, Double_t* y_values, int cnt, doub
 
 
 
-void plot_psr_profile_nonorm( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", double unixtime=-1,
-                       int bNormaliseInputData=2, bool bShowOriginalDataWithFit=false,
+void plot_psr_snr( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", int bNormaliseInputData=2, bool bShowOriginalDataWithFit=true,
                        const char* fit_func_name="pulse_gauss", // pulse, pulse_gauss, pulse_gauss_only
                        double noise_start=0, double noise_end=0.4, 
                        double sigma_simulated=0.1120, // simulated sigma of noise in Jy , sigma_Stokes_I - for the entire duration of the observation !!!
                        bool bIsSigmaSimulPerPhaseBin=false, // if this is true no need to multiply sigma_simulated by sqrt(n_bins)
                        bool bUseFitResidualsRMS=false, // use residuals of the FIT to calculate Sigma_obs which may be slightly different than 1.00 (after normalisation)
                        double min_y=-1000000,  double max_y=-1000000, int bLog=0,
-      const char* szDescX="Time [ms]",
+      const char* szDescX="Phase",
       const char* szDescY="Signal to Noise Ratio (SNR)", 
       const char* szTitle=NULL,
       double fit_min_x=-100000, double fit_max_x=-100000,
@@ -979,7 +979,6 @@ void plot_psr_profile_nonorm( const char* basename="sigmaG1_vs_lapSigmaG1_for_ro
    if( !szTitle){
       szTitle = basename;
    }
-   gUnixTime = unixtime;
    gLog = bLog;
    gNormaliseInputData = bNormaliseInputData;
    gNoiseStart = noise_start;
@@ -1041,7 +1040,7 @@ void plot_psr_profile_nonorm( const char* basename="sigmaG1_vs_lapSigmaG1_for_ro
 
    // normalisation of X-axis to [0,1] range is required always to make it
    // easier to find peak of the flux (~0.5)
-//   normalise_x( x_value1, lq1 );
+   normalise_x( x_value1, lq1 );
 
    // normalise by Y-MEAN/RMS
    if( bNormaliseInputData == 1 ){

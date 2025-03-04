@@ -6,14 +6,16 @@ if [[ -n "$1" && "$1" != "-" ]]; then
 fi
 
 local_dir=`pwd`
+force=1
 
 ssh aavs@nimbus4 "ls -d ${template}" > single_pulses_dir_list.txt
 
 for remote_dir in `cat single_pulses_dir_list.txt`
 do
    subdir=`echo $remote_dir | awk '{i=index($0,"20");print substr($0,i);}'`   
+   t_from_start=`echo ${remote_dir} | awk '{i=index($1,"single_pulse_archive_pulse_");print substr($1,i+27,10);}'`
    
-   if [[ -s ${subdir}/PULSE_ARFILES.txt ]]; then
+   if [[ -s ${subdir}/PULSE_ARFILES.txt && $force -le 0 ]]; then
       echo "INFO : data in ${subdir} already copied"
    else  
       echo "INFO : getting data from $remote_dir"
@@ -44,12 +46,14 @@ do
          
          echo "ssh aavs@nimbus4 \"ls -d ${remote_dir}/channel_0_1_*\""
          chdir=`ssh aavs@nimbus4 "ls -d ${remote_dir}/channel_0_1_*"`
-         outline=`echo $chdir | awk '{i=index($0,"channel_0_1");print substr($1,i+12)" "180;}'`
+         outline=`echo $chdir | awk '{i=index($0,"channel_0_1");print substr($1,i+12)" "1800;}'`
+         uxtime=`echo $chdir | awk '{i=index($0,"channel_0_1");print substr($1,i+12);}'`
+         uxtime_total=`echo $uxtime" "$t_from_start | awk '{printf("%.8f\n",$1+$2);}'`
          
          echo -n $outline > point.txt
                   
-         echo "root -l plot_psr_profile_nonorm.C(\"${pulse_arfile_base}_2col.txt\")"
-         root -l "plot_psr_profile_nonorm.C(\"${pulse_arfile_base}_2col.txt\")"
+         echo "root -l plot_psr_profile_nonorm.C(\"${pulse_arfile_base}_2col.txt\",${uxtime_total})"
+         root -l "plot_psr_profile_nonorm.C(\"${pulse_arfile_base}_2col.txt\",${uxtime_total})"
          
          cat point.txt >> ../../../../new_arfiles.txt	
       else
