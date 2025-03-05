@@ -147,7 +147,7 @@ void FluenceRatePerHourPowerLaw( const char* fname, double TotalTimeInHours=0.99
                 int bLog=1, const char* szTitleX="Fluence [Jy ms]", const char* szTitleY="Rate / hour", 
                 int DoBorder=1, const char* szTitle=NULL, const char* szOutFile=NULL,
                 const char* szOutPostfix="_histo", int unix_time=0, const char* flag=NULL,
-                int bNormalise=0, int bPrintHeader=1 )
+                int bNormalise=0, int bPrintHeader=1, int bPlotExtrapolation=0 )
 {
     gChannel = channel;
     dDbm2DbmPerHz = 0;
@@ -514,25 +514,27 @@ void FluenceRatePerHourPowerLaw( const char* fname, double TotalTimeInHours=0.99
 
    char szFunc[128];
    sprintf(szFunc,"%.8f*(x/%.8f)^(%.8f)",fit_norm,gFlux0,fit_exp);
-
-   TCanvas* c2 = new TCanvas("c2","plot",10,10,3500,1200);
-   c2->SetFillColor(0);
-   c2->SetFillStyle(0);
-   c2->SetLogx(1);
-   c2->SetLogy(1);
-//   TF1* pPowerLawDistrib = new TF1("PowerLawDistrib","1.43526679 * (x/1000.00000000)^(-2.77212884)",1,100000000);
    TF1* pPowerLawDistrib = new TF1("PowerLawDistrib",szFunc,1,100000000);
-   pPowerLawDistrib->Draw();
-   pPowerLawDistrib->GetHistogram()->GetXaxis()->SetTitle( szTitleX );
-   pPowerLawDistrib->GetHistogram()->GetYaxis()->SetTitle( szTitleY );
 
-   c2->Update();
-   gSystem->Sleep(1);
-   szPngName="images/";
-   szPngName += fname;
-   szPngName += "_FluRatePerHourPowerLawFittedDistrib";
-   szPngName += ".png";
-   c2->Print(szPngName.Data());
+   if( bPlotExtrapolation ){
+      TCanvas* c2 = new TCanvas("c2","plot",10,10,3500,1200);
+      c2->SetFillColor(0);
+      c2->SetFillStyle(0);
+      c2->SetLogx(1);
+      c2->SetLogy(1);
+//   TF1* pPowerLawDistrib = new TF1("PowerLawDistrib","1.43526679 * (x/1000.00000000)^(-2.77212884)",1,100000000);
+      pPowerLawDistrib->Draw();
+      pPowerLawDistrib->GetHistogram()->GetXaxis()->SetTitle( szTitleX );
+      pPowerLawDistrib->GetHistogram()->GetYaxis()->SetTitle( szTitleY );
+
+      c2->Update();
+      gSystem->Sleep(1);
+      szPngName="images/";
+      szPngName += fname;
+      szPngName += "_FluRatePerHourPowerLawFittedDistrib";
+      szPngName += ".png";
+      c2->Print(szPngName.Data());
+   }
 
 
    printf("PROBABILITIES of bright pulses are:\n");
@@ -540,6 +542,6 @@ void FluenceRatePerHourPowerLaw( const char* fname, double TotalTimeInHours=0.99
    printf("10^7 Jy : %e\n",pPowerLawDistrib->Eval(10000000.00));
    printf("10^8 Jy : %e\n",pPowerLawDistrib->Eval(100000000.00));
 
-   
+   printf("PWD : %s\n",gSystem->pwd());   
 }
 
