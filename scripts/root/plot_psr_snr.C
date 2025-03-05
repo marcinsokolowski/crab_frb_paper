@@ -209,7 +209,7 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
          double fit_min_x=-100000, double fit_max_x=-100000, 
          Double_t* y_values_errors=NULL,
          Double_t* init_params=NULL,
-         double bIgnorePeak=0.2 )
+         double bIgnorePeak=0.2, bool bSaveFit=false )
 {
     int MarkerType = 20;
     int ColorNum = kRed;
@@ -498,16 +498,21 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
          }
       }
       fclose(out_f);     
-      
-      double integral = line_draw->Integral( minX, maxX, 1e-18 ) - par[0]*(maxX-minX);
+
+      double integral_value = line_draw->Integral( minX, maxX, 1e-18 );      
+      double integral = integral_value - par[0]*(maxX-minX);
       double fluence = integral*gCalConstant*1000.00; // calibration constant and 1000 to make Jy ms 
-      printf("Integral = %.8f -> fluence = %.8f [Jy ms] (par[0] offset = %.8f -> subtracted %.8f  )\n",integral,fluence,par[0],par[0]*(maxX-minX));
+      double fluence_error = 0.00;
+      printf("Integral = %.8f -> fluence = %.8f [Jy ms] (par[0] offset = %.8f -> subtracted %.8f  ) , raw_integral value = %.8f\n",integral,fluence,par[0],par[0]*(maxX-minX),integral_value);
 
       TF1* line_int = new TF1("fit_func2",Pulse_with_gauss_onset,minX,maxX,5);
+      double par0 = par[0];
       par[0] = 0.00;
       line_int->SetParameters(par);
       double integral2 = line_int->Integral( minX, maxX, 1e-18 );
       printf("Integral2 = %.8f\n",integral2);
+      par[0] = par0; // set back the value of par0
+      double fluence2 = integral2*gCalConstant*1000.00;
 
       double sum=0.00;
       for(int i=0;i<numVal;i++){
@@ -516,7 +521,17 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
              sum += y_values[i];
           }
       }
-      printf("Manual integration in DrawGraph (sum) = %.8f in range [%.8f -  %.8f]\n",sum,minX,maxX);
+      double offset_correction = par[0]*(maxX-minX);
+      double integral_manual = sum*(x_values[1]-x_values[0]);
+      double integral_manual_offset_corrected = integral_manual - offset_correction;
+      double fluence_manual = integral_manual_offset_corrected*gCalConstant*1000.00;
+      printf("Manual integration in DrawGraph (sum) = %.8f in range [%.8f -  %.8f] -> Integral = %.8f -> Corrected for offset = %.8f (subtracted %.8f)\n",sum,minX,maxX,integral_manual,integral_manual_offset_corrected,offset_correction);   
+
+   if( bSaveFit ){
+      FILE* outf2 = fopen("fitted_fluence.txt","a+");
+      fprintf(outf2,"%s %.8f %.8f %.8f %.8f\n",gInputFileName,fluence,fluence_error,fluence2,fluence_manual);
+      fclose(outf2); 
+   }
 
    pGraph->GetXaxis()->SetTitleOffset(1.00);
    pGraph->GetYaxis()->SetTitleOffset(0.60);
@@ -1145,9 +1160,9 @@ void plot_psr_snr( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", double
          c2->SetLogy(1);
       }
       // just subtract baselines :
-/*      for(int i=0;i<lq1;i++){
+      for(int i=0;i<lq1;i++){
          y_value1_original[i] = y_value1_original[i] - gYaxisOffset;
-      }*/
+      }
 
       for(int i=0;i<lq1;i++){
          y_value1_err[i] = rms_original;
@@ -1155,7 +1170,7 @@ void plot_psr_snr( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", double
 
       printf("DEBUG : using rms_original = %.8f\n",rms_original);
       TGraphErrors* pGraph2 = DrawGraph( x_value1_original, y_value1_original, lq1, 1, NULL, fit_func_name, 0.00, max_y, szTitle,
-                                         basename, bLog, szDescX, szDescY, fit_min_x, fit_max_x, y_value1_err, gFittedParametersOriginalScaling, 0.01/2.00 ); // gFittedParametersOriginalScaling[4]*2.00 );
+                                         basename, bLog, szDescX, szDescY, fit_min_x, fit_max_x, y_value1_err, gFittedParametersOriginalScaling, 0.01/2.00, true ); // gFittedParametersOriginalScaling[4]*2.00 );
 
       TF1* line_original_data = new TF1("fit_func_test",Pulse_with_gauss_onset_original,gMinX,gMaxX,gFittedParametersN);
 //   TF1* line_original_data = new TF1("fit_func_test",Pulse_with_gauss_onset_original,0,1,gFittedParametersN);

@@ -381,7 +381,7 @@ void FluenceRatePerHourPowerLaw( const char* fname, double TotalTimeInHours=0.99
    
       TLatex lat;
       lat.SetTextAlign(23);
-      lat.SetTextSize(0.07);
+      lat.SetTextSize(0.03);
       
       int max_bin = histo->GetMaximumBin();
       int max_value = histo->GetBinContent( max_bin );
@@ -390,26 +390,20 @@ void FluenceRatePerHourPowerLaw( const char* fname, double TotalTimeInHours=0.99
       fit_norm = par[0];
       fit_exp  = par[1];
       int base = gFixedRefPower/10;
-      double text_x = 500000;
-      double text_y = 0.9;
-      if( strstr(fname,"satellite") ){ 
-         text_x = 30000;
-         text_y = 0.8;
-         if( strstr(fname,"satellite-yy") ){
-            text_x = 30000;
-            text_y = 0.3;
-         }
-      }
+      double text_x = 200;
+      double text_y = 400;
 
-      sprintf(szDesc,"Fitted formula: N #times #left(#frac{Power[mW]}{10^{%d}mW}#right)^{#alpha}",base);
+//      sprintf(szDesc,"Fitted formula: N #times #left(#frac{Power[mW]}{10^{%d}mW}#right)^{#alpha}",base);
 //      lat.DrawLatex( -149.8+shift_text,0.05,szDesc);
-      lat.DrawLatex( text_x, text_y,"Fit results:");
+//      lat.DrawLatex( text_x, text_y,"Fit results:");
 
-      int n_digits=2;
-      sprintf(szDesc,"P(%.0f) = %.5f #pm %.5f",gFlux0,fit_norm,round_to_n_digits(fit_norm_err,n_digits,1));
-      lat.DrawLatex( text_x, text_y/2,szDesc);      
-      sprintf(szDesc,"#alpha = %.2f #pm 0.02",fit_exp,round_to_n_digits(fit_exp_err,n_digits,1));
-      lat.DrawLatex( text_x, text_y/4,szDesc);
+//      int n_digits=2;
+//      sprintf(szDesc,"P(%.0f) = %.5f #pm %.5f",gFlux0,fit_norm,round_to_n_digits(fit_norm_err,n_digits,1));
+//      lat.DrawLatex( text_x, text_y/2,szDesc);      
+//      sprintf(szDesc,"#alpha = %.2f #pm 0.02",fit_exp,round_to_n_digits(fit_exp_err,n_digits,1));
+//      lat.DrawLatex( text_x, text_y/4,szDesc);
+      sprintf(szDesc,"Max fluence = %.2f [Jy ms] , min = %.2f [Jy ms]\n",max_val,min_val);
+      lat.DrawLatex( text_x, text_y, szDesc );
 
 
 
@@ -472,6 +466,16 @@ void FluenceRatePerHourPowerLaw( const char* fname, double TotalTimeInHours=0.99
    lat.SetTextSize(0.07);
    char szText[128];
    sprintf(szText,"Min Value = %d, Max Value = %d\n",(int)min_val,(int)max_val);
+   
+   FILE* outf2 = fopen("MAX_FLUENCE.txt","w");
+   fprintf(outf2,"%.4f\n",max_val);
+   fclose(outf2);
+
+   outf2 = fopen("MIN_FLUENCE.txt","w");
+   fprintf(outf2,"%.4f\n",min_val);
+   fclose(outf2);
+
+
 //   lat.DrawLatex( min_val+(max_val-min_val)/3,  histo->GetBinContent(histo->GetMaximumBin()) * 0.9 , szText);
 //   printf("lat at (%.2f,%.2f) = %s\n",min_val+(max_val-min_val)/3,  histo->GetBinContent(histo->GetMaximumBin()) * 0.9,szText);
 
