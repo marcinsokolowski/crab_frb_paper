@@ -73,8 +73,8 @@ do
       MEAN_SEFD=`cat ../../../../../../analysis*/MEAN_SEFD.txt | tail -1`
       
       # use maximum SNR 
-      echo "~/github/crab_frb_paper/scripts/calib/fit_profiles.sh ${MEAN_SEFD} ${SNR_THRESHOLD} - \"${root_options}\" # ${SNR_THRESHOLD}"
-      ~/github/crab_frb_paper/scripts/calib/fit_profiles.sh ${MEAN_SEFD} ${SNR_THRESHOLD} - "${root_options}" # ${SNR_THRESHOLD}
+      echo "~/github/crab_frb_paper/scripts/calib/fit_profiles.sh ${MEAN_SEFD} ${SNR_THRESHOLD} - \"${root_options}\" 1" # ${SNR_THRESHOLD}
+      ~/github/crab_frb_paper/scripts/calib/fit_profiles.sh ${MEAN_SEFD} ${SNR_THRESHOLD} - "${root_options}" 1 # ${SNR_THRESHOLD}
       
       cd ..
    else
