@@ -447,12 +447,16 @@ void FluenceRatePerHourPowerLaw( const char* fname, double TotalTimeInHours=0.99
       histo->GetYaxis()->SetTitleOffset(0.6);
       histo->GetYaxis()->SetLabelSize(0.05);
    }
+
+   double fluence_of_oneperhour_pulse = gFlux0 / TMath::Power( par[0] , (1.00/par[1]) );
    
    TLatex lat;
    lat.SetTextAlign(23);
-   lat.SetTextSize(0.07);
+   lat.SetTextSize(0.03);
    char szText[128];
-   sprintf(szText,"Min Value = %d, Max Value = %d\n",(int)min_val,(int)max_val);
+   sprintf(szText,"Max fluence = %.2f [Jy ms] , min fluence = %.2f [Jy ms], one per hour fluence = %.2f\n",max_val,min_val,fluence_of_oneperhour_pulse);
+   lat.DrawLatex( 200, 3*par[0], szText );
+
 
    char szOutFile2[128];
    sprintf(szOutFile2,"MAX_%s",fname);
@@ -464,6 +468,12 @@ void FluenceRatePerHourPowerLaw( const char* fname, double TotalTimeInHours=0.99
    outf2 = fopen(szOutFile2,"w");
    fprintf(outf2,"%.4f\n",min_val);
    fclose(outf2);
+
+   sprintf(szOutFile2,"ONEPERHOUR_FLUENCE_fitmin%.2f_%s",fit_min_x,fname);
+   outf2 = fopen(szOutFile2,"w");
+   fprintf(outf2,"%.4f\n",fluence_of_oneperhour_pulse);
+   fclose(outf2);
+
 
 
 //   lat.DrawLatex( min_val+(max_val-min_val)/3,  histo->GetBinContent(histo->GetMaximumBin()) * 0.9 , szText);
