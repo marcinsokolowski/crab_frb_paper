@@ -504,6 +504,11 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
       double fluence = integral*gCalConstant*1000.00; // calibration constant and 1000 to make Jy ms 
       double fluence_error = 0.00;
       printf("Integral = %.8f -> fluence = %.8f [Jy ms] (par[0] offset = %.8f -> subtracted %.8f  ) , raw_integral value = %.8f\n",integral,fluence,par[0],par[0]*(maxX-minX),integral_value);
+      double chi2 = line->GetChisquare();
+      double ndf = line->GetNDF();
+      double chi2_ndf = chi2/ndf;
+      double par0_err = line->GetParError(0);
+      printf("Chi2 = %.8f , ndf = %.1f , chi2_ndf = %.8f , isnan(par[0] error) = %d\n",chi2,ndf,chi2_ndf,isnan(par0_err));
 
       TF1* line_int = new TF1("fit_func2",Pulse_with_gauss_onset,minX,maxX,5);
       double par0 = par[0];
@@ -528,9 +533,11 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
       printf("Manual integration in DrawGraph (sum) = %.8f in range [%.8f -  %.8f] -> Integral = %.8f -> Corrected for offset = %.8f (subtracted %.8f)\n",sum,minX,maxX,integral_manual,integral_manual_offset_corrected,offset_correction);   
 
    if( bSaveFit ){
-      FILE* outf2 = fopen("fitted_fluence.txt","a+");
-      fprintf(outf2,"%s %.8f %.8f %.8f %.8f\n",gInputFileName,fluence,fluence_error,fluence2,fluence_manual);
-      fclose(outf2); 
+      if( fluence > 0 && chi2_ndf<1.5 && !isnan(par0_err) ){
+         FILE* outf2 = fopen("fitted_fluence.txt","a+");
+         fprintf(outf2,"%s %.8f %.8f %.8f %.8f\n",gInputFileName,fluence,fluence_error,fluence2,fluence_manual);
+         fclose(outf2); 
+      }
    }
 
    pGraph->GetXaxis()->SetTitleOffset(1.00);

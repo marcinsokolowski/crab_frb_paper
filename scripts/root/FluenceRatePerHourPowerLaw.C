@@ -393,19 +393,6 @@ void FluenceRatePerHourPowerLaw( const char* fname, double TotalTimeInHours=0.99
       double text_x = 200;
       double text_y = 400;
 
-//      sprintf(szDesc,"Fitted formula: N #times #left(#frac{Power[mW]}{10^{%d}mW}#right)^{#alpha}",base);
-//      lat.DrawLatex( -149.8+shift_text,0.05,szDesc);
-//      lat.DrawLatex( text_x, text_y,"Fit results:");
-
-//      int n_digits=2;
-//      sprintf(szDesc,"P(%.0f) = %.5f #pm %.5f",gFlux0,fit_norm,round_to_n_digits(fit_norm_err,n_digits,1));
-//      lat.DrawLatex( text_x, text_y/2,szDesc);      
-//      sprintf(szDesc,"#alpha = %.2f #pm 0.02",fit_exp,round_to_n_digits(fit_exp_err,n_digits,1));
-//      lat.DrawLatex( text_x, text_y/4,szDesc);
-      sprintf(szDesc,"Max fluence = %.2f [Jy ms] , min = %.2f [Jy ms]\n",max_val,min_val);
-      lat.DrawLatex( text_x, text_y, szDesc );
-
-
 
       double mean = sum/count;
       double mean2 = (sum2/count);
@@ -466,12 +453,15 @@ void FluenceRatePerHourPowerLaw( const char* fname, double TotalTimeInHours=0.99
    lat.SetTextSize(0.07);
    char szText[128];
    sprintf(szText,"Min Value = %d, Max Value = %d\n",(int)min_val,(int)max_val);
-   
-   FILE* outf2 = fopen("MAX_FLUENCE.txt","w");
+
+   char szOutFile2[128];
+   sprintf(szOutFile2,"MAX_%s",fname);
+   FILE* outf2 = fopen(szOutFile2,"w");
    fprintf(outf2,"%.4f\n",max_val);
    fclose(outf2);
 
-   outf2 = fopen("MIN_FLUENCE.txt","w");
+   sprintf(szOutFile2,"MIN_%s",fname);
+   outf2 = fopen(szOutFile2,"w");
    fprintf(outf2,"%.4f\n",min_val);
    fclose(outf2);
 

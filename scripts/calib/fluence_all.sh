@@ -24,11 +24,10 @@ if [[ -n "$4" && "$4" != "-" ]]; then
    root_options="$4"
 fi
 
-prepare_data=1
+replot_only=0
 if [[ -n "$5" && "$5" != "-" ]]; then
-   prepare_data=$5
+   replot_only=$5
 fi
-
 
 
 for path in `ls -d ${template}`
@@ -41,9 +40,9 @@ do
    echo "cat ../../../../../../analysis*/MEAN_SEFD.txt | tail -1"      
    MEAN_SEFD=`cat ../../../../../../analysis*/MEAN_SEFD.txt | tail -1`
 
-   echo "~/github/crab_frb_paper/scripts/calib/fluence.sh ${MEAN_SEFD} 5"
+   echo "~/github/crab_frb_paper/scripts/calib/fluence.sh ${MEAN_SEFD} 5 - - ${replot_only}"
    sleep 1
-   ~/github/crab_frb_paper/scripts/calib/fluence.sh ${MEAN_SEFD} 5 
+   ~/github/crab_frb_paper/scripts/calib/fluence.sh ${MEAN_SEFD} 5 - - ${replot_only}
 
    cd ${curr_path}
 done
