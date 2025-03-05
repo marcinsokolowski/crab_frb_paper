@@ -499,8 +499,13 @@ void plot_maxfluence_vs_time( const char* basename="sigmaG1_vs_lapSigmaG1_for_ro
    Int_t ncols;
    Int_t lq1=0,lq2=0,lq3=0,lq5=0,lq9=0,lq25=0;
 
-   lq1 = ReadResultsFile( basename, x_value1, y_value1, -1, -1, 0, 2 ); 
-   int lq1_err = ReadResultsFile( basename, x_value1_err, y_value1_err, -1, -1, 1, 3 ); 
+   lq1 = ReadResultsFile( basename, x_value1, y_value1, -1, -1, 0, 1 ); 
+   for(int i=0;i<lq1;i++){
+       x_value1_err[i] = 0.00;
+       y_value1_err[i] = 0.00;
+   }
+
+//   int lq1_err = ReadResultsFile( basename, x_value1_err, y_value1_err, -1, -1, 1, 3 ); 
 
    time_t ut_start_time = (time_t)gStartTime;
    if( !(gmtime_tm = gmtime( &ut_start_time )) ){

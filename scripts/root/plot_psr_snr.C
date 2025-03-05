@@ -14,6 +14,7 @@
 #include <TH1F.h>
 #include <TPaveText.h>
 #include <TGraph.h>
+#include <TGraphErrors.h>
 #include <TPad.h>
 #include <TCanvas.h>
 #include <TLegend.h>

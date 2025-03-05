@@ -4,15 +4,25 @@ template="/media/msok/5508b34c-040a-4dce-a8ff-2c4510a5d1a3/eda2/202?_??_??_pulsa
 
 
 rm -f maxfluence_vs_time.txt
+rm -f fluenceonehour_vs_time.txt
+
 for file in `ls ${template}`
 do
+   dir=`dirname $file`
    uxtime=`echo $file | awk '{i=index($1,"merged_channels_");uxtime=substr($1,i+16,10);print uxtime}'`
    
+   one_hour=`cat $dir/ONEPERHOUR_FLUENCE_*txt | head -1`
+   
+   
    max_fluence=`cat $file`
-   echo "$uxtime $max_fluence" >> maxfluence_vs_time.txt   
+   echo "$uxtime $max_fluence" >> maxfluence_vs_time.txt
+   
+   echo "$uxtime $one_hour" >> fluenceonehour_vs_time.txt   
 done
 
 
 cp ~/github/crab_frb_paper/scripts/root/plot_maxfluence_vs_time.C .
 
 root -l "plot_maxfluence_vs_time.C(\"maxfluence_vs_time.txt\")"
+
+root -l "plot_maxfluence_vs_time.C(\"fluenceonehour_vs_time.txt\")"

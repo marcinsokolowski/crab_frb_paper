@@ -6,13 +6,13 @@ root_options="-b -q -l"
 echo "rm -f fitted_fluence.txt"
 rm -f fitted_fluence.txt
 
-echo "cp ~/github/crab_frb_paper/scripts/root/plot_psr_snr.C"
-cp ~/github/crab_frb_paper/scripts/root/plot_psr_snr.C
+echo "cp ~/github/crab_frb_paper/scripts/root/plot_psr_snr.C ."
+cp ~/github/crab_frb_paper/scripts/root/plot_psr_snr.C .
 
 mkdir -p images/
 for file in `ls ${template}`
 do
-   root -b -q -l "plot_psr_snr.C(\"${file}\")"
+   root -b -q -l "plot_psr_snr.C+(\"${file}\")"
 done
 
 cat fitted_fluence.txt | awk '{print $2;}' > fitted_fluence_1col.txt
