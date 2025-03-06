@@ -22,5 +22,5 @@ do
       sleep 30
    fi   
    
-   cd ..
+   cd -
 done
