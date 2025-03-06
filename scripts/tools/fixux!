@@ -1,0 +1,26 @@
+#!/bin/bash
+
+for dir in `ls -d 202?_??_??_pulsars_msok/J0534+2200_flagants_ch40_ch256/256/`
+do
+   echo
+   echo $dir
+   cd ${dir}      
+   pwd
+   
+   if [[ -s UNIXTIME.txt ]]; then
+      echo "INFO : UNIXTIME.txt already exists for $dir -> skipped "
+   else
+      filfile=`ssh aavs2 "ls /data/${dir}/filterbank_msok_64ch/*.fil | head -1"`
+      bfile=`basename $filfile`
+      ux=`echo $bfile | awk '{print substr($1,13,17);}'`
+   
+      echo $ux > UNIXTIME.txt
+      
+      echo "UNIXTIME.txt generated with:"
+      cat UNIXTIME.txt
+   
+      sleep 30
+   fi   
+   
+   cd ..
+done

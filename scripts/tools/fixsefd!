@@ -1,0 +1,20 @@
+#!/bin/bash
+
+for dataset in `ls -d 2024_12_3?_pulsars_msok`
+do
+   echo
+   echo $dataset
+   cd ${dataset}
+   if [[ -d analysis ]]; then
+      cd analysis
+      if [[ ! -s MEAN_SEFD.txt ]]; then
+         mean_sefd=`awk -v sum=0 -v cnt=0 '{sum+=$2;cnt+=1;}END{print sum/cnt;}' sefd_vs_time.txt`
+         echo "mean_sefd = $mean_sefd"
+         echo "$mean_sefd" > MEAN_SEFD.txt
+         pwd
+         cat MEAN_SEFD.txt
+      fi
+      cd ..
+   fi
+   cd ..
+done
