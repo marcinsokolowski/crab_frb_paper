@@ -20,7 +20,7 @@ void histotau( const char* fname, int column=0,
                 int dofit=1, double low=0.00, double up=0.01, int bin_no=100,
                 int bLog=0, const char* szTitleX="Scattering Time [sec]", const char* szTitleY="Number of pulses fitted", 
                 int DoBorder=1, const char* szTitle=NULL, const char* szOutFile=NULL,
-                const char* szOutPostfix="_histo", int unix_time=0, const char* flag=NULL,
+                const char* szOutPostfix="_histo", int unix_time=0, const char* flag="unknown",
                 int bNormalise=0, 
                                          int bPrintHeader=1,
                                          const char* szOutDir="images/",
@@ -137,8 +137,10 @@ void histotau( const char* fname, int column=0,
 
    double border=(up-low)/10.00;
    if( DoBorder <= 0 )
-      border=0;
-   TH1F*  histo = new TH1F(szHistoTitle,szTitle,bin_no,low-border,up+border);
+      border=0; 
+   border = 0;
+
+   TH1F*  histo = new TH1F(szHistoTitle,szTitle,bin_no,low,up); // no border just raw
    TH1F* h_px = histo;
    while (1) {
       if(fgets(buff,lSize,fcd)==0)
@@ -269,7 +271,7 @@ void histotau( const char* fname, int column=0,
       FILE* out = fopen("taufit.txt","a+");
       // filename SIGMA MEAN NORMALIZATION AVG RMS
       if( bPrintHeader > 0 ){
-         fprintf(out,"# FILE FIT_SIGMA FIT_MEAN FIT_NORM MEAN RMS\n");
+         fprintf(out,"# FILE FIT_SIGMA FIT_MEAN FIT_NORM MEAN RMS UNIXTIME\n");
       }
       fprintf(out,"%s %.8f %.8f %.8f %.8f %.8f %d\n",flag,par[2],par[1],par[0],mean,histo_stddev,unix_time); // was mean,rms
       fclose(out);      
