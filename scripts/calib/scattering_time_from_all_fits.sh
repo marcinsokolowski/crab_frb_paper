@@ -32,8 +32,22 @@ do
      fi
      
      cp ~/github/crab_frb_paper/scripts/root/histotau.C .
-     
-     root -l "histotau.C(\"tau.txt\",0,1,0,0.01,100,0,\"Scattering Time [sec]\", \"Number of pulses fitted\", 0, \"${dataset}\", NULL, \"_histo\", $unixtime, \"${dataset}\" )"
+
+     rm -f taufit.txt     
+     root -l "histotau.C(\"tau.txt\",0,1,0,0.06,100,0,\"Scattering Time [sec]\", \"Number of pulses fitted\", 0, \"${dataset}\", NULL, \"_histo\", $unixtime, \"${dataset}\" )"
      cat taufit.txt        
      cd -
 done
+
+path=/media/msok/5508b34c-040a-4dce-a8ff-2c4510a5d1a3/eda2/202?_??_??_pulsars_msok/J0534+2200_flagants_ch40_ch256/256/filterbank_msok_64ch/merged_channels_??????????/presto_sps_thresh5_numdms100_dmstep0.01/merged/pulses_snr5_calibrated/
+cat ${path}/taufit.txt | awk '{if($1!="#"){print  $7" 86400 "$3*1000" "$2*1000;}}' > taugauss_vs_time.txt
+cat ${path}/taufit.txt | awk '{if($1!="#"){print  $7" 86400 "$5*1000" "$6*1000;}}' > taumean_vs_time.txt
+
+mkdir -p images/
+root -l "plot_scattau_vs_time.C(\"taugauss_vs_time.txt\")"
+
+echo "TEST?"
+root -l "plot_scattau_vs_time.C(\"taumean_vs_time.txt\")"
+
+
+
