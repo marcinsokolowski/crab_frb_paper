@@ -452,8 +452,9 @@ int ReadResultsFile( const char* fname, Double_t* x_values, Double_t* y_values,
            continue;
 	  }
 
-     if( all == 0 ){
+     if( gStartTime <= 0.001 && all==0 ){
          gStartTime = x_val;
+         printf("START TIME SET TO : %.8f\n",gStartTime);
      }
 
 	  x_values[all] = (x_val - gStartTime);
@@ -472,7 +473,7 @@ int ReadResultsFile( const char* fname, Double_t* x_values, Double_t* y_values,
 
 void plot_plidx_vs_time_error( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", double min_y=-6, double max_y=0,
                               const char* szDescY="SNR : fitted power law index vs. time",
-                              int x_col=0, int y_col=2, int y_col_err=4,
+                              int x_col=0, int y_col=2, int y_col_err=3,
                                         int min_local_time=-1e6, int max_local_time=1e6,
 					const char* fit_func_name=NULL,
 					int bLog=0,
@@ -531,7 +532,7 @@ void plot_plidx_vs_time_error( const char* basename="sigmaG1_vs_lapSigmaG1_for_r
    Int_t lq1=0,lq2=0,lq3=0,lq5=0,lq9=0,lq25=0;
 
    lq1 = ReadResultsFile( basename, x_value1, y_value1, -1, -1, x_col, y_col ); 
-   Int_t lq1_err = ReadResultsFile( basename, x_value_err1, y_value_err1, -1, -1, x_col, y_col_err ); 
+   Int_t lq1_err = ReadResultsFile( basename, x_value_err1, y_value_err1, -1, -1, x_col+1, y_col+1 ); 
 
 	time_t ut_start_time = (time_t)gStartTime;
    if( !(gmtime_tm = gmtime( &ut_start_time )) ){

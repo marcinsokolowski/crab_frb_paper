@@ -16,6 +16,7 @@
 
 int gVerb=0;
 
+double gUnixTime=-1;
 int g_dDbm2DbmPerHz=1;
 int gChannel=0;
 double gFreqBinHz=(480.00/4096.00)*1e6;
@@ -141,6 +142,7 @@ const char* change_ext(const char* name,const char* new_ext,char* out)
 void FluenceRatePerHourPowerLaw( const char* fname, double TotalTimeInHours=0.998768602,
                 int column=0,
                 double fit_min_x=600, double fit_max_x=10000, 
+                double unixtime=-1,
                 int dofit=1, int dDbm2DbmPerHz=1,
                 double low=90, double up=5000, int bin_no=100,
                 const char* szExtDesc=NULL, int shift_text=0, int channel=0,
@@ -149,6 +151,7 @@ void FluenceRatePerHourPowerLaw( const char* fname, double TotalTimeInHours=0.99
                 const char* szOutPostfix="_histo", int unix_time=0, const char* flag=NULL,
                 int bNormalise=0, int bPrintHeader=1, int bPlotExtrapolation=0 )
 {
+    gUnixTime = unixtime;
     gChannel = channel;
     dDbm2DbmPerHz = 0;
     char gOutHistoFile[1024];
@@ -398,12 +401,14 @@ void FluenceRatePerHourPowerLaw( const char* fname, double TotalTimeInHours=0.99
       double mean2 = (sum2/count);
       double rms = sqrt( mean2 - mean*mean );
 
-      FILE* out = fopen("flux_fit_results.txt","a+");
+      char szFitFile[128];
+      sprintf(szFitFile,"%s.fit_results_fit_range_%.2f-%.2f",fname,fit_min_x,fit_max_x);
+      FILE* out = fopen(szFitFile,"a+");
       // filename SIGMA MEAN NORMALIZATION AVG RMS
 //    if( bPrintHeader > 0 ){
 //       fprintf(out,"# FILE FIT_SIGMA FIT_MEAN FIT_NORM MEAN RMS\n");
 //    }
-      fprintf(out,"%.20f %.20f %.20f %.20f %.4f %d\n",fit_norm,fit_exp,fit_norm_err,fit_exp_err,((double)gChannel)*(480.00/4096.00),gChannel);
+      fprintf(out,"%.20f %.20f %.20f %.20f %.4f %d %.8f\n",fit_norm,fit_exp,fit_norm_err,fit_exp_err,((double)gChannel)*(480.00/4096.00),gChannel,gUnixTime);
       fclose(out);      
 
 
