@@ -284,19 +284,22 @@ fi
 # Fluence distributions :
 cd $curr_dir
 pwd
-path=`ls -d "J0534+2200_flagants_ch40_ch256/256/filterbank_msok_64ch/merged_channels_??????????/presto_sps_thresh5_numdms100_dmstep0.01/"`
+
+echo "~/github/crab_frb_paper/scripts/calib/process_fluence_and_scatter.sh"
+~/github/crab_frb_paper/scripts/calib/process_fluence_and_scatter.sh
+# path=`ls -d "J0534+2200_flagants_ch40_ch256/256/filterbank_msok_64ch/merged_channels_??????????/presto_sps_thresh5_numdms100_dmstep0.01/"`
 
 # fit profile to peak SNR pulse:
-echo "~/github/crab_frb_paper/scripts/calib/fit_profiles_all.sh ${path} -40"
-~/github/crab_frb_paper/scripts/calib/fit_profiles_all.sh ${path} -40
+# echo "~/github/crab_frb_paper/scripts/calib/fit_profiles_all.sh ${path} -40"
+# ~/github/crab_frb_paper/scripts/calib/fit_profiles_all.sh ${path} -40
 
 # calculate fluence for all pulses :
-echo "~/github/crab_frb_paper/scripts/calib/fluence_all.sh ${path}/merged"
-~/github/crab_frb_paper/scripts/calib/fluence_all.sh ${path}/merged
+# echo "~/github/crab_frb_paper/scripts/calib/fluence_all.sh ${path}/merged"
+# ~/github/crab_frb_paper/scripts/calib/fluence_all.sh ${path}/merged
 
 # fits to all pulse profiles :
-echo "~/github/crab_frb_paper/scripts/calib/fit_all_profiles_all_dates.sh ${path}/merged/pulses_snr5_calibrated/"
-~/github/crab_frb_paper/scripts/calib/fit_all_profiles_all_dates.sh ${path}/merged/pulses_snr5_calibrated/
+# echo "~/github/crab_frb_paper/scripts/calib/fit_all_profiles_all_dates.sh ${path}/merged/pulses_snr5_calibrated/"
+# ~/github/crab_frb_paper/scripts/calib/fit_all_profiles_all_dates.sh ${path}/merged/pulses_snr5_calibrated/
 
 
 # Fluence calculated as an integral of fitted profiles -> distributions :
