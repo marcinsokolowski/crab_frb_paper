@@ -1199,16 +1199,22 @@ void plot_psr_snr( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", double
       outf = fopen(szFittedFile,"w");
       fprintf(outf,"%.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.1f %.2f\n",gFittedParameters[0],gFittedParametersErrors[0],gFittedParameters[1],gFittedParametersErrors[1],gFittedParameters[2],gFittedParametersErrors[2],gFittedParameters[3],gFittedParametersErrors[3],gFittedParameters[4],gFittedParametersErrors[4],snr,gFinalChi2);
       fclose(outf);
-   }
 
-
-
-   TString szPngName1="images/";
-   if( outpngfile ){
-      szPngName1 += outpngfile;
+      TString szPngName1="images/";
+      if( outpngfile ){
+         szPngName1 += outpngfile;
+      }else{
+         szPngName1 += basename;
+         szPngName1 += ".png";
+      }
    }else{
-      szPngName1 += basename;
-      szPngName1 += ".png";
+      TString szPngName1="images/";
+      if( outpngfile ){
+         szPngName1 += outpngfile;
+      }else{
+         szPngName1 += basename;
+         szPngName1 += ".png";
+      }
+      c1->Print(szPngName1.Data());  
    }
-   c1->Print(szPngName1.Data());
 }
