@@ -24,7 +24,7 @@
 #include <TComplex.h>
 #include <TFile.h>
 
-
+double gFinalChi2 = -1.00;
 int gLog=0;
 int gVerb=0;
 int gNormaliseInputData=1;
@@ -465,9 +465,14 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
          gFittedParametersErrors[2] = line->GetParError(2);
          gFittedParametersErrors[3] = line->GetParError(3);
          gFittedParametersErrors[4] = line->GetParError(4);
-
       }
 
+      double chi2 = line->GetChisquare();
+      double ndf = line->GetNDF();
+      double chi2_ndf = chi2/ndf;
+      double par0_err = line->GetParError(0);
+      printf("Chi2 = %.8f , ndf = %.1f , chi2_ndf = %.8f , isnan(par[0] error) = %d\n",chi2,ndf,chi2_ndf,isnan(par0_err));
+      gFinalChi2 = chi2_ndf;
 
       double sum_resid=0.00;
       double sum_resid2=0.00;
@@ -968,6 +973,12 @@ void plot_psr_profile( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", in
       double fit_min_x=-100000, double fit_max_x=-100000,
       int x_col=0, int y_col=1, const char* outpngfile=NULL )
 {
+   int index;
+   double snr,time;
+   if( sscanf(basename,"pulse%d_snr%lf_time%lfsec.txt",&index,&snr,&time) == 3){
+      printf("SSCANF OK : %d , %.1f %.8f\n",index,snr,time);
+   }
+
    if( !szTitle){
       szTitle = basename;
    }
@@ -1140,7 +1151,7 @@ void plot_psr_profile( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", in
 
       sprintf(szFittedFile,"%s.refit",basename);
       outf = fopen(szFittedFile,"w");
-      fprintf(outf,"%.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f\n",gFittedParameters[0],gFittedParametersErrors[0],gFittedParameters[1],gFittedParametersErrors[1],gFittedParameters[2],gFittedParametersErrors[2],gFittedParameters[3],gFittedParametersErrors[3],gFittedParameters[4],gFittedParametersErrors[4]);
+      fprintf(outf,"%.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.1f %.2f\n",gFittedParameters[0],gFittedParametersErrors[0],gFittedParameters[1],gFittedParametersErrors[1],gFittedParameters[2],gFittedParametersErrors[2],gFittedParameters[3],gFittedParametersErrors[3],gFittedParameters[4],gFittedParametersErrors[4],snr,gFinalChi2);
       fclose(outf);
    }
 

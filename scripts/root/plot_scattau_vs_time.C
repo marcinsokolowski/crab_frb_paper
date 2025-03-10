@@ -441,6 +441,7 @@ int ReadResultsFile( const char* fname, Double_t* x_values, Double_t* y_values,
 
 void plot_scattau_vs_time( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", 
                            const char* basename2=NULL,
+                           const char* basename3=NULL,
                            int min_local_time=-1e6, int max_local_time=1e6,
                const char* fit_func_name=NULL, double min_y=1, 
                double max_y=6, int bLog=0,
@@ -526,7 +527,7 @@ void plot_scattau_vs_time( const char* basename="sigmaG1_vs_lapSigmaG1_for_root"
 
    TLegend *legend = new TLegend(.35,0.8,0.65,0.95);
    legend->SetTextFont(72);
-   legend->SetTextSize(0.08); // 0.05 - large for eps-es to papers 
+   legend->SetTextSize(0.03); // 0.05 - large for eps-es to papers 
    legend->SetFillStyle(1001);
    legend->AddEntry(pGraph1,basename,"P");
 
@@ -542,9 +543,26 @@ void plot_scattau_vs_time( const char* basename="sigmaG1_vs_lapSigmaG1_for_root"
 
       TGraphErrors* pGraph2 = DrawGraph( x_value2, y_value2, lq2, 1, NULL, fit_func_name, min_y, max_y, szTitle, basename, bLog, szDescX, szDescY, fit_min_x, fit_max_x, y_value2_err, "P,same", 34 , kRed );
 
-      legend->AddEntry(pGraph2,"Coherent (.ar files)","P");     
+//      legend->AddEntry(pGraph2,"Coherent (.ar files)","P");     
+      legend->AddEntry(pGraph2, basename2, "P");
    }
-   
+
+   if( basename3 ){
+      Double_t* x_value3 = new Double_t[MAX_ROWS];
+      Double_t* y_value3 = new Double_t[MAX_ROWS];
+      Double_t* x_value3_err = new Double_t[MAX_ROWS];
+      Double_t* y_value3_err = new Double_t[MAX_ROWS];
+
+      int lq3 = ReadResultsFile( basename3, x_value3, y_value3, -1, -1, 0, 2 ); 
+      int lq3_err = ReadResultsFile( basename3, x_value3_err, y_value3_err, -1, -1, 1, 3 ); 
+
+      TGraphErrors* pGraph3 = DrawGraph( x_value3, y_value3, lq3, 1, NULL, fit_func_name, min_y, max_y, szTitle, basename, bLog, szDescX, szDescY, fit_min_x, fit_max_x, y_value3_err, "P,same", 22 , kBlue );
+
+//      legend->AddEntry(pGraph3,"Coherent (.ar files)","P");     
+      legend->AddEntry(pGraph3, basename3, "P");
+   }
+
+   legend->Draw();   
    c1->Update();
 
    TString szEpsName1=outdir;

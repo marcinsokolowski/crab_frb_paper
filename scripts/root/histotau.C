@@ -12,6 +12,7 @@
 #include <TMath.h>
 #include <TComplex.h>
 #include <TFile.h>
+#include <TSystem.h>
 
 
 int gVerb=0;
@@ -20,7 +21,7 @@ void histotau( const char* fname, int column=0,
                 int dofit=1, double low=0.00, double up=0.01, int bin_no=100,
                 int bLog=0, const char* szTitleX="Scattering Time [sec]", const char* szTitleY="Number of pulses fitted", 
                 int DoBorder=1, const char* szTitle=NULL, const char* szOutFile=NULL,
-                const char* szOutPostfix="_histo", int unix_time=0, const char* flag="unknown",
+                const char* szOutPostfix="_histo", double unix_time=0, const char* flag="unknown",
                 int bNormalise=0, 
                                          int bPrintHeader=1,
                                          const char* szOutDir="images/",
@@ -64,7 +65,7 @@ void histotau( const char* fname, int column=0,
 
 //         printf("%s\n",buff);
 
-         double valx,valy;
+         double valx=0.00,valy=0.00;
          double tmp_val,tmp_val1,tmp_val2,tmp_val3;
 
 /*         if( column <= 3 ){
@@ -90,7 +91,7 @@ void histotau( const char* fname, int column=0,
             char* ptr=NULL;
             char* search_ptr=buff;
             int col=0;
-            while( ptr = strtok(search_ptr," \t") ){
+            while( (ptr = strtok(search_ptr," \t")) ){
                search_ptr = NULL;
                if( gVerb ){
                   printf("ptr = %s\n",ptr);
@@ -151,14 +152,14 @@ void histotau( const char* fname, int column=0,
          continue;
 
 
-      double valx,valy;
+      double valx=0.00,valy=0.00;
       double tmp_val,tmp_val1,tmp_val2,tmp_val3;
 
             int ncols=0;
             char* ptr=NULL;
             char* search_ptr=buff;
             int col=0;
-            while( ptr = strtok(search_ptr," \t") ){
+            while( (ptr = strtok(search_ptr," \t")) ){
                search_ptr = NULL;
                if( gVerb ){
                   printf("ptr = %s\n",ptr);
@@ -195,7 +196,7 @@ void histotau( const char* fname, int column=0,
      }
    }
 
-   printf("Number of rejected (Power > -35 dBm) = %d out of %d = %.8f \%\n",rejected,cnt,((double)rejected)/((double)cnt));
+   printf("Number of rejected (Power > -35 dBm) = %d out of %d = %.8f %%\n",rejected,cnt,((double)rejected)/((double)cnt));
 
 
    TCanvas* c1 = new TCanvas("c1","plot",200,10,1800,1200);
@@ -273,7 +274,7 @@ void histotau( const char* fname, int column=0,
       if( bPrintHeader > 0 ){
          fprintf(out,"# FILE FIT_SIGMA FIT_MEAN FIT_NORM MEAN RMS UNIXTIME\n");
       }
-      fprintf(out,"%s %.8f %.8f %.8f %.8f %.8f %d\n",flag,par[2],par[1],par[0],mean,histo_stddev,unix_time); // was mean,rms
+      fprintf(out,"%s %.8f %.8f %.8f %.8f %.8f %.8f\n",flag,par[2],par[1],par[0],mean,histo_stddev,unix_time); // was mean,rms
       fclose(out);      
 
       printf("GAUSS MEAN  = %.8f\n",par[1]);
@@ -282,7 +283,7 @@ void histotau( const char* fname, int column=0,
    }else{
       FILE* out = fopen("sigma.txt","a+");
       // filename SIGMA MEAN NORMALIZATION AVG RMS
-      fprintf(out,"%s %.8f %.8f %.8f %.8f %.8f %d\n",flag,0,histo->GetMean(),histo->GetRMS(),histo->GetMean(),histo->GetRMS(),unix_time);
+      fprintf(out,"%s %.8f %.8f %.8f %.8f %.8f %.8f\n",flag,0.00,histo->GetMean(),histo->GetRMS(),histo->GetMean(),histo->GetRMS(),unix_time);
       fclose(out);
    }
 
@@ -321,7 +322,7 @@ void histotau( const char* fname, int column=0,
 
    if( unix_time > 0 ){
       FILE* of = fopen( "max_vs_time.txt", "a" );
-      fprintf(of,"%d %.2f %.2f\n",unix_time,min_val,max_val);
+      fprintf(of,"%d %.2f %.2f\n",int(unix_time),min_val,max_val);
       fclose(of);
    }
 
