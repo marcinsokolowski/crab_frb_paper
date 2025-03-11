@@ -75,7 +75,7 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
         if(y_values[i]<minY)
             minY = y_values[i];
 
-        double x_err = 0.00;
+        double x_err = 0.3;
         if( x_values_err ){
            x_err = x_values_err[i]; 
         }
