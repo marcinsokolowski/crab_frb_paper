@@ -307,9 +307,20 @@ echo "~/github/crab_frb_paper/scripts/calib/process_fluence_and_scatter.sh"
 # TODO :
 # - plot Fluence distribution
 # - plot Luminosity distribution , use distance to Crab and fluence to calculate this one 
-
-echo "In order to plot all the results vs. time execute:"
-echo "cd /media/msok/5508b34c-040a-4dce-a8ff-2c4510a5d1a3/eda2/"
-echo "~/github/crab_frb_paper/scripts/calib/process_all_datasets.sh"
-
+read -p "Do you want to create final plots and vs. time plots ? [y/n]: " answer
+if [[ $answer == "y" || $answer == "Y" ]]; then
+   echo "INFO : you requested to create final plots, including vs. time plots, this will take a while ..."
+   echo "Waiting 10 seconds, if you changed your mind press Ctrl+C to stop script now"
+   sleep 10
+   
+   cd /media/msok/5508b34c-040a-4dce-a8ff-2c4510a5d1a3/eda2/
+   pwd
+   echo "~/github/crab_frb_paper/scripts/calib/process_all_datasets.sh"
+   ~/github/crab_frb_paper/scripts/calib/process_all_datasets.sh
+else
+   echo "WARNING : final plots not requested"
+   echo "In order to plot all the results vs. time execute:"
+   echo "cd /media/msok/5508b34c-040a-4dce-a8ff-2c4510a5d1a3/eda2/"
+   echo "~/github/crab_frb_paper/scripts/calib/process_all_datasets.sh"
+fi
 

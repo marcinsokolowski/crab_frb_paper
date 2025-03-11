@@ -45,6 +45,7 @@ if [[ $do_fitting -gt 0 ]]; then
          cat ${dir}/calibrated_fluence.txt >> calibrated_fluence.all
          
          FullTotalTimeInSec=$(($FullTotalTimeInSec+$TotalTimeSeconds))
+         echo "DEBUG : FullTotalTimeInSec = $FullTotalTimeInSec [sec]"
       fi
    done
 else 
@@ -68,14 +69,11 @@ root -l "plot_plidx_vs_time_error.C(\"calibratedfluence_index_vs_time_fit_range_
 
 
 # plot and fit ditribution of fluence from all nights :
+cp ~/github/crab_frb_paper/scripts/root/FluenceRatePerHourPowerLaw.C .
+
 FullTotalTimeInHours=`echo $FullTotalTimeInSec | awk '{print $1/3600.00;}'`
 root -l "FluenceRatePerHourPowerLaw.C(\"fitted_fluence.all\",${FullTotalTimeInHours},0,600,10000,-1)"
 root -l "FluenceRatePerHourPowerLaw.C(\"fitted_fluence.all\",${FullTotalTimeInHours},0,800,10000,-1)"
 
 root -l "FluenceRatePerHourPowerLaw.C(\"calibrated_fluence.all\",${FullTotalTimeInHours},0,600,10000,-1)"
 root -l "FluenceRatePerHourPowerLaw.C(\"calibrated_fluence.all\",${FullTotalTimeInHours},0,800,10000,-1)"
-
-
-
-
-

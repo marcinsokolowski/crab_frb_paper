@@ -170,3 +170,21 @@ root -l "plot_plidx_vs_time_error.C(\"snr_vs_time.txt\",-6,0,\"SNR : fitted powe
 root -l "plot_plidx_vs_time_error.C(\"lumin_vs_time.txt\",-6,0,\"Spectral luminosity : fitted power law index vs. time\")"
 root -l "plot_plidx_vs_time_error.C(\"flux_vs_time.txt\",-6,0,\"Peak flux density : fitted power law index vs. time\")"
 
+# Plot all fluence and total distribution of fluence from all observations :
+# TODO : add question if show all plots (default YES) :
+root_options="-l"
+read -p "Show plots of fluence distribution for every night ? [y/n]: " answer
+if [[ $answer == "n" || $answer == "N" ]]; then
+   root_options="-l -q -b"
+fi
+echo "~/github/crab_frb_paper/scripts/calib/replot_fluence_vs_time.sh - \"${root_options}\""
+~/github/crab_frb_paper/scripts/calib/replot_fluence_vs_time.sh - "${root_options}"
+
+
+# Plot max fluence vs. time :
+echo "~/github/crab_frb_paper/scripts/calib/plot_maxfluence_vs_time.sh"
+~/github/crab_frb_paper/scripts/calib/plot_maxfluence_vs_time.sh
+
+# MAX of fluence calculated from integral of fitted pulse profiles:
+echo "~/github/crab_frb_paper/scripts/calib/plot_fitted_maxfluence_vs_time.sh"
+~/github/crab_frb_paper/scripts/calib/plot_fitted_maxfluence_vs_time.sh

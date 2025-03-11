@@ -6,8 +6,9 @@ pwd
 path=`ls -d J0534+2200_flagants_ch40_ch256/256/filterbank_msok_64ch/merged_channels_??????????/presto_sps_thresh5_numdms100_dmstep0.01/`
 
 dataset=`basename $curr_dir`
-if [[ -d $path ]]; then
-   echo "INFO : $path exists -> continuing"
+dat_count=`ls ${path}/_DM56.7?.dat |wc -l`
+if [[ -d $path && $dat_count -gt 0 ]]; then
+   echo "INFO : $path and data _DM56.7?.dat exist -> continuing"
 else
    echo "INFO : $path does not exist -> copying data now ..."   
    cd ..
