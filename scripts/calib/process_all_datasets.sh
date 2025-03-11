@@ -16,6 +16,10 @@ if [[ -n "$3" && "$3" != "-" ]]; then
    min_good_time="$3"
 fi
 
+base_path=/media/msok/5508b34c-040a-4dce-a8ff-2c4510a5d1a3/eda2/
+if [[ -n "$4" && "$4" != "-" ]]; then
+   base_path="$4"
+fi
 
 echo "###################################"
 echo "PARAMETERS:"
@@ -23,6 +27,7 @@ echo "###################################"
 echo "analysis_dir = $analysis_dir"
 echo "outdir    = $outdir"
 echo "min_good_time = $min_good_time"
+echo "base_path = $base_path"
 echo "###################################"
 
 
@@ -191,9 +196,13 @@ echo "~/github/crab_frb_paper/scripts/calib/plot_fitted_maxfluence_vs_time.sh"
 
 
 # Scattering vs. time :
-cd /media/msok/5508b34c-040a-4dce-a8ff-2c4510a5d1a3/eda2/
+cd ${base_path}/
 echo "~/github/crab_frb_paper/scripts/calib/scattering_time_from_all_fits.sh"
 ~/github/crab_frb_paper/scripts/calib/scattering_time_from_all_fits.sh 
 
 # scattering vs. number of GPs :
+cd ${base_path}/crab_full_analysis_final/merged
+awk '{print $1" "$3}' taumean_vs_time.txt > taumean_vs_time_2col.txt
+correlate_files taumean_vs_time_2col.txt merged-ngps_vs_uxtime.txt Ngps_vs_taufit.txt -i 3600 -c 2
+root -l "plot_ngps_vs_tau.C(\"Ngps_vs_taufit.txt\")"
 
