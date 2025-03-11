@@ -15,7 +15,7 @@ if [[ -n "$3" && "$3" != "-" ]]; then
    chi2_max=$3
 fi
 
-root_options="-l"
+root_options="-l -q -b"
 if [[ -n "$4" && "$4" != "-" ]]; then
    root_options="$4"
 fi

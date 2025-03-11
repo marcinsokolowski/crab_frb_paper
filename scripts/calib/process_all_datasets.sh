@@ -188,3 +188,12 @@ echo "~/github/crab_frb_paper/scripts/calib/plot_maxfluence_vs_time.sh"
 # MAX of fluence calculated from integral of fitted pulse profiles:
 echo "~/github/crab_frb_paper/scripts/calib/plot_fitted_maxfluence_vs_time.sh"
 ~/github/crab_frb_paper/scripts/calib/plot_fitted_maxfluence_vs_time.sh
+
+
+# Scattering vs. time :
+cd /media/msok/5508b34c-040a-4dce-a8ff-2c4510a5d1a3/eda2/
+echo "~/github/crab_frb_paper/scripts/calib/scattering_time_from_all_fits.sh"
+~/github/crab_frb_paper/scripts/calib/scattering_time_from_all_fits.sh 
+
+# scattering vs. number of GPs :
+
