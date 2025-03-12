@@ -62,7 +62,7 @@ do
       
          awk '{if($1!="#"){print $3" "$1;}}' presto.cand > presto.txt
          mkdir -p images/
-         root ${root_options} "plot_samples_with_candidates.C(\"detrended_normalised_${b}.txt\",\"presto.txt\",NULL,NULL,\"presto_merged_sorted.txt\")"
+         root ${root_options} "plot_samples_with_candidates.C(\"detrended_normalised_${b}.txt\",\"presto.txt\",NULL,NULL,\"presto_merged.txt\")"
       else
          echo "Data preparation skipped"
          cd merged
