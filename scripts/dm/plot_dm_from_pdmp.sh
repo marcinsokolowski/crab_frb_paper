@@ -29,3 +29,7 @@ do
    
    echo "$ux 43200 $dm_mean $dm_err" >> dm_vs_ux.txt
 done
+
+cp ~/github/crab_frb_paper/scripts/root/plot_dm_vs_time.C .
+root -l "plot_dm_vs_time.C(\"dm_vs_ux.txt\")"
+
