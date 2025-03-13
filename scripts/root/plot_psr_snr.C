@@ -945,6 +945,7 @@ double normalise_y_meanrms( Double_t* x_values, Double_t* y_values, int cnt, dou
    double mean = (sum/count);
    printf("MEAN = %e (count = %d)\n",mean,count);
    printf("RMS  = %e (count = %d)\n",rms,count);
+   printf("SNR = 1 / rms = %.4f\n",1/rms);
    printf("Y-axis range : %.8f - %.8f\n",minY,maxY);
 
    for(int i=0;i<cnt;i++){
@@ -987,12 +988,29 @@ double normalise_y_minmax( Double_t* x_values, Double_t* y_values, int cnt, doub
    double mean = (sum/count);
    printf("MEAN = %e (count = %d)\n",mean,count);
    printf("RMS  = %e (count = %d)\n",rms,count);
+   printf("SNR = 1 / rms = %.4f\n",(maxY-minY)/rms);
    printf("Y-axis range : %.8f - %.8f\n",minY,maxY);
 
+   sum2=0;
+   sum=0;
+   count=0;
    gYaxisNormFactor = (maxY-minY);
    for(int i=0;i<cnt;i++){
+      double x_val = x_values[i];
       y_values[i] = (y_values[i] - minY)/gYaxisNormFactor;
+
+      if( (start<0 || x_val >= start) && (end<0 || x_val <= end) ){
+        sum += y_values[i];
+        sum2 += y_values[i]*y_values[i];
+        count++;
+      }
    }
+
+   double rms_norm = sqrt( sum2/count - (sum/count)*(sum/count) );
+   printf("AFTER NORMALISATION:\n");
+   printf("RMS  = %e (count = %d)\n",rms_norm,count);
+   printf("SNR = 1 / rms = %.4f\n",1.00/rms_norm);
+
 
    gOriginalMean = mean;
    gOriginalRMS = rms;
