@@ -39,4 +39,6 @@ do
 done
 
 
-cat ${template}/candidates_fits/DM.txt 
+cat ${template}/candidates_fits/DM.txt | awk '{print $1" 0 "$2" 0";}'  > dm_vs_time.txt
+cp ~/github/crab_frb_paper/scripts/root/plot_dm_vs_time.C .
+root -l "plot_dm_vs_time.C(\"dm_vs_time.txt\")"

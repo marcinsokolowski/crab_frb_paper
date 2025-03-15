@@ -307,6 +307,9 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
    par[2] = 0.0;
    par[3] = 0.0;
 
+   double phase_max=-1, max_value=-1;
+   int phase_max_i = -1;
+
    int local_func=0;
    if( fit_func_name && strlen(fit_func_name) ){
       if( strcmp( fit_func_name, "pulse" )==0 ){
@@ -315,11 +318,23 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
          line_draw = new TF1("fit_func2",Pulse_with_linear_onset,minX,maxX,5);
          local_func=1;
 
+         for(int i=0;i<numVal;i++){
+            if( y_values[i] > max_value ){
+                max_value = y_values[i];
+                phase_max = x_values[i];
+                phase_max_i = i;
+            }
+         }
+
+         double ts = phase_max - 2*(x_values[1]-x_values[0]);
+         double tp = phase_max;
+         double alpha = max_value / (tp - ts);
+
          par[0] = 0;
-         par[1] = 0.5;
-         par[2] = 0.5;
-         par[3] = 17.0;
-         par[4] = 7.00; // very long decay ...
+         par[1] = ts;
+         par[2] = tp;
+         par[3] = max_value;
+         par[4] = 0.001; // very long decay ...
 
 /*         if( gNormaliseInputData ){
             par[1] = par[1] / numVal;
@@ -372,11 +387,11 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
          line_draw = new TF1("fit_func2",Pulse_gauss,minX,maxX,4);
          local_func=1;
          
-         double phase_max=-1, max_value=-1;
          for(int i=0;i<numVal;i++){
             if( y_values[i] > max_value ){
                 max_value = y_values[i];
                 phase_max = x_values[i];
+                phase_max_i = i;
             }
          }
 
@@ -533,6 +548,45 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
       double integral_manual_offset_corrected = integral_manual - offset_correction;
       double fluence_manual = integral_manual_offset_corrected*gCalConstant*1000.00;
       printf("Manual integration in DrawGraph (sum) = %.8f in range [%.8f -  %.8f] -> Integral = %.8f -> Corrected for offset = %.8f (subtracted %.8f)\n",sum,minX,maxX,integral_manual,integral_manual_offset_corrected,offset_correction);   
+
+      double t_peak = x_values[phase_max_i];
+      int pre_rise_i = phase_max_i - 10;
+      if( pre_rise_i < 0 ){
+         pre_rise_i = 0;
+      }
+      int post_rise_i = phase_max_i + 50;
+      if( post_rise_i >= numVal ){
+         post_rise_i = numVal;
+      }
+      double start_x = x_values[pre_rise_i];
+      double end_x = x_values[phase_max_i]+50*gFittedParameters[4];
+      double dt = 0.000001;
+
+      double x_left = -1;
+      double x_right = -1;      
+      double t = start_x;
+      while( t < end_x ){
+         double fitval = line_draw->Eval( t );
+         printf("SEARCH : %.6f %.8f\n",t,fitval);
+
+         if(x_left < 0 ){
+            if( fitval >= max_value/2 ){
+               x_left = t;
+            }
+         }else{
+            if( t > t_peak ){
+                if( x_right < 0 ){
+                   if( fitval <= (max_value/2) ){
+                      x_right = t;
+                      break; 
+                   }
+                }
+            }
+         }
+
+         t += dt;
+      }
+      printf("PULSE FWHM %.8f - %.8f -> width = %.8f [ms]\n",x_left,x_right,(x_right-x_left)*1000.00);
 
    if( bSaveFit ){
       if( fluence > 0 && chi2_ndf<1.5 && !isnan(par0_err) ){

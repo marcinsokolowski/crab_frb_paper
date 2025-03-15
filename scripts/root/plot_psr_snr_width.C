@@ -62,11 +62,11 @@ Double_t gFittedParametersOriginalScaling[100];
 Double_t gFittedParametersOriginalScalingErrors[100];
 int      gFittedParametersN=5;
 
-// double gMinX_Allowed = -1e20;
-// double gMaxX_Allowed = +1e20;
+double gMinX_Allowed = -1e20;
+double gMaxX_Allowed = +1e20;
 
-double gMinX_Allowed = 0.87;
-double gMaxX_Allowed = 0.93;
+// double gMinX_Allowed = 0.87;
+// double gMaxX_Allowed = 0.93;
 
 
 // No scattering tau = 0.050
@@ -1091,9 +1091,11 @@ double normalise_y_minmax( Double_t* x_values, Double_t* y_values, int cnt, doub
 
 
 
-void plot_psr_snr_width( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", double cal_constant=33.03678886,
-                   int bNormaliseInputData=2, bool bShowOriginalDataWithFit=true,
-                       const char* fit_func_name="pulse_gauss", // pulse, pulse_gauss, pulse_gauss_only
+void plot_psr_snr_width( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", 
+                         double range_start=-1e20, double range_end=+1e20,
+                         double cal_constant=1.00,
+                   int bNormaliseInputData=0, bool bShowOriginalDataWithFit=false,
+                       const char* fit_func_name="pulse", // pulse, pulse_gauss, pulse_gauss_only
                        double noise_start=0, double noise_end=0.4, 
                        double sigma_simulated=0.1120, // simulated sigma of noise in Jy , sigma_Stokes_I - for the entire duration of the observation !!!
                        bool bIsSigmaSimulPerPhaseBin=false, // if this is true no need to multiply sigma_simulated by sqrt(n_bins)
@@ -1105,6 +1107,9 @@ void plot_psr_snr_width( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", 
       double fit_min_x=-100000, double fit_max_x=-100000,
       int x_col=0, int y_col=1, const char* outpngfile=NULL )
 {
+   gMinX_Allowed = range_start;
+   gMaxX_Allowed = range_end;
+
    // snr002315_snr5.7_time3120.549304sec.txt
    int index;
    double snr,time;
