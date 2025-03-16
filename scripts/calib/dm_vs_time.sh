@@ -11,12 +11,19 @@ step_dm=0.001
 outdir=ScanDM_NEW/
 force=0
 
+echo "-----------------------------------------------------"
+echo "List of data to process"
+echo "-----------------------------------------------------"
+ls -d ${template}
+echo "-----------------------------------------------------"
+sleep 5
+
 curr_path=`pwd`
 for dir in `ls -d ${template}`
 do
    echo
    cd $dir   
-   candfile=`ls merged_channels_*.cand_merged | tail -1`
+   candfile=`ls merged_channels_??????????.cand_merged | tail -1`
    ux=`echo $candfile | cut -b 17-26`
    maxsnr_id=`awk -v maxsnr=-1 -v id=0 '{if($1!="#"){if($3>maxsnr){maxsnr=$3;id=$1;}}}END{print id;}' ${candfile}`
    echo "MAX SNR candidate ID = $maxsnr_id"
