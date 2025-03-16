@@ -18,6 +18,7 @@
 
 int gLog=0;
 int gVerb=0;
+double gUNIXTIME=-1;
 
 #define MAX_ROWS 10000000
 
@@ -398,7 +399,7 @@ int ReadResultsFile( const char* fname, Double_t* x_values, Double_t* y_values,
    return all;
 }  
 
-void plot_fwhm_vs_dm( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", 
+void plot_fwhm_vs_dm( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", double unixtime=-1,
                const char* fit_func_name=NULL, double min_y=-10000, 
                double max_y=-10000 , int bLog=0,
       const char* szDescX="DM [pc/cm^3]",const char* szDescY="FWHM [ms]", const char* szTitle=NULL,
@@ -409,6 +410,7 @@ void plot_fwhm_vs_dm( const char* basename="sigmaG1_vs_lapSigmaG1_for_root",
       szTitle = basename;
    }
    gLog = bLog;
+   gUNIXTIME = unixtime;
    
    // gROOT->Reset();
    // const char* basename = "s_vs_sigma_g_sqr";
@@ -457,6 +459,17 @@ void plot_fwhm_vs_dm( const char* basename="sigmaG1_vs_lapSigmaG1_for_root",
             fit_max_x );
    
    c1->Update();
+
+   double min_fwhm=1e20,min_fwhm_dm=-1;
+   for(int i=0;i<lq1;i++){
+      if( y_value1[i] < min_fwhm ){
+         min_fwhm = y_value1[i];
+         min_fwhm_dm = x_value1[i];
+      }     
+   }
+   FILE* outf = fopen("DM_FWHM.txt","w");
+   fprintf(outf,"%.8f 43200 %.8f 0.00 %.8f\n",gUNIXTIME,min_fwhm_dm,min_fwhm);
+   fclose(outf);
 
 /*   TString szEpsName1=basename;
    szEpsName1 += ".eps";

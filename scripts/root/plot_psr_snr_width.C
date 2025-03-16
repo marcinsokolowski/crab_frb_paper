@@ -341,7 +341,7 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
          par[1] = ts;
          par[2] = tp;
          par[3] = max_value;
-         par[4] = 0.001; // very long decay ...
+         par[4] = 0.001; // very long decay ...         
 
 /*         if( gNormaliseInputData ){
             par[1] = par[1] / numVal;
@@ -599,6 +599,13 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
       FILE* outf = fopen("FWHM.txt","a+"); 
       fprintf(outf,"%s %.8f\n",gInputFileName,fwhm);
       fclose(outf);
+
+
+      outf = fopen("TAU_FWHM.txt","a+"); 
+      fprintf(outf,"%s %.8f %.8f\n",gInputFileName,gFittedParameters[4],gFittedParametersErrors[4]);
+      fclose(outf);
+
+
 
    if( bSaveFit ){
       if( fluence > 0 && chi2_ndf<1.5 && !isnan(par0_err) ){
