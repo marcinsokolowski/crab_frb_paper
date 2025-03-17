@@ -23,7 +23,7 @@ do
    start_x=`echo $maxx | awk '{print $1-20*0.001}'`
    end_x=`echo $maxx | awk '{print $1+40*0.001}'`
 
-   root -b -l -q "plot_psr_snr_width.C(\"${snrfile}\",${start_x},${end_x})"
+   root -b -l -q "plot_psr_snr_width.C+(\"${snrfile}\",${start_x},${end_x})"
 
    pwd
 done
