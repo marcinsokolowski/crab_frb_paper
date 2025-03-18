@@ -416,7 +416,7 @@ void histo_time_between_pulses( const char* fname, int column=0,
       double mean2 = (sum2/count);
       double rms = sqrt( mean2 - mean*mean );
 
-      FILE* out = fopen("snr_fit_results.txt","a+");
+      FILE* out = fopen("time_between_pulses_fit_results.txt","a+");
       // filename SIGMA MEAN NORMALIZATION AVG RMS
 //    if( bPrintHeader > 0 ){
 //       fprintf(out,"# FILE FIT_SIGMA FIT_MEAN FIT_NORM MEAN RMS\n");
@@ -503,7 +503,7 @@ void histo_time_between_pulses( const char* fname, int column=0,
    TString szPngName;
    szPngName="images/";
    szPngName += fname;
-   szPngName += "_SNRRatePerHourPowerLaw";
+   szPngName += "_time_between_pulses";
    szPngName += ".png";
    c1->Print(szPngName.Data());
 }
