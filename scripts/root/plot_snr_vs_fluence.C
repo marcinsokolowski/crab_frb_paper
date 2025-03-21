@@ -401,7 +401,7 @@ int ReadResultsFile( const char* fname, Double_t* x_values, Double_t* y_values,
 void plot_snr_vs_fluence( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", 
                const char* fit_func_name=NULL, double min_y=-10000, 
                double max_y=-10000 , int bLog=0,
-      const char* szDescX="SNR",const char* szDescY="Fluence [Jy ms]", const char* szTitle=NULL,
+      const char* szDescX="Fluence [Jy ms]",const char* szDescY="SNR", const char* szTitle=NULL,
       double fit_min_x=-100000, double fit_max_x=-100000,
       int x_col=0, int y_col=1, const char* outpngfile=NULL )
 {
