@@ -46,6 +46,9 @@ fi
 # plot and fit distributions using completness threshold:
 cd mp_ip/
 mkdir -p images/
+
+root ${root_options} "histofile_raw.C(\"gp_phase.txt\",0,0,0,1,50)"
+
 cp ~/github/crab_frb_paper/scripts/root/FluenceRatePerHourPowerLaw.C .
 root ${root_options} "FluenceRatePerHourPowerLaw.C(\"mp_fluence.txt\",${TotalTimeHours},0,1000,100000)"
 root ${root_options} "FluenceRatePerHourPowerLaw.C(\"ip_fluence.txt\",${TotalTimeHours},0,1000,100000)"
