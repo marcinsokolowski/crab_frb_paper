@@ -366,6 +366,10 @@ void FluenceRatePerHourPowerLaw( const char* fname, double TotalTimeInHours=0.99
    Double_t parerrors=NULL;
    Double_t fit_norm=0.00,fit_exp=0.00;
    Double_t fit_norm_err=0.00,fit_exp_err=0.00;
+
+
+   int max_bin = 0;
+   double max_value = 0.00;
    if( dofit ){
       TF1* pFitFunc = new TF1("power_law_distrib",power_law_distrib,fit_min_x,fit_max_x,2);
       par[0] = 1;
@@ -386,8 +390,8 @@ void FluenceRatePerHourPowerLaw( const char* fname, double TotalTimeInHours=0.99
       lat.SetTextAlign(23);
       lat.SetTextSize(0.03);
       
-      int max_bin = histo->GetMaximumBin();
-      int max_value = histo->GetBinContent( max_bin );
+      max_bin = histo->GetMaximumBin();
+      max_value = histo->GetBinContent( max_bin );
       printf("max_value = %d\n",max_value);
       char szDesc[256];
       fit_norm = par[0];
@@ -460,7 +464,7 @@ void FluenceRatePerHourPowerLaw( const char* fname, double TotalTimeInHours=0.99
    lat.SetTextSize(0.03);
    char szText[128];
    sprintf(szText,"Max fluence = %.2f [Jy ms] , min fluence = %.2f [Jy ms], one per hour fluence = %.2f\n",max_val,min_val,fluence_of_oneperhour_pulse);
-   lat.DrawLatex( 200, 3*par[0], szText );
+   lat.DrawLatex( 300, max_value*3, szText ); // max_val
 
 
    char szOutFile2[128];
