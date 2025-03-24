@@ -139,7 +139,7 @@ const char* change_ext(const char* name,const char* new_ext,char* out)
 
 
 void SpectralLuminosity_DistrPowerLaw( const char* fname, double TotalTimeInHours=0.998768602,
-                double low=1e23, double up=2e25, int bin_no=100,
+                double low=1.5e23, double up=2e25, int bin_no=100,
                 double fit_min_x=1e24, double fit_max_x=2e25,
                 int column=0,
                 int dofit=1, int dDbm2DbmPerHz=1,

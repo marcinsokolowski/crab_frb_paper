@@ -29,4 +29,7 @@ fi
 # where the bkgd_level is typically 0 after detrending and RMS=1 after normalization. This definition has the advantage that you will get (basically) the same sigma for any pulse no
 # matter how much the input time series has been downsampled as long as the pulse is still resolved.
 # 
-cat ${files} | grep -v "#" | awk -v sefd=${sefd} -v npol=2 -v bw_hz=29629629 -v timeres_sec=0.00096768 '{snr=$2;inttime_sec=timeres_sec;sigma_sim=sefd/sqrt(npol*bw_hz*inttime_sec);flu=snr*sigma_sim;print snr" -> "flu;}'
+
+# If SEFD = SEFD_I - already Stokes I SEFD this means that there is not need for npol=2 and I should just use npol=1 !!!
+# My original results of calibrated flux density were by factor SQRT(2) underestimated (too low)
+cat ${files} | grep -v "#" | awk -v sefd=${sefd} -v npol=1 -v bw_hz=29629629 -v timeres_sec=0.00096768 '{snr=$2;inttime_sec=timeres_sec;sigma_sim=sefd/sqrt(npol*bw_hz*inttime_sec);flu=snr*sigma_sim;print snr" -> "flu;}'

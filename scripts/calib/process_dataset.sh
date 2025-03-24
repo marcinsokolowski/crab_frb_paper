@@ -42,8 +42,22 @@ else
 fi
 
 outdir=analysis_final
+prev_analysis="../analysis"
 if [[ -n "$2" && "$2" != "-" ]]; then
    outdir="$2"
+fi
+if [[ -d ${outdir} ]]; then
+   echo "WARNING : directory ${outdir} already exists -> moving"
+   echo "mv ${outdir} ${outdir}_prev"
+   echo "Waiting 10 seconds (press Ctrl+C to cancel) ..."
+   echo "mv ${outdir} ${outdir}_prev"
+   sleep 10
+   mv ${outdir} ${outdir}_prev
+   
+   prev_analysis="../${outdir}_prev"
+   echo "prev_analysis = $prev_analysis"
+   echo "Waiting 10 seconds before continuing (press Ctrl+C to cancel) ..."
+   sleep 10
 fi
 
 calc_sefd=1
@@ -51,7 +65,6 @@ if [[ -n "$3" && "$3" != "-" ]]; then
    calc_sefd=$3
 fi
 
-prev_analysis="../analysis"
 if [[ -n "$4" && "$4" != "-" ]]; then
    prev_analysis="$4"
 fi
@@ -80,6 +93,12 @@ if [[ ! -d $presto_dir ]]; then
 fi
 # sleep 20
 
+crude_dm_plots=0
+if [[ -n "$8" && "$8" != "-" ]]; then
+   crude_dm_plots=$8
+fi
+
+
 echo "###################################################"
 echo "PARAMETERS:"
 echo "###################################################"
@@ -88,6 +107,7 @@ echo "prev_analysis = $prev_analysis"
 echo "calc_sefd = $calc_sefd"
 echo "force_calc_sefd = $force_calc_sefd"
 echo "sefds_only = $sefds_only"
+echo "crude_dm_plots = $crude_dm_plots"
 echo "###################################################"
 
 
@@ -217,69 +237,73 @@ else
    sleep 5 
 fi   
 
-# dump timeseries from DM57.dat file:
-if [[ -s presto_5sigma_pulses/_DM57.00.dat ]]; then
-   ln -s presto_5sigma_pulses/_DM57.00.dat
-   echo "~/github/crab_frb_paper/scripts/calib/process_presto_candidates.sh _DM57.00.dat \"-U 1\""
-   ~/github/crab_frb_paper/scripts/calib/process_presto_candidates.sh _DM57.00.dat "-U 1"
+if [[ $crude_dm_plots -gt 0 ]]; then
+   # dump timeseries from DM57.dat file:
+   if [[ -s presto_5sigma_pulses/_DM57.00.dat ]]; then
+      ln -s presto_5sigma_pulses/_DM57.00.dat
+      echo "~/github/crab_frb_paper/scripts/calib/process_presto_candidates.sh _DM57.00.dat \"-U 1\""
+      ~/github/crab_frb_paper/scripts/calib/process_presto_candidates.sh _DM57.00.dat "-U 1"
+   else
+      echo "WARNING : file presto_5sigma_pulses/_DM57.00.dat not found - cannot dump timeseries -> please verify"
+      sleep 10
+   fi
+
+   # plot distribution of calibrated mean peak flux density :
+   # cp  ~/github/crab_frb_paper/scripts/root/FluDistrPowerLaw.C .
+   # root -l "FluDistrPowerLaw.C(\"all_crab_gps_norfi_fluxcal.singlepulse\")"
+   mkdir -p images/
+   cp  ~/github/crab_frb_paper/scripts/root/FluRatePerHourPowerLaw.C .
+   root -l "FluRatePerHourPowerLaw.C(\"all_crab_gps_norfi_fluxcal.singlepulse\",${TotalTimeInHours})"
+
+   # plots SNR distribution 
+   cat all_crab_gps_norfi.singlepulse | awk '{if($1!="#"){print $2;}}' > all_crab_gps_norfi.snr
+   # cp  ~/github/crab_frb_paper/scripts/root/SNRDistrPowerLaw.C .
+   # root -l "SNRDistrPowerLaw.C(\"all_crab_gps_norfi.snr\")"
+   cp  ~/github/crab_frb_paper/scripts/root/SNRRatePerHourPowerLaw.C .
+   root -l "SNRRatePerHourPowerLaw.C(\"all_crab_gps_norfi.snr\",${TotalTimeInHours})"
+
+   # plot disitrbution of luminosity :
+   cp ~/github/crab_frb_paper/scripts/root/SpectralLuminosity_DistrPowerLaw.C .
+   root -l "SpectralLuminosity_DistrPowerLaw.C(\"all_crab_gps_norfi_fluxcal.singlepulse\",${TotalTimeInHours})"
+
+   # Analysis on merged PRESTO candidates :
+   mkdir -p merged/
+   cd merged/
+   echo "~/github/crab_frb_paper/scripts/calib/presto2cand.sh ../all_crab_gps_norfi.singlepulse"
+   ~/github/crab_frb_paper/scripts/calib/presto2cand.sh ../all_crab_gps_norfi.singlepulse
+
+   echo "~/github/crab_frb_paper/scripts/calib/snr2jy.sh presto.cand_normal $mean_sefd | awk '{print $3;}' > presto_norfi_fluxcal.cand_normal"
+   ~/github/crab_frb_paper/scripts/calib/snr2jy.sh presto.cand_normal $mean_sefd | awk '{print $3;}' > presto_norfi_fluxcal.cand_normal
+   
+   mkdir -p images/
+   # plot distribution of calibrated mean peak flux density :
+   cp  ~/github/crab_frb_paper/scripts/root/FluRatePerHourPowerLaw.C .
+   root -l "FluRatePerHourPowerLaw.C(\"presto_norfi_fluxcal.cand_normal\",${TotalTimeInHours})"
+   
+   cp ~/github/crab_frb_paper/scripts/root/SpectralLuminosity_DistrPowerLaw.C .
+   root -l "SpectralLuminosity_DistrPowerLaw.C(\"presto_norfi_fluxcal.cand_normal\",${TotalTimeInHours})"
+
+   # plots SNR distribution 
+   cat presto.cand_normal | awk '{if($1!="#"){print $2;}}' > presto.cand_normal_snr
+   cp  ~/github/crab_frb_paper/scripts/root/SNRRatePerHourPowerLaw.C .
+   root -l "SNRRatePerHourPowerLaw.C(\"presto.cand_normal_snr\",${TotalTimeInHours})"
+
+
+   if [[ -s ../detrended_normalised__DM57.00.txt ]]; then
+      ln -s ../detrended_normalised__DM57.00.txt
+   
+   
+      cp ~/github/crab_frb_paper/scripts/root/plot_samples_with_candidates.C .
+      awk '{if($1!="#"){print $3" "$1;}}' presto.cand > presto.txt
+      awk '{if($1!="#"){print $3" "$2;}}' presto.cand_normal.sorted > presto_merged_sorted.txt
+   
+      root -l "plot_samples_with_candidates.C(\"detrended_normalised__DM57.00.txt\",\"presto.txt\",NULL,NULL,\"presto_merged_sorted.txt\")"   
+   else
+      echo "WARNING : file ../timeseries__DM57.00.txt not found -> cannot overplot time series and PRESTO candidates and merged candidates"
+   fi   
 else
-   echo "WARNING : file presto_5sigma_pulses/_DM57.00.dat not found - cannot dump timeseries -> please verify"
-   sleep 10
+   echo "WARNING : Plotting/analysis of crude DM=57.00 is not requested"
 fi
-
-# plot distribution of calibrated mean peak flux density :
-# cp  ~/github/crab_frb_paper/scripts/root/FluDistrPowerLaw.C .
-# root -l "FluDistrPowerLaw.C(\"all_crab_gps_norfi_fluxcal.singlepulse\")"
-mkdir -p images/
-cp  ~/github/crab_frb_paper/scripts/root/FluRatePerHourPowerLaw.C .
-root -l "FluRatePerHourPowerLaw.C(\"all_crab_gps_norfi_fluxcal.singlepulse\",${TotalTimeInHours})"
-
-# plots SNR distribution 
-cat all_crab_gps_norfi.singlepulse | awk '{if($1!="#"){print $2;}}' > all_crab_gps_norfi.snr
-# cp  ~/github/crab_frb_paper/scripts/root/SNRDistrPowerLaw.C .
-# root -l "SNRDistrPowerLaw.C(\"all_crab_gps_norfi.snr\")"
-cp  ~/github/crab_frb_paper/scripts/root/SNRRatePerHourPowerLaw.C .
-root -l "SNRRatePerHourPowerLaw.C(\"all_crab_gps_norfi.snr\",${TotalTimeInHours})"
-
-# plot disitrbution of luminosity :
-cp ~/github/crab_frb_paper/scripts/root/SpectralLuminosity_DistrPowerLaw.C .
-root -l "SpectralLuminosity_DistrPowerLaw.C(\"all_crab_gps_norfi_fluxcal.singlepulse\",${TotalTimeInHours})"
-
-# Analysis on merged PRESTO candidates :
-mkdir -p merged/
-cd merged/
-echo "~/github/crab_frb_paper/scripts/calib/presto2cand.sh ../all_crab_gps_norfi.singlepulse"
-~/github/crab_frb_paper/scripts/calib/presto2cand.sh ../all_crab_gps_norfi.singlepulse
-
-echo "~/github/crab_frb_paper/scripts/calib/snr2jy.sh presto.cand_normal $mean_sefd | awk '{print $3;}' > presto_norfi_fluxcal.cand_normal"
-~/github/crab_frb_paper/scripts/calib/snr2jy.sh presto.cand_normal $mean_sefd | awk '{print $3;}' > presto_norfi_fluxcal.cand_normal
-
-mkdir -p images/
-# plot distribution of calibrated mean peak flux density :
-cp  ~/github/crab_frb_paper/scripts/root/FluRatePerHourPowerLaw.C .
-root -l "FluRatePerHourPowerLaw.C(\"presto_norfi_fluxcal.cand_normal\",${TotalTimeInHours})"
-
-cp ~/github/crab_frb_paper/scripts/root/SpectralLuminosity_DistrPowerLaw.C .
-root -l "SpectralLuminosity_DistrPowerLaw.C(\"presto_norfi_fluxcal.cand_normal\",${TotalTimeInHours})"
-
-# plots SNR distribution 
-cat presto.cand_normal | awk '{if($1!="#"){print $2;}}' > presto.cand_normal_snr
-cp  ~/github/crab_frb_paper/scripts/root/SNRRatePerHourPowerLaw.C .
-root -l "SNRRatePerHourPowerLaw.C(\"presto.cand_normal_snr\",${TotalTimeInHours})"
-
-
-if [[ -s ../detrended_normalised__DM57.00.txt ]]; then
-   ln -s ../detrended_normalised__DM57.00.txt
-   
-   
-   cp ~/github/crab_frb_paper/scripts/root/plot_samples_with_candidates.C .
-   awk '{if($1!="#"){print $3" "$1;}}' presto.cand > presto.txt
-   awk '{if($1!="#"){print $3" "$2;}}' presto.cand_normal.sorted > presto_merged_sorted.txt
-   
-   root -l "plot_samples_with_candidates.C(\"detrended_normalised__DM57.00.txt\",\"presto.txt\",NULL,NULL,\"presto_merged_sorted.txt\")"   
-else
-   echo "WARNING : file ../timeseries__DM57.00.txt not found -> cannot overplot time series and PRESTO candidates and merged candidates"
-fi   
 
 # Fluence distributions :
 cd $curr_dir

@@ -6,6 +6,7 @@ if [[ -n "$1" && "$1" != "-" ]]; then
 fi
 
 cd $path
+pwd
 ux=`echo $path | awk '{idx=index($0,"merged_channels_");print substr($0,idx+16,10);}'`
 
 root_options="-l"
@@ -46,7 +47,7 @@ infile=calibrated_pulses.txt
 period=`python ~/github/crab_frb_paper/scripts/crab/crab_fu.py $ux 1`
 # period=`python ~/github/crab_frb_paper/scripts/crab/crab_fu_tabular.py $ux 1`
 echo "Period of Crab for ux = $ux is $period [seconds] vs. default value 0.033836032 from 15 DEC 2024 ( https://www.jb.man.ac.uk/pulsar/crab/crab2.txt )"
-sleep 5
+sleep 1
 
 
 mkdir -p mp_ip/
@@ -64,6 +65,9 @@ if [[ $answer == "y" || $answer == "Y" ]]; then
    read -p "MP end phase [default $mp_phase_end]: " mp_phase_end
    read -p "IP start phase [default $ip_phase_start]: " ip_phase_start
    read -p "IP end phase [default $ip_phase_end]: " ip_phase_end
+   
+   echo "$mp_phase_start $mp_phase_end" > MP_PHASE_RANGE.txt
+   echo "$ip_phase_start $ip_phase_end" > IP_PHASE_RANGE.txt
 else
    echo "Using default pulse windows: MP $mp_phase_start - $mp_phase_end , IP : $ip_phase_start - $ip_phase_end"   
 fi
@@ -85,8 +89,8 @@ fi
 cd mp_ip/
 
 cp ~/github/crab_frb_paper/scripts/root/FluenceRatePerHourPowerLaw.C .
-root ${root_options} "FluenceRatePerHourPowerLaw.C(\"mp_fluence.txt\",${TotalTimeHours},0,1000,100000)"
-root ${root_options} "FluenceRatePerHourPowerLaw.C(\"ip_fluence.txt\",${TotalTimeHours},0,1000,100000)"
+root ${root_options} "FluenceRatePerHourPowerLaw.C(\"mp_fluence.txt\",${TotalTimeHours},0,800,100000)"
+root ${root_options} "FluenceRatePerHourPowerLaw.C(\"ip_fluence.txt\",${TotalTimeHours},0,800,100000)"
 
 
 # TODO : per rotation (see Brad's paper) :

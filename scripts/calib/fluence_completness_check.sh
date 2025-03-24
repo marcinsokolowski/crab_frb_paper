@@ -15,8 +15,8 @@ cat ${template} > all_calibrated_pulses.txt
 cp ~/github/crab_frb_paper/scripts/root/plot_snr_vs_fluence.C .
 cp ~/github/crab_frb_paper/scripts/root/plot_fluence_vs_snr.C .
 
-awk '{if($1!="#"){print $6" "$3;}}' all_calibrated_pulses.txt > all_prestosnr_vs_fluence.txt
-awk '{if($1!="#"){print $3" "$6;}}' all_calibrated_pulses.txt > all_fluence_vs_prestosnr.txt
+awk '{if($1!="#"){print $3" "$6;}}' all_calibrated_pulses.txt > all_prestosnr_vs_fluence.txt
+awk '{if($1!="#"){print $6" "$3;}}' all_calibrated_pulses.txt > all_fluence_vs_prestosnr.txt
 
 mkdir -p images/
 root -l "plot_snr_vs_fluence.C(\"all_prestosnr_vs_fluence.txt\")"

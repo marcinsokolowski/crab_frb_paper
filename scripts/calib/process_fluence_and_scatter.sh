@@ -29,10 +29,13 @@ echo "~/github/crab_frb_paper/scripts/calib/fit_profiles_all.sh ${path} -40"
 ~/github/crab_frb_paper/scripts/calib/fit_profiles_all.sh ${path} -40
 
 # calculate fluence for all pulses :
-echo "~/github/crab_frb_paper/scripts/calib/fluence_all.sh ${path}/merged"
-~/github/crab_frb_paper/scripts/calib/fluence_all.sh ${path}/merged
+echo "~/github/crab_frb_paper/scripts/calib/fluence_all.sh ${path}/merged - - - 1"
+~/github/crab_frb_paper/scripts/calib/fluence_all.sh ${path}/merged - - - 1 
 
 # fits to all pulse profiles :
 echo "~/github/crab_frb_paper/scripts/calib/fit_all_profiles_all_dates.sh ${path}/merged/pulses_snr5_calibrated/"
 ~/github/crab_frb_paper/scripts/calib/fit_all_profiles_all_dates.sh ${path}/merged/pulses_snr5_calibrated/
 
+echo "Separating GPs from MPs and IPs ..."
+echo "~/github/crab_frb_paper/scripts/calib/fluence_mp_and_ip_all.sh ${path}/merged/pulses_snr5_calibrated/"
+~/github/crab_frb_paper/scripts/calib/fluence_mp_and_ip_all.sh ${path}/merged/pulses_snr5_calibrated/

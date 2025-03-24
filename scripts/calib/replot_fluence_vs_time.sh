@@ -33,10 +33,14 @@ if [[ $do_fitting -gt 0 ]]; then
    
       cp ~/github/crab_frb_paper/scripts/root/FluenceRatePerHourPowerLaw.C .
       root ${root_options} "FluenceRatePerHourPowerLaw.C(\"fitted_fluence_1col.txt\",${TotalTimeHours},0,800,10000,${UNIXTIME})"
-      root ${root_options} "FluenceRatePerHourPowerLaw.C(\"fitted_fluence_1col.txt\",${TotalTimeHours},0,600,10000,${UNIXTIME})"
+#      root ${root_options} "FluenceRatePerHourPowerLaw.C(\"fitted_fluence_1col.txt\",${TotalTimeHours},0,600,10000,${UNIXTIME})"
 
       root ${root_options} "FluenceRatePerHourPowerLaw.C(\"calibrated_fluence.txt\",${TotalTimeHours},0,800,10000,${UNIXTIME})"
-      root ${root_options} "FluenceRatePerHourPowerLaw.C(\"calibrated_fluence.txt\",${TotalTimeHours},0,600,10000,${UNIXTIME})"
+#      root ${root_options} "FluenceRatePerHourPowerLaw.C(\"calibrated_fluence.txt\",${TotalTimeHours},0,600,10000,${UNIXTIME})"
+
+      # use completness threshold = 1000 Jy ms (see /home/msok/Desktop/SKA/papers/2024/EDA2_FRBs/20250319_tests_of_completness_threshold.odt )
+#      root ${root_options} "FluenceRatePerHourPowerLaw.C(\"fitted_fluence_1col.txt\",${TotalTimeHours},0,1000,10000,${UNIXTIME})"
+#      root ${root_options} "FluenceRatePerHourPowerLaw.C(\"calibrated_fluence.txt\",${TotalTimeHours},0,1000,10000,${UNIXTIME})"
          
       cd -
 
@@ -55,16 +59,20 @@ fi
 
 cp ~/github/crab_frb_paper/scripts/root/plot_plidx_vs_time_error.C .
 
-cat ${template}/fitted_fluence_1col.txt.fit_results_fit_range_600.00-10000.00 | awk '{print $7" "1800" "$2" "$4}' > fittedfluence_index_vs_time_fit_range_600-10000.txt
-cat ${template}/fitted_fluence_1col.txt.fit_results_fit_range_800.00-10000.00 | awk '{print $7" "1800" "$2" "$4}' > fittedfluence_index_vs_time_fit_range_800-10000.txt
+# cat ${template}/fitted_fluence_1col.txt.fit_results_fit_range_600.00-10000.00 | awk '{print $7" "1800" "$2" "$4}' > fittedfluence_index_vs_time_fit_range_600-10000.txt
+# cat ${template}/fitted_fluence_1col.txt.fit_results_fit_range_800.00-10000.00 | awk '{print $7" "1800" "$2" "$4}' > fittedfluence_index_vs_time_fit_range_800-10000.txt
+cat ${template}/fitted_fluence_1col.txt.fit_results_fit_range_1000.00-10000.00 | awk '{print $7" "1800" "$2" "$4}' > fittedfluence_index_vs_time_fit_range_1000-10000.txt
 
-root -l "plot_plidx_vs_time_error.C(\"fittedfluence_index_vs_time_fit_range_600-10000.txt\",-6,0,\"Fluence index (fit range >600 Jy ms) [Integral of fit]\")"
+# root -l "plot_plidx_vs_time_error.C(\"fittedfluence_index_vs_time_fit_range_1000-10000.txt\",-6,0,\"Fluence index (fit range >1000 Jy ms) [Integral of fit]\")"
+# root -l "plot_plidx_vs_time_error.C(\"fittedfluence_index_vs_time_fit_range_600-10000.txt\",-6,0,\"Fluence index (fit range >600 Jy ms) [Integral of fit]\")"
 root -l "plot_plidx_vs_time_error.C(\"fittedfluence_index_vs_time_fit_range_800-10000.txt\",-6,0,\"Fluence index (fit range >800 Jy ms) [Integral of fit]\")"
 
-cat ${template}/calibrated_fluence.txt.fit_results_fit_range_600.00-10000.00 | awk '{print $7" "1800" "$2" "$4}' > calibratedfluence_index_vs_time_fit_range_600-10000.txt
-cat ${template}/calibrated_fluence.txt.fit_results_fit_range_800.00-10000.00 | awk '{print $7" "1800" "$2" "$4}' > calibratedfluence_index_vs_time_fit_range_800-10000.txt
+# cat ${template}/calibrated_fluence.txt.fit_results_fit_range_600.00-10000.00 | awk '{print $7" "1800" "$2" "$4}' > calibratedfluence_index_vs_time_fit_range_600-10000.txt
+# cat ${template}/calibrated_fluence.txt.fit_results_fit_range_800.00-10000.00 | awk '{print $7" "1800" "$2" "$4}' > calibratedfluence_index_vs_time_fit_range_800-10000.txt
+cat ${template}/calibrated_fluence.txt.fit_results_fit_range_1000.00-10000.00 | awk '{print $7" "1800" "$2" "$4}' > calibratedfluence_index_vs_time_fit_range_1000-10000.txt
 
-root -l "plot_plidx_vs_time_error.C(\"calibratedfluence_index_vs_time_fit_range_600-10000.txt\",-6,0,\"Fluence index (fit range >600 Jy ms) [fluence from data]\")"
+# root -l "plot_plidx_vs_time_error.C(\"calibratedfluence_index_vs_time_fit_range_1000-10000.txt\",-6,0,\"Fluence index (fit range >1000 Jy ms) [fluence from data]\")"
+# root -l "plot_plidx_vs_time_error.C(\"calibratedfluence_index_vs_time_fit_range_600-10000.txt\",-6,0,\"Fluence index (fit range >600 Jy ms) [fluence from data]\")"
 root -l "plot_plidx_vs_time_error.C(\"calibratedfluence_index_vs_time_fit_range_800-10000.txt\",-6,0,\"Fluence index (fit range >800 Jy ms) [fluence from data]\")"
 
 
@@ -72,8 +80,11 @@ root -l "plot_plidx_vs_time_error.C(\"calibratedfluence_index_vs_time_fit_range_
 cp ~/github/crab_frb_paper/scripts/root/FluenceRatePerHourPowerLaw.C .
 
 FullTotalTimeInHours=`echo $FullTotalTimeInSec | awk '{print $1/3600.00;}'`
-root -l "FluenceRatePerHourPowerLaw.C(\"fitted_fluence.all\",${FullTotalTimeInHours},0,600,10000,-1)"
+# root -l "FluenceRatePerHourPowerLaw.C(\"fitted_fluence.all\",${FullTotalTimeInHours},0,600,10000,-1)"
 root -l "FluenceRatePerHourPowerLaw.C(\"fitted_fluence.all\",${FullTotalTimeInHours},0,800,10000,-1)"
 
-root -l "FluenceRatePerHourPowerLaw.C(\"calibrated_fluence.all\",${FullTotalTimeInHours},0,600,10000,-1)"
+# root -l "FluenceRatePerHourPowerLaw.C(\"calibrated_fluence.all\",${FullTotalTimeInHours},0,600,10000,-1)"
 root -l "FluenceRatePerHourPowerLaw.C(\"calibrated_fluence.all\",${FullTotalTimeInHours},0,800,10000,-1)"
+
+# root -l "FluenceRatePerHourPowerLaw.C(\"fitted_fluence.all\",${FullTotalTimeInHours},0,1000,10000,-1)"
+# root -l "FluenceRatePerHourPowerLaw.C(\"calibrated_fluence.all\",${FullTotalTimeInHours},0,1000,10000,-1)"

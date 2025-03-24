@@ -23,6 +23,7 @@ int gDb2Num=0;
 // frequency range :
 double gMinFreq=-100.00;
 double gMaxFreq=1e20;
+double gStartX = -1;
 
 double gMinAllowedValue=-1e20;
 
@@ -404,8 +405,11 @@ int ReadResultsFile( const char* fname, Double_t* x_values, Double_t* y_values,
         }
         continue;
      }
-     
-     x_values[all] = x_val;
+
+     if( gStartX < 0 ){
+        gStartX = x_val;     
+     }
+     x_values[all] = x_val - gStartX;
      y_values[all] = y_val;
 
      if( y_val < gMinAllowedValue ){

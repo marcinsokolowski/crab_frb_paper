@@ -21,4 +21,4 @@ TotalTimeHours=`cat ../../../../../../../analysis_final/TotalGoodTimeInSec.txt |
 
 cp ~/github/crab_frb_paper/scripts/root/FluenceRatePerHourPowerLaw.C .
 root -l "FluenceRatePerHourPowerLaw.C(\"fitted_fluence_1col.txt\",${TotalTimeHours},0,800,10000)"
-root -l "FluenceRatePerHourPowerLaw.C(\"fitted_fluence_1col.txt\",${TotalTimeHours},0,600,10000)"
+# root -l "FluenceRatePerHourPowerLaw.C(\"fitted_fluence_1col.txt\",${TotalTimeHours},0,600,10000)"

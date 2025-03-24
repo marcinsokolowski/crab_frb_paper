@@ -68,7 +68,8 @@ if [[ ! -d pulses_snr${snr_threshold}_calibrated/ || $replot_only -gt 0 ]]; then
    
    cp ~/github/crab_frb_paper/scripts/root/FluenceRatePerHourPowerLaw.C .
    root ${root_options} "FluenceRatePerHourPowerLaw.C(\"calibrated_fluence.txt\",${TotalTimeHours},0,800,10000)"
-   root ${root_options} "FluenceRatePerHourPowerLaw.C(\"calibrated_fluence.txt\",${TotalTimeHours},0,600,10000)"
+#   root ${root_options} "FluenceRatePerHourPowerLaw.C(\"calibrated_fluence.txt\",${TotalTimeHours},0,600,10000)"
+#   root ${root_options} "FluenceRatePerHourPowerLaw.C(\"calibrated_fluence.txt\",${TotalTimeHours},0,1000,10000)"
    
    echo "PARAMETERS : SEFD = $sefd, TotalTimeHours=$TotalTimeHours"
    
