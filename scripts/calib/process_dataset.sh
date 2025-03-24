@@ -49,15 +49,13 @@ fi
 if [[ -d ${outdir} ]]; then
    echo "WARNING : directory ${outdir} already exists -> moving"
    echo "mv ${outdir} ${outdir}_prev"
-   echo "Waiting 10 seconds (press Ctrl+C to cancel) ..."
+   echo "Waiting 2 seconds (press Ctrl+C to cancel) ..."
    echo "mv ${outdir} ${outdir}_prev"
-   sleep 10
+   sleep 2
    mv ${outdir} ${outdir}_prev
    
    prev_analysis="../${outdir}_prev"
    echo "prev_analysis = $prev_analysis"
-   echo "Waiting 10 seconds before continuing (press Ctrl+C to cancel) ..."
-   sleep 10
 fi
 
 calc_sefd=1
