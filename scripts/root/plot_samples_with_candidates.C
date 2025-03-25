@@ -106,7 +106,7 @@ TGraph* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
    TGraph* pGraph = new TGraph(q);
    for(int i=0;i<numVal;i++){
        if( gVerb ){
-           printf("q=%d %f %f\n",q, x_values[i], y_values[i] );
+           printf("q=%ld %f %f\n",q, x_values[i], y_values[i] );
        }
 
        pGraph->SetPoint( i, x_values[i], y_values[i] );
@@ -352,7 +352,7 @@ int ReadResultsFile( const char* fname, Double_t* x_values, Double_t* y_values,
       char* ptr=NULL;
       char* search_ptr=buff;
       int col=0;
-      while( ptr = strtok(search_ptr," \t") ){
+      while( (ptr = strtok(search_ptr," \t")) ){
          search_ptr = NULL;
          if( gVerb ){
               printf("ptr = %s\n",ptr);
@@ -546,7 +546,7 @@ void plot_samples_with_candidates( const char* basename="sigmaG1_vs_lapSigmaG1_f
                           const char* cand_file=NULL, // 1369650000_20230601101942_ch120_02_sorted.cand                          
                           double min_x=-1e20, double max_x=1e20, const char* oper=NULL,
                           const char* fit_func_name=NULL, double min_y=-6, 
-                          double max_y=50, double min_allowed_value=-1e20,
+                          double max_y=100, double min_allowed_value=-1e20,
                           int sleep_time=-1,
                 int bLog=0,
       const char* szDescX="Time [ms]",const char* szDescY="SNR", const char* szTitle="", const char* szOutDir="images/",
