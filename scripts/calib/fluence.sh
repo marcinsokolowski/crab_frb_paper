@@ -36,7 +36,7 @@ fi
 
 outdir=pulses_snr${snr_threshold}_calibrated/
 
-if [[ ! -d pulses_snr${snr_threshold}_calibrated/ || $replot_only -gt 0 ]]; then
+if [[ ! -d pulses_snr${snr_threshold}_calibrated/ || $replot_only -ge 0 ]]; then
    running_median_file=running_median.txt
    rmqiqr_file=running_rmsiqr.txt
    detrendnorm_file=detrended_normalised_${b}.txt

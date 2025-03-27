@@ -7,7 +7,9 @@ path=`ls -d J0534+2200_flagants_ch40_ch256/256/filterbank_msok_64ch/merged_chann
 
 dataset=`basename $curr_dir`
 dat_count=`ls ${path}/_DM56.7?.dat |wc -l`
-if [[ -d $path && $dat_count -gt 0 ]]; then
+force=1
+
+if [[ -d $path && $dat_count -gt 0 && $force -le 0 ]]; then
    echo "INFO : $path and data _DM56.7?.dat exist -> continuing"
 else
    echo "INFO : $path does not exist -> copying data now ..."   
@@ -19,7 +21,7 @@ else
    ~/github/crab_frb_paper/scripts/scp/scp_exect_dm_dat.sh ${dataset}
    cd $curr_dir
    
-   path=`ls -d J0534+2200_flagants_ch40_ch256/256/filterbank_msok_64ch/merged_channels_??????????/presto_sps_thresh5_numdms100_dmstep0.01/`
+   path=`ls -d J0534+2200_flagants_ch40_ch256/256/filterbank_msok_64ch/merged_channels_??????????/presto_sps_thresh5_numdms10_dmstep0.01/`
    pwd
 fi   
 
@@ -29,8 +31,8 @@ echo "~/github/crab_frb_paper/scripts/calib/fit_profiles_all.sh ${path} -40"
 ~/github/crab_frb_paper/scripts/calib/fit_profiles_all.sh ${path} -40
 
 # calculate fluence for all pulses :
-echo "~/github/crab_frb_paper/scripts/calib/fluence_all.sh ${path}/merged - - - 1"
-~/github/crab_frb_paper/scripts/calib/fluence_all.sh ${path}/merged - - - 1 
+echo "~/github/crab_frb_paper/scripts/calib/fluence_all.sh ${path}/merged - - - 0"
+~/github/crab_frb_paper/scripts/calib/fluence_all.sh ${path}/merged - - - 0
 
 # fits to all pulse profiles :
 echo "~/github/crab_frb_paper/scripts/calib/fit_all_profiles_all_dates.sh ${path}/merged/pulses_snr5_calibrated/"

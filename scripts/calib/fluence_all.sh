@@ -2,7 +2,7 @@
 
 curr_path=`pwd`
 
-template="20??_??_??_pulsars_msok/J0534+2200_flagants_ch40_ch256/256/filterbank_msok_64ch/merged_channels_??????????/presto_sps_thresh5_numdms100_dmstep0.01/merged/"
+template="20??_??_??_pulsars_msok/J0534+2200_flagants_ch40_ch256/256/filterbank_msok_64ch/merged_channels_??????????/presto_sps_thresh5_numdms10_dmstep0.01/merged/"
 if [[ -n "$1" && "$1" != "-" ]]; then
    template="$1"
 fi
