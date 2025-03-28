@@ -36,7 +36,8 @@ fi
 
 outdir=pulses_snr${snr_threshold}_calibrated/
 
-if [[ ! -d pulses_snr${snr_threshold}_calibrated/ || $replot_only -ge 0 ]]; then
+# if [[ ! -d pulses_snr${snr_threshold}_calibrated/ || $replot_only -ge 0 ]]; then
+if [[ 1 -gt 0 ]]; then
    running_median_file=running_median.txt
    rmqiqr_file=running_rmsiqr.txt
    detrendnorm_file=detrended_normalised_${b}.txt
@@ -46,15 +47,15 @@ if [[ ! -d pulses_snr${snr_threshold}_calibrated/ || $replot_only -ge 0 ]]; then
    
    if [[ $replot_only -le 0 ]]; then
       timeseries_file=timeseries.txt
-      echo "~/github/presto_tools/build/presto_data_reader $datfile -o ${outdir}/${timeseries_file} ${options}"
-      ~/github/presto_tools/build/presto_data_reader $datfile -o ${outdir}/${timeseries_file} ${options}
+      echo "~/github/presto_tools/build3/presto_data_reader $datfile -o ${outdir}/${timeseries_file} ${options}"
+      ~/github/presto_tools/build3/presto_data_reader $datfile -o ${outdir}/${timeseries_file} ${options}
    
       if [[ ! -s presto_merged.txt ]]; then
          awk '{if($1!="#"){print $3" "$2;}}' presto.cand_normal > presto_merged.txt
       fi
 
-      echo "~/github/presto_tools/build/extract_pulses_new ${datfile} presto_merged.txt -X ${sefd} -C -t $snr_threshold -P pulses_snr${snr_threshold}_calibrated/ -r 100 -U 1 -R ${outdir}/${running_median_file} -I ${outdir}/${rmqiqr_file} -o ${outdir}/${detrendnorm_file} -O ${outdir}/${calibrated_pulses_file} > extract_pulses_new.out 2>&1"
-      ~/github/presto_tools/build/extract_pulses_new ${datfile} presto_merged.txt -X ${sefd} -C -t $snr_threshold -P pulses_snr${snr_threshold}_calibrated/ -r 100 -U 1 -R ${outdir}/${running_median_file} -I ${outdir}/${rmqiqr_file} -o ${outdir}/${detrendnorm_file} -O ${outdir}/${calibrated_pulses_file} > extract_pulses_new.out 2>&1
+      echo "~/github/presto_tools/build3/extract_pulses_new ${datfile} presto_merged.txt -X ${sefd} -C -t $snr_threshold -P pulses_snr${snr_threshold}_calibrated/ -r 100 -U 1 -R ${outdir}/${running_median_file} -I ${outdir}/${rmqiqr_file} -o ${outdir}/${detrendnorm_file} -O ${outdir}/${calibrated_pulses_file} > extract_pulses_new.out 2>&1"
+      ~/github/presto_tools/build3/extract_pulses_new ${datfile} presto_merged.txt -X ${sefd} -C -t $snr_threshold -P pulses_snr${snr_threshold}_calibrated/ -r 100 -U 1 -R ${outdir}/${running_median_file} -I ${outdir}/${rmqiqr_file} -o ${outdir}/${detrendnorm_file} -O ${outdir}/${calibrated_pulses_file} > extract_pulses_new.out 2>&1
    else
       echo "INFO : replotting only -> no need to extrac pulses again"
    fi   
@@ -74,7 +75,7 @@ if [[ ! -d pulses_snr${snr_threshold}_calibrated/ || $replot_only -ge 0 ]]; then
    echo "PARAMETERS : SEFD = $sefd, TotalTimeHours=$TotalTimeHours"
    
    cd -
-else
-   echo "INFO : Pulses already dumped"
+#else
+#   echo "INFO : Pulses already dumped"
 fi   
 

@@ -31,7 +31,8 @@ fi
 
 outdir=pulses_snr${snr_threshold}_calibrated/
 
-if [[ ! -d pulses_snr${snr_threshold}_calibrated/ ]]; then
+# if [[ ! -d pulses_snr${snr_threshold}_calibrated/ ]]; then
+if [[ 1 -gt 0 ]]; then
    running_median_file=running_median.txt
    rmqiqr_file=running_rmsiqr.txt
    detrendnorm_file=detrended_normalised_${b}.txt
@@ -40,19 +41,20 @@ if [[ ! -d pulses_snr${snr_threshold}_calibrated/ ]]; then
    mkdir -p ${outdir}/
    
    timeseries_file=timeseries.txt
-   echo "~/github/presto_tools/build/presto_data_reader $datfile -o ${outdir}/${timeseries_file} ${options}"
-   ~/github/presto_tools/build/presto_data_reader $datfile -o ${outdir}/${timeseries_file} ${options}
+   echo "~/github/presto_tools/build3/presto_data_reader $datfile -o ${outdir}/${timeseries_file} ${options}"
+   ~/github/presto_tools/build3/presto_data_reader $datfile -o ${outdir}/${timeseries_file} ${options}
 
-   echo "~/github/presto_tools/build/extract_pulses ${datfile} presto.txt -X ${sefd} -C -t $snr_threshold -P pulses_snr${snr_threshold}_calibrated/ -r 100 -U 1 -R ${outdir}/${running_median_file} -I ${outdir}/${rmqiqr_file} -o ${outdir}/${detrendnorm_file} -O ${outdir}/${calibrated_pulses_file}"
-   ~/github/presto_tools/build/extract_pulses ${datfile} presto.txt -X ${sefd} -C -t $snr_threshold -P pulses_snr${snr_threshold}_calibrated/ -r 100 -U 1 -R ${outdir}/${running_median_file} -I ${outdir}/${rmqiqr_file} -o ${outdir}/${detrendnorm_file} -O ${outdir}/${calibrated_pulses_file}
+# was ~/github/presto_tools/build/extract_pulses
+   echo "~/github/presto_tools/build3/extract_pulses ${datfile} presto.txt -X ${sefd} -C -t $snr_threshold -P pulses_snr${snr_threshold}_calibrated/ -r 100 -U 1 -R ${outdir}/${running_median_file} -I ${outdir}/${rmqiqr_file} -o ${outdir}/${detrendnorm_file} -O ${outdir}/${calibrated_pulses_file}"
+   ~/github/presto_tools/build3/extract_pulses ${datfile} presto.txt -X ${sefd} -C -t $snr_threshold -P pulses_snr${snr_threshold}_calibrated/ -r 100 -U 1 -R ${outdir}/${running_median_file} -I ${outdir}/${rmqiqr_file} -o ${outdir}/${detrendnorm_file} -O ${outdir}/${calibrated_pulses_file}
    
    cd ${outdir}/
    awk '{if($1!="#"){print $2;}}' calibrated_pulses.txt > calibrated_flux.txt
    awk '{if($1!="#"){print $3;}}' calibrated_pulses.txt > calibrated_fluence.txt
    awk '{if($1!="#"){print $4;}}' calibrated_pulses.txt > calibrated_snr.txt
    cd -
-else
-   echo "INFO : Pulses already dumped"
+#else
+#   echo "INFO : Pulses already dumped"
 fi   
 
 if [[ $do_fitting -gt 0 ]]; then

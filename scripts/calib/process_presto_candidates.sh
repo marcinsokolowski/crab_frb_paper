@@ -20,16 +20,16 @@ b=${datfile%%.dat}
 
 # original de-dispersed timeseries:
 timeseries_file=timeseries_${b}.txt
-echo "~/github/presto_tools/build/presto_data_reader $datfile -o ${timeseries_file} ${options}"
-~/github/presto_tools/build/presto_data_reader $datfile -o ${timeseries_file} ${options}
+echo "~/github/presto_tools/build3/presto_data_reader $datfile -o ${timeseries_file} ${options}"
+~/github/presto_tools/build3/presto_data_reader $datfile -o ${timeseries_file} ${options}
 
 # running median, de-trending and normalisation by RMS_IQR :
 running_median_file=running_median_${b}.txt
 rmqiqr_file=rmsiqr_${b}.txt
 detrendnorm_file=detrended_normalised_${b}.txt
 
-echo "~/github/presto_tools/build/presto_data_reader $datfile -o ${detrendnorm_file} -r 100 -R ${running_median_file} -I ${rmqiqr_file} ${options}"
-~/github/presto_tools/build/presto_data_reader $datfile -o ${detrendnorm_file} -r 100 -R ${running_median_file} -I ${rmqiqr_file} ${options}
+echo "~/github/presto_tools/build3/presto_data_reader $datfile -o ${detrendnorm_file} -r 100 -R ${running_median_file} -I ${rmqiqr_file} ${options}"
+~/github/presto_tools/build3/presto_data_reader $datfile -o ${detrendnorm_file} -r 100 -R ${running_median_file} -I ${rmqiqr_file} ${options}
 
 awk '{print $1" "$3+$4;}' ${detrendnorm_file} > up.txt
 awk '{print $1" "$3-$4;}' ${detrendnorm_file} > down.txt
