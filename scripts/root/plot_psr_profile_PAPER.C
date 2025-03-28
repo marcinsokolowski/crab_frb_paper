@@ -315,11 +315,11 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
          line_draw = new TF1("fit_func2",Pulse_with_linear_onset,minX,maxX,5);
          local_func=1;
 
-         par[0] = 0;
-         par[1] = 0.5;
-         par[2] = 0.5;
-         par[3] = 17.0;
-         par[4] = 7.00; // very long decay ...
+         par[0] = 91;
+         par[1] = 0.017;
+         par[2] = 0.02;
+         par[3] = 20000;
+         par[4] = 0.0019; // very long decay ...
 
 /*         if( gNormaliseInputData ){
             par[1] = par[1] / numVal;
@@ -1065,12 +1065,12 @@ void plot_psr_profile_PAPER( const char* basename="sigmaG1_vs_lapSigmaG1_for_roo
    printf("Control RMS after re-scaling:\n");
    double rms_new = calc_rms( x_value1, y_value1, lq1, noise_start, noise_end );
    printf("RMS after rescaling = %.6f in range %.6f - %.6f\n",rms_new,noise_start,noise_end);
-
+   
    for(int i=0;i<lq1;i++){
      y_value1_err[i] = rms_new;
    }
 
-
+   
    
    // drawing background graphs here :
    TGraphErrors* pGraph1 = DrawGraph( x_value1, y_value1, lq1, 1, NULL, fit_func_name, min_y, max_y, szTitle,
@@ -1140,11 +1140,20 @@ void plot_psr_profile_PAPER( const char* basename="sigmaG1_vs_lapSigmaG1_for_roo
          y_value1_original[i] = y_value1_original[i] - gYaxisOffset;
       }
 
+      double check_sum=0.00,check_sum2=0,check_count=0;
       for(int i=0;i<lq1;i++){
          y_value1_err[i] = rms_original;
+
+         if( x_value1_original[i] < 0.015 ){
+           check_sum += y_value1_original[i];
+           check_sum2 += (y_value1_original[i]*y_value1_original[i]);
+           check_count++;
+         }
       }
 
-      printf("DEBUG : using rms_original = %.8f\n",rms_original);
+      double check_rms = sqrt( check_sum2/check_count - (check_sum/check_count)*(check_sum/check_count) );     
+
+      printf("DEBUG : using rms_original = %.8f vs. check_rms = %.8f\n",rms_original,check_rms);
       TGraphErrors* pGraph2 = DrawGraph( x_value1_original, y_value1_original, lq1, 1, NULL, fit_func_name, 0.00, max_y, szTitle,
                                          basename, bLog, szDescX, szDescY, fit_min_x, fit_max_x, y_value1_err, gFittedParametersOriginalScaling, 0.01/2.00 ); // gFittedParametersOriginalScaling[4]*2.00 );
 
