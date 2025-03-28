@@ -60,17 +60,30 @@ root ${root_options} "histofile_raw.C(\"gp_phase.txt\",0,0,0,1,50)"
 cd ..
 
 read -p "Do you want to overwrite phase windows for Mainpulse (MP) and Interpulse (IP) : [y/n] " answer
-if [[ $answer == "y" || $answer == "Y" ]]; then
-   read -p "MP start phase [default $mp_phase_start]: " mp_phase_start
-   read -p "MP end phase [default $mp_phase_end]: " mp_phase_end
-   read -p "IP start phase [default $ip_phase_start]: " ip_phase_start
-   read -p "IP end phase [default $ip_phase_end]: " ip_phase_end
+
+if [[ -s MP_PHASE_RANGE.txt && -s IP_PHASE_RANGE.txt ]]; then
+   echo "Files MP_PHASE_RANGE.txt and IP_PHASE_RANGE.txt exist -> using previous values of MP and IP start/end times"
+   mp_phase_start=`cat MP_PHASE_RANGE.txt | awk '{print $1;}'`
+   mp_phase_end=`cat MP_PHASE_RANGE.txt | awk '{print $2;}'`
+   ip_phase_start=`cat IP_PHASE_RANGE.txt | awk '{print $1;}'`
+   ip_phase_end=`cat IP_PHASE_RANGE.txt | awk '{print $2;}'
    
-   echo "$mp_phase_start $mp_phase_end" > MP_PHASE_RANGE.txt
-   echo "$ip_phase_start $ip_phase_end" > IP_PHASE_RANGE.txt
+   echo "MP range : $mp_phase_start - $mp_phase_end"
+   echo "IP range : $ip_phase_start - $ip_phase_end"
 else
-   echo "Using default pulse windows: MP $mp_phase_start - $mp_phase_end , IP : $ip_phase_start - $ip_phase_end"   
+   if [[ $answer == "y" || $answer == "Y" ]]; then
+      read -p "MP start phase [default $mp_phase_start]: " mp_phase_start
+      read -p "MP end phase [default $mp_phase_end]: " mp_phase_end
+      read -p "IP start phase [default $ip_phase_start]: " ip_phase_start
+      read -p "IP end phase [default $ip_phase_end]: " ip_phase_end
+   
+      echo "$mp_phase_start $mp_phase_end" > MP_PHASE_RANGE.txt
+      echo "$ip_phase_start $ip_phase_end" > IP_PHASE_RANGE.txt
+   else
+      echo "Using default pulse windows: MP $mp_phase_start - $mp_phase_end , IP : $ip_phase_start - $ip_phase_end"   
+   fi
 fi
+
 
 # select only MPs :
 cat ${infile} | awk -v period=${period} -v mp_start=${mp_phase_start} -v mp_end=${mp_phase_end} '{if($1!="#"){time=$1;phase=( time % period)/period;if( (mp_end>mp_start && phase>=mp_start && phase<=mp_end) || (mp_end < mp_start && (phase>=mp_start || phase<=mp_end)) ){print $3;}}}' > mp_ip/mp_fluence.txt

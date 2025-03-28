@@ -10,7 +10,7 @@ if [[ -n "$2" && "$2" != "-" ]]; then
    outdir="$2"
 fi
 
-min_good_time=1800 # or perhaps should be 3000 seconds ?
+min_good_time=1300 # or perhaps should be 3000 seconds ? Allow 2024-12-14 to be used !
 # TotalGoodTimeInSec.txt
 if [[ -n "$3" && "$3" != "-" ]]; then
    min_good_time="$3"
