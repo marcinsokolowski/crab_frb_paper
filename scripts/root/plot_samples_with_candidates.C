@@ -546,7 +546,7 @@ void plot_samples_with_candidates( const char* basename="sigmaG1_vs_lapSigmaG1_f
                           const char* cand_file=NULL, // 1369650000_20230601101942_ch120_02_sorted.cand                          
                           double min_x=-1e20, double max_x=1e20, const char* oper=NULL,
                           const char* fit_func_name=NULL, double min_y=-6, 
-                          double max_y=100, double min_allowed_value=-1e20,
+                          double max_y=500, double min_allowed_value=-1e20,
                           int sleep_time=-1,
                 int bLog=0,
       const char* szDescX="Time [ms]",const char* szDescY="SNR", const char* szTitle="", const char* szOutDir="images/",

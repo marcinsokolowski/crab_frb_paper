@@ -1,6 +1,6 @@
 #!/bin/bash
 
-path="/media/msok/5508b34c-040a-4dce-a8ff-2c4510a5d1a3/eda2/2024_12_14_pulsars_msok/J0534+2200_flagants_ch40_ch256/256/filterbank_msok_64ch/merged_channels_??????????/presto_sps_thresh5_numdms100_dmstep0.01/merged/pulses_snr5_calibrated"
+path="/media/msok/5508b34c-040a-4dce-a8ff-2c4510a5d1a3/eda2/2024_12_14_pulsars_msok/J0534+2200_flagants_ch40_ch256/256/filterbank_msok_64ch/merged_channels_??????????/presto_sps_thresh5_numdms10_dmstep0.01/merged/pulses_snr5_calibrated"
 if [[ -n "$1" && "$1" != "-" ]]; then
    path="$1"
 fi
@@ -66,7 +66,7 @@ if [[ -s MP_PHASE_RANGE.txt && -s IP_PHASE_RANGE.txt ]]; then
    mp_phase_start=`cat MP_PHASE_RANGE.txt | awk '{print $1;}'`
    mp_phase_end=`cat MP_PHASE_RANGE.txt | awk '{print $2;}'`
    ip_phase_start=`cat IP_PHASE_RANGE.txt | awk '{print $1;}'`
-   ip_phase_end=`cat IP_PHASE_RANGE.txt | awk '{print $2;}'
+   ip_phase_end=`cat IP_PHASE_RANGE.txt | awk '{print $2;}'`
    
    echo "MP range : $mp_phase_start - $mp_phase_end"
    echo "IP range : $ip_phase_start - $ip_phase_end"

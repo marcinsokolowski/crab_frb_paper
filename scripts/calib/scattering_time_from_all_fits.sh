@@ -1,6 +1,6 @@
 #!/bin/bash
 
-template="/media/msok/5508b34c-040a-4dce-a8ff-2c4510a5d1a3/eda2/202?_??_??_pulsars_msok/J0534+2200_flagants_ch40_ch256/256/filterbank_msok_64ch/merged_channels_??????????/presto_sps_thresh5_numdms100_dmstep0.01/merged/pulses_snr5_calibrated/"
+template="/media/msok/5508b34c-040a-4dce-a8ff-2c4510a5d1a3/eda2/202?_??_??_pulsars_msok/J0534+2200_flagants_ch40_ch256/256/filterbank_msok_64ch/merged_channels_??????????/presto_sps_thresh5_numdms10_dmstep0.01/merged/pulses_snr5_calibrated/"
 if [[ -n "$1" && "$1" != "-" ]]; then
    template="$1"
 fi
@@ -20,7 +20,7 @@ if [[ -n "$4" && "$4" != "-" ]]; then
    root_options="$4"
 fi
 
-maxsnr_template="/media/msok/5508b34c-040a-4dce-a8ff-2c4510a5d1a3/eda2/202?_??_??_pulsars_msok/J0534+2200_flagants_ch40_ch256/256/filterbank_msok_64ch/merged_channels_??????????/presto_sps_thresh5_numdms100_dmstep0.01/merged/pulses_snr*.??_calibrated/"
+maxsnr_template="/media/msok/5508b34c-040a-4dce-a8ff-2c4510a5d1a3/eda2/202?_??_??_pulsars_msok/J0534+2200_flagants_ch40_ch256/256/filterbank_msok_64ch/merged_channels_??????????/presto_sps_thresh5_numdms10_dmstep0.01/merged/pulses_snr*.??_calibrated/"
 if [[ -n "$1" && "$1" != "-" ]]; then
    maxsnr_template="$1"
 fi
@@ -75,11 +75,11 @@ done
 
 
 
-path=/media/msok/5508b34c-040a-4dce-a8ff-2c4510a5d1a3/eda2/202?_??_??_pulsars_msok/J0534+2200_flagants_ch40_ch256/256/filterbank_msok_64ch/merged_channels_??????????/presto_sps_thresh5_numdms100_dmstep0.01/merged/pulses_snr5_calibrated/
+path=/media/msok/5508b34c-040a-4dce-a8ff-2c4510a5d1a3/eda2/202?_??_??_pulsars_msok/J0534+2200_flagants_ch40_ch256/256/filterbank_msok_64ch/merged_channels_??????????/presto_sps_thresh5_numdms10_dmstep0.01/merged/pulses_snr5_calibrated/
 cat ${path}/taufit.txt | awk '{if($1!="#"){print  $7" 86400 "$3*1000" "$2*1000;}}' > taugauss_vs_time.txt
 cat ${path}/taufit.txt | awk '{if($1!="#"){print  $7" 86400 "$5*1000" "$6*1000;}}' > taumean_vs_time.txt
 
-maxsnr_path=/media/msok/5508b34c-040a-4dce-a8ff-2c4510a5d1a3/eda2/202?_??_??_pulsars_msok/J0534+2200_flagants_ch40_ch256/256/filterbank_msok_64ch/merged_channels_??????????/presto_sps_thresh5_numdms100_dmstep0.01/merged/pulses_snr*.??_calibrated/
+maxsnr_path=/media/msok/5508b34c-040a-4dce-a8ff-2c4510a5d1a3/eda2/202?_??_??_pulsars_msok/J0534+2200_flagants_ch40_ch256/256/filterbank_msok_64ch/merged_channels_??????????/presto_sps_thresh5_numdms10_dmstep0.01/merged/pulses_snr*.??_calibrated/
 cat ${maxsnr_path}/taufit.txt | awk '{if($1!="#"){print  $7" 86400 "$3*1000" "$2*1000;}}' > maxsnr_taugauss_vs_time.txt
 cat ${maxsnr_path}/taufit.txt | awk '{if($1!="#"){print  $7" 86400 "$5*1000" "$6*1000;}}' > maxsnr_taumean_vs_time.txt
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 rm -f crab_taufit_vs_time.txt
-for fitfile in `ls /media/msok/5508b34c-040a-4dce-a8ff-2c4510a5d1a3/eda2/20??_??_??_pulsars_msok/J0534+2200_flagants_ch40_ch256/256/filterbank_msok_64ch/merged_channels_??????????/presto_sps_thresh5_numdms100_dmstep0.01/merged/pulses_snr30_calibrated/taufit.txt`
+for fitfile in `ls /media/msok/5508b34c-040a-4dce-a8ff-2c4510a5d1a3/eda2/20??_??_??_pulsars_msok/J0534+2200_flagants_ch40_ch256/256/filterbank_msok_64ch/merged_channels_??????????/presto_sps_thresh5_numdms10_dmstep0.01/merged/pulses_snr30_calibrated/taufit.txt`
 do
    uxtime=`echo $fitfile | awk '{i=index($1,"merged_channels");print substr($1,i+16,10);}'`
    

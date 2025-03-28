@@ -3,7 +3,7 @@
 # Fluence distributions :
 curr_dir=`pwd`
 pwd
-path=`ls -d J0534+2200_flagants_ch40_ch256/256/filterbank_msok_64ch/merged_channels_??????????/presto_sps_thresh5_numdms100_dmstep0.01/`
+path=`ls -d J0534+2200_flagants_ch40_ch256/256/filterbank_msok_64ch/merged_channels_??????????/presto_sps_thresh5_numdms10_dmstep0.01/`
 
 dataset=`basename $curr_dir`
 dat_count=`ls ${path}/_DM56.7?.dat |wc -l`
