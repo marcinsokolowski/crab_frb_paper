@@ -220,6 +220,7 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
    TF1 *part2 = NULL;
     Double_t maxX=-100000,maxY=-100000;
     Double_t minX=100000,minY=100000;
+    Double_t maxYarg=-1;
 
 
     TGraphErrors* pGraph = new TGraphErrors(q);
@@ -236,8 +237,10 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
 
         if(x_values[i]>maxX)
             maxX = x_values[i];
-        if(y_values[i]>maxY)
+        if(y_values[i]>maxY){
             maxY = y_values[i];
+            maxYarg = x_values[i];
+        }
       
         if(x_values[i]<minX)
             minX = x_values[i];
@@ -314,10 +317,10 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
          local_func=1;
 
          par[0] = 0;
-         par[1] = 0.5;
-         par[2] = 0.5;
-         par[3] = 17.0;
-         par[4] = 7.00; // very long decay ...
+         par[1] = maxYarg - 0.005;
+         par[2] = maxYarg;
+         par[3] = maxY*0.5;
+         par[4] = 2.00; // very long decay ...
 
 /*         if( gNormaliseInputData ){
             par[1] = par[1] / numVal;
