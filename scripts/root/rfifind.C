@@ -336,7 +336,25 @@ void rfifind( const char* fname, double rfi_threshold=10.00, double low=0, doubl
    printf("DEBUG : bin width = %.4f vs. %.4f\n",histo->GetBinWidth(0),histo->GetBinWidth(bin_no));
 
 
+   // calculate MEAN and RMS of bin content:
+   sum=0;
+   sum2=0;
+   count=0;
    double good_time = 0;
+   for(int ch=0;ch<histo->GetNbinsX();ch++){
+      double val_histo = histo->GetBinContent(ch);
+      printf("BIN(%d) = %.4f\n",ch,val_histo);
+
+      sum += val_histo;
+      sum2 += (val_histo*val_histo);
+      count++;
+   }
+
+   double mean_bin_content = sum/count;
+   double rms_bin_content = sqrt(sum2/count - mean_bin_content*mean_bin_content);
+   printf("MEAN BIN CONTENT = %.8f +/- %.8f\n",mean_bin_content,rms_bin_content);
+
+   rfi_threshold = mean_bin_content + 1*rms_bin_content;
    FILE* outf = fopen("rfi.ranges","w");
    for(int ch=0;ch<histo->GetNbinsX();ch++){
       double val_histo = histo->GetBinContent(ch);
@@ -359,6 +377,7 @@ void rfifind( const char* fname, double rfi_threshold=10.00, double low=0, doubl
       }
    }
    fclose(outf);
+
 
    printf("Good time = %.6f seconds\n",good_time);
    FILE* outf2 = fopen("TotalGoodTimeInSec.txt","w");
