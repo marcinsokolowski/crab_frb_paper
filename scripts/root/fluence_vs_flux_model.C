@@ -140,11 +140,13 @@ void fluence_vs_flux_model()
    pulse->SetParameters(par);
    pulse->Draw();   
 
-   double calka = pulse->Integral( -0.02, +0.02, 1e-10 );
-   printf("Integral = %.8f [Jy ms]\n",calka);
+   double calka = pulse->Integral( -0.02, +0.02, 1e-10 ); // in Jy seconds because all the time parameters are in seconds !!!   
+   double calka_Jyms = calka*1000.00;
+   printf("Integral = %.8f [Jy s] = %.8f [Jy ms]\n",calka,calka_Jyms);
 
-   FILE* outf = fopen("peakflux_vs_tau_30Jyms.txt","w");
-   double F0 = 30; // fluence is constant 
+   FILE* outf = fopen("peakflux_vs_tau_1000Jyms.txt","w");
+   fprintf(outf,"# Tau[ms]   Peak_flux[Jy]  Integral   Fluence_min[Jy ms] N_gp\n");
+   double F0 = 1000; // fluence is constant in Jy*ms 
    double tau = 0.0005;
    double tau_step = 0.00001;
    double threshold = 5*sigma_n;  
@@ -153,7 +155,7 @@ void fluence_vs_flux_model()
       TF1* pulse_nonorm = new TF1("Pulse_with_gauss_onset_NONORM",Pulse_with_gauss_onset_NONORM,-0.02,0.02,5);
       par[4] = tau;
       pulse_nonorm->SetParameters(par);
-      double calka = pulse_nonorm->Integral( -0.02, +0.02, 1e-10 );
+      double calka = pulse_nonorm->Integral( -0.02, +0.02, 1e-10 )*1000.00; // *1000 to make it Jy ms 
       double peak_flux = F0/calka;       
       double F_min = threshold*calka;
 
