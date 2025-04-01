@@ -270,7 +270,7 @@ if [[ -s ../detrended_normalised__DM57.00.txt ]]; then
    awk '{if($1!="#"){print $3" "$1;}}' presto.cand > presto.txt
    awk '{if($1!="#"){print $3" "$2;}}' presto.cand_normal.sorted > presto_merged_sorted.txt
    
-   root -l "plot_samples_with_candidates.C(\"detrended_normalised__DM57.00.txt\",\"presto.txt\",NULL,NULL,\"presto_merged_sorted.txt\")"   
+   root -l "plot_samples_with_candidates.C+(\"detrended_normalised__DM57.00.txt\",\"presto.txt\",NULL,NULL,\"presto_merged_sorted.txt\")"   
 else
    echo "WARNING : file ../timeseries__DM57.00.txt not found -> cannot overplot time series and PRESTO candidates and merged candidates"
 fi   

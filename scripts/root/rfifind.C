@@ -354,7 +354,7 @@ void rfifind( const char* fname, double rfi_threshold=10.00, double low=0, doubl
    double rms_bin_content = sqrt(sum2/count - mean_bin_content*mean_bin_content);
    printf("MEAN BIN CONTENT = %.8f +/- %.8f\n",mean_bin_content,rms_bin_content);
 
-   rfi_threshold = mean_bin_content + 1*rms_bin_content;
+//   rfi_threshold = mean_bin_content + 1*rms_bin_content;
    FILE* outf = fopen("rfi.ranges","w");
    for(int ch=0;ch<histo->GetNbinsX();ch++){
       double val_histo = histo->GetBinContent(ch);

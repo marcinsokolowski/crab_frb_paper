@@ -65,7 +65,8 @@ Double_t Pulse_with_gauss_onset_NONORM( Double_t* x, Double_t* y )
 
 
    double flux = offset;
-   double norm = (1.00/sqrt(sigma*2*TMath::Pi()));
+//   double norm = (1.00/sqrt(sigma*2*TMath::Pi()));
+   double norm = 1.00; // have just no normalisation here at all - but the numbers for peak flux are too high then ???
    double gaussian = norm*exp(-0.5*(t - t_peak)*(t - t_peak)/(sigma*sigma) );
 
    if( t < t_peak ){

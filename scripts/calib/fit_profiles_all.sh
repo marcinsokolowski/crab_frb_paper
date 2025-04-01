@@ -73,7 +73,7 @@ do
          fi
 
          mkdir -p images/
-         root ${root_options} "plot_samples_with_candidates.C(\"detrended_normalised_${b}.txt\",\"presto.txt\",NULL,NULL,\"presto_merged_sorted.txt\")"
+         root ${root_options} "plot_samples_with_candidates.C+(\"detrended_normalised_${b}.txt\",\"presto.txt\",NULL,NULL,\"presto_merged_sorted.txt\")"
          
          echo "~/github/crab_frb_paper/scripts/calib/snr2jy.sh presto.cand_normal $mean_sefd | awk '{print $3;}' > presto_norfi_fluxcal.cand_normal"
          ~/github/crab_frb_paper/scripts/calib/snr2jy.sh presto.cand_normal $mean_sefd | awk '{print $3;}' > presto_norfi_fluxcal.cand_normal
