@@ -43,10 +43,10 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
          double min_y=-10000, double max_y=-10000,
          const char* szStarName="", const char* fname="default",
          int bLog=0, const char* szDescX=NULL, const char* szDescY=NULL,
-         double fit_min_x=-100000, double fit_max_x=-100000, Double_t* x_values_err=NULL )
+         double fit_min_x=-100000, double fit_max_x=-100000, Double_t* x_values_err=NULL,
+         int ColorNum = kRed, const char* szOPT="AP", bool bShowError=true  )
 {
     int MarkerType = 20;
-    int ColorNum = kRed;
 
     Double_t z,sigma_z,const_part;
     TF1 *line = NULL;
@@ -79,7 +79,9 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
         if( x_values_err ){
            x_err = x_values_err[i]; 
         }
-        pGraph->SetPointError( i, x_err, sqrt( y_values[i] ) );
+        if( bShowError ){
+           pGraph->SetPointError( i, x_err, sqrt( y_values[i] ) ); 
+        }
     }
     printf("Found min_x=%.2f , max_x=%.2f\n",minX,maxX);
     printf("Found min_y=%.2f , max_y=%.2f\n",minY,maxY);
@@ -141,7 +143,7 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
     pGraph->SetTitle( szStarName );
 // WORKS 
 //    pGraph->GetXaxis()->SetLimits(0,1);
-    pGraph->Draw("AP");
+    pGraph->Draw( szOPT );
 
    if( fit_min_x<=-100000 ){
       fit_min_x = minX;
@@ -404,7 +406,7 @@ int ReadResultsFile( const char* fname, Double_t* x_values, Double_t* y_values,
    return all;
 }  
 
-void plot_ngps_vs_tau( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", 
+void plot_ngps_vs_tau( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", const char* modelfile=NULL,
                const char* fit_func_name=NULL, double min_y=-10000, 
                double max_y=-10000 , int bLog=0,
       const char* szDescX="Scattering Time [ms]",const char* szDescY="Number of GPs", const char* szTitle=NULL,
@@ -462,6 +464,19 @@ void plot_ngps_vs_tau( const char* basename="sigmaG1_vs_lapSigmaG1_for_root",
             basename, bLog, szDescX, szDescY, fit_min_x,
             fit_max_x );
    
+   if( modelfile ){
+      Double_t* x_value2 = new Double_t[MAX_ROWS];
+      Double_t* y_value2 = new Double_t[MAX_ROWS];
+
+      lq2 = ReadResultsFile( modelfile, x_value2, y_value2, -1, -1, 0, 1 );
+
+      TGraphErrors* pGraph2 = DrawGraph( x_value2, y_value2, lq2, 1, NULL, 
+              fit_func_name, min_y, max_y, szTitle,
+            basename, bLog, szDescX, szDescY, fit_min_x,
+            fit_max_x, NULL, kBlack, "L,same", false );
+ 
+   }
+
    c1->Update();
 
 /*   TString szEpsName1=basename;
