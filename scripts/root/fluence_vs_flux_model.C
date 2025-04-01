@@ -28,6 +28,13 @@ double sigma_noise( double sefd, double delta_time, double delta_freq, int n_pol
    return sigma_n;
 }
 
+Double_t Fluence_distrib_powerlaw( Double_t* x, Double_t* y )
+{
+   Double_t fluence = x[0];
+
+   return y[0]*TMath::Power( (fluence/1000.00) , y[1] );
+}
+
 Double_t Pulse_with_gauss_onset( Double_t* x, Double_t* y )
 {
    Double_t t = x[0];
@@ -79,6 +86,22 @@ Double_t Pulse_with_gauss_onset_NONORM( Double_t* x, Double_t* y )
    return flux + offset;
 }
 
+// count_gps( fluence_distrib, F_min, fluence_bin );
+double count_gps( TF1* fluence_distrib, double F_min, double fluence_bin )
+{
+   double N_gp = 0;
+   double F = F_min;
+   while( F < 10000 ){
+      double F_c = F + fluence_bin/2.00;
+      double n = fluence_distrib->Eval( F_c );
+      N_gp += n;
+//      printf("DEBUG count_gps : + %.8f = %.8f\n",n,N_gp);
+
+      F += fluence_bin;
+   }
+
+   return N_gp;
+}
 
 void fluence_vs_flux_model()
 {
@@ -86,9 +109,28 @@ void fluence_vs_flux_model()
 
    printf("Noise in data = %.6f [Jy]\n",sigma_n);
 
+   Double_t par[5];
+
+   TCanvas* c1 = new TCanvas("c1","c1",200,10,2000,1000);
+   c1->SetLogx(1);
+   c1->SetLogy(1);
+   c1->cd();
+
+   double fluence_bin = (5000-90)/100.00; 
+   TF1* fluence_distrib = new TF1("Fluence_distrib_powerlaw",Fluence_distrib_powerlaw,90,5000,2);
+   par[0] = 18.00;
+   par[1] = -3.132;
+   fluence_distrib->SetParameters(par);
+   fluence_distrib->Draw();   
+
+   TCanvas* c2 = new TCanvas("c2","c2",200,10,2000,1000);
+//   c1->SetLogx(1);
+//   c1->SetLogy(1);
+   c2->cd();
+
+
 //   TF1* pulse = new TF1("Pulse_with_gauss_onset",Pulse_with_gauss_onset,-0.02,0.02,5);
    TF1* pulse = new TF1("Pulse_with_gauss_onset_NONORM",Pulse_with_gauss_onset_NONORM,-0.02,0.02,5);
-   Double_t par[5];
    par[0] = 0.000;
    par[1] = 0.000;
    par[2] = 500.00;
@@ -115,11 +157,13 @@ void fluence_vs_flux_model()
       double peak_flux = F0/calka;       
       double F_min = threshold*calka;
 
-      printf("Tau = %.6f [ms] : calka = %.6f [Jy ms] -> peak flux = %.8f [Jy]\n",tau*1000.00,calka,peak_flux);
+      double N_gp = count_gps( fluence_distrib, F_min, fluence_bin );
+
+      printf("Tau = %.6f [ms] : calka = %.6f [Jy ms] -> peak flux = %.8f [Jy] -> N_gp = %.4f\n",tau*1000.00,calka,peak_flux,N_gp);
 //      pulse_nonorm->Draw();
 //      break;
       
-      fprintf(outf,"%.8f %.8f %.8f %.8f\n",tau*1000.00,peak_flux,calka,F_min);
+      fprintf(outf,"%.8f %.8f %.8f %.8f %.8f\n",tau*1000.00,peak_flux,calka,F_min,N_gp);
       tau += tau_step;
    }
 
