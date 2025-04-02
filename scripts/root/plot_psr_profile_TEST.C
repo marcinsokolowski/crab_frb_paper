@@ -715,7 +715,7 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
       }
       fclose(out_f);     
 
-
+   }
    pGraph->GetXaxis()->SetTitleOffset(1.00);
    pGraph->GetYaxis()->SetTitleOffset(0.60);
    pGraph->GetXaxis()->SetTitleSize(0.05);
@@ -740,152 +740,8 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
    lat.SetTextAlign(23);
    lat.SetTextSize(0.05);
                                                                                 
-   char szDesc[255];
-   sprintf(szDesc,"sigma/mean = %.8f\n",r);
-   
-   return pGraph;
-       
-
-      double mean_resid = sum_resid / count_resid;
-      double rms_resid = sqrt( sum_resid2/count_resid - mean_resid*mean_resid);
-      printf("Checking residuals of the fit:\n");
-      printf("\tMean residual = %.6f\n",mean_resid);
-      printf("\tRMS  residual = %.6f\n",rms_resid);
-
-      // calculate W10 
-      int n_bins = numVal;
-      double max_flux = -1000;
-      double phase=0.00;
-      double delta_phase=(1.00/n_bins); // 0.001;
-      double fluence = 0.00;
-      double sum_profile = 0.00; // fit 
-      int n_bins_fit=0;
-      while( phase < 1.00 ){ // was 2.0
-         double flux = line_draw->Eval( phase );
-         printf("DEBUG : phase = %.3f -> flux = %.4f\n",phase,flux);
-         if( flux > max_flux ){
-            max_flux = flux;            
-         }
-         fluence += flux*delta_phase;
-         sum_profile += flux;
-
-         phase += delta_phase;
-         n_bins_fit += 1;
-      }
-      printf("DEBUG : max_flux = %.8f\n",max_flux);
-
-      if( n_bins_fit != n_bins ){
-         printf("WARNING : n_bins_fit = %d != %d = n_bins -> should stick to the same number of bins, as in the data !!!\n",n_bins_fit,n_bins);
-      }
-
-      double sum_profile_data = 0.00;
-      for(int i=0;i<numVal;i++){
-         if( x_values[i] >= gNoiseEnd ){
-            sum_profile_data += y_values[i];
-            // printf("DEBUG = %e\n",y_values[i]);
-         }
-      }
-      double sum_profile_data_before_rescale =  sum_profile_data*gOriginalRMS;
-
-      printf("Max flux = %.6f [units]\n",max_flux);
-      printf("Mean flux = %.6f [units] (or %.6f) = %.8f / %.8f\n",(fluence/phase),(sum_profile/n_bins),fluence,phase);
-      printf("Fluence  = %.6f [units*phase]\n",fluence);
-      printf("Sum profile = %.8f\n",sum_profile);
-      printf("Sum profile data = %e (before re-scaling = %e)\n",sum_profile_data,sum_profile_data_before_rescale);
-
-      double w10_start=-1;
-      double w10_end=-1;
-
-      phase=0.00;
-      double prev_phase=-1;
-      double prev_ratio=-1;
-      while( phase < 2.00 ){
-         double flux = line_draw->Eval( phase );
-         double ratio = flux/max_flux;
-         if( ratio >= 0.1 && prev_ratio < 0.1 ){
-            printf("Start phase for W10 = %.6f\n",phase);
-            w10_start = phase;
-         }
-         if( ratio < 0.1 && prev_ratio >= 0.1 ){
-            printf("End phase for W10 = %.6f\n",phase);
-            w10_end = phase;
-         }
-         
-         prev_phase = phase;
-         prev_ratio = ratio;
-         phase += delta_phase;
-      }
-
-      double w10 = (w10_end - w10_start);
-      printf("W10 phase range = %.8f - %.8f\n",w10_start,w10_end);
-      printf("W10 = %.6f [ms]\n",(w10*gPulsarPeriodMS));
-
-//      int n_bins = numVal;
-      double mean_flux = (sum_profile*gSigmaSimulated)/(gOriginalRMS*n_bins);
-      double peak_flux_jy = max_flux*(gSigmaSimulated/gOriginalRMS);
-
-      if( gNormaliseInputData ){
-         // if normalised by RMS -> sum_profile is already = sum_profile_ORIGNAL/gOriginalRMS -> no need to divide by gOriginalRMS again
-         mean_flux = (sum_profile*gSigmaSimulated)/(n_bins);
-         printf("DEBUG : mean_flux = %.8f * %.8f / %d\n",sum_profile,gSigmaSimulated,n_bins);
-
-         // same applies to peak flux :
-         peak_flux_jy = max_flux*gSigmaSimulated; // max_flux = max_flux_original/gOriginalRMS
-
-         if( gUseFitResidualsRMS ){
-            printf("INFO : using residuals of the FIT to calculate zeta\n");
-            mean_flux = (sum_profile*gSigmaSimulated)/(n_bins*rms_resid);
-            peak_flux_jy = max_flux*gSigmaSimulated/rms_resid;
-         }
-      }
-
-      // double norm = peak_flux*(1.00/sqrt(sigma*2*TMath::Pi()));
-      double fitted_peak = par[2]/sqrt(2*TMath::Pi()*par[3]);
-      printf("Fitted peak flux: SNR = %.8f [no units]\n",fitted_peak);
- 
-      printf("Mean flux density = %.6f Jy\n",mean_flux);
-      printf("Peak flux density = %.6f Jy\n",peak_flux_jy);
-
-      FILE* out2_f = fopen("final_flux.txt","a+");
-      fprintf(out2_f,"%s %.8f %.8f\n",gInputFileName,mean_flux,peak_flux_jy);
-      fclose(out2_f);
-
-      printf("DEBUG - before re-scaling:\n");
-      double mean_flux_no_rescale = (sum_profile_data_before_rescale*gSigmaSimulated)/(n_bins*gOriginalRMS);
-      printf("\tDEBUG : Mean flux density without rescaling = %e\n",mean_flux_no_rescale);
-      double zeta_debug = gSigmaSimulated/gOriginalRMS;
-      printf("\tDEBUG : sum_profile_data*zeta / n_bins = %.8f * %.8f / %d = %.8f\n",sum_profile_data,zeta_debug,n_bins,(sum_profile_data*zeta_debug / n_bins));
-      double mean_flux_data = (sum_profile_data*gSigmaSimulated)/(n_bins*gOriginalRMS);
-      printf("\tDEBUG : Mean flux density data = %e\n",mean_flux_data);
-      printf("\tDEBUG : zeta = %.8f\n",(gSigmaSimulated/gOriginalRMS));
-   }   
-
-   pGraph->GetXaxis()->SetTitleOffset(1.00);
-   pGraph->GetYaxis()->SetTitleOffset(0.60);
-   pGraph->GetXaxis()->SetTitleSize(0.05);
-   pGraph->GetXaxis()->SetLabelSize(0.05);
-   pGraph->GetYaxis()->SetTitleSize(0.05);
-   pGraph->GetYaxis()->SetLabelSize(0.05);
-
-
-   if( szDescX && szDescX[0] ){
-      pGraph->GetHistogram()->SetXTitle( szDescX );
-   }else{
-      pGraph->GetHistogram()->SetXTitle("Channel");
-   }
-   if( szDescY && szDescY[0] ){
-       pGraph->GetHistogram()->SetYTitle( szDescY );
-   }else{
-      pGraph->GetHistogram()->SetYTitle("Power");
-   }
-   // pGraph->GetHistogram()->SetYTitle("sigmaG1_homeo/SigmaG1");
-
-   TLatex lat;
-   lat.SetTextAlign(23);
-   lat.SetTextSize(0.05);
-                                                                                
-   char szDesc[255];
-   sprintf(szDesc,"sigma/mean = %.8f\n",r);
+//   char szDesc[255];
+//   sprintf(szDesc,"sigma/mean = %.8f\n",r);
    
    return pGraph;
 }
@@ -1356,9 +1212,9 @@ void plot_psr_profile_TEST( const char* basename="sigmaG1_vs_lapSigmaG1_for_root
 
       TF1* line_original_data = new TF1("fit_func_test",Pulse_with_gauss_onset_original,gMinX,gMaxX,gFittedParametersN);
 //   TF1* line_original_data = new TF1("fit_func_test",Pulse_with_gauss_onset_original,0,1,gFittedParametersN);
-      line_original_data->SetParameters(gFittedParametersOriginalScaling);
-      printf("DEBUG : %.8f\n",line_original_data->Eval( x_value1_original[0] ));
-      line_original_data->Draw("same");
+//      line_original_data->SetParameters(gFittedParametersOriginalScaling);
+//      printf("DEBUG : %.8f\n",line_original_data->Eval( x_value1_original[0] ));
+//      line_original_data->Draw("same");
       c2->Update();
 
       sprintf(szFittedFile,"%s.refit",basename);
