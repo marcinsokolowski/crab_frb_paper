@@ -18,6 +18,7 @@
 #include <TCanvas.h>
 #include <TLegend.h>
 #include <TMultiGraph.h>
+#include <TGraphErrors.h>
 #include <TLatex.h>
 #include <TStyle.h>
 #include <TMath.h>
@@ -135,6 +136,221 @@ Double_t Pulse_with_gauss_onset( Double_t* x, Double_t* y )
 
    return flux + offset;
 }
+
+TF1* pConvolution = NULL;
+
+Double_t Gauss_convolved_with_exptail( Double_t* x, Double_t* y )
+{
+   Double_t t = x[0];
+
+   Double_t offset = y[0];
+   Double_t t_peak = y[1];
+   Double_t peak_flux = y[2];
+   Double_t sigma = y[3];
+   Double_t tau = y[4];
+
+   double flux = offset;
+   double norm = peak_flux*(1.00/sqrt(sigma*2*TMath::Pi()));
+   double gaussian = norm*exp(-0.5*(t - t_peak)*(t - t_peak)/(sigma*sigma) );
+
+   if( t < t_peak ){
+      flux = gaussian;
+   }else{
+      // exponential decay
+      flux = norm*exp( - (t-t_peak) / tau );
+   }
+
+   return flux + offset;
+}
+
+Double_t gauss_exp_convol( Double_t* x, Double_t* y )
+{
+   Double_t t_prim = x[0];
+
+   Double_t offset = y[0];
+   Double_t t_peak = y[1];
+   Double_t peak_flux = y[2];
+   Double_t sigma = y[3];
+   Double_t tau = y[4];
+   Double_t t = y[5];
+
+   double flux = offset;
+   double norm = peak_flux*(1.00/sqrt(sigma*2*TMath::Pi()));
+   double gaussian = norm*exp(-0.5*(t_prim - t_peak)*(t_prim - t_peak)/(sigma*sigma) );
+   double exp_val = exp( - (t-t_prim) / tau );   
+
+  
+   Double_t ret = gaussian*exp_val;
+
+   printf("DEBUG : ret = %.8f ( %.8f %.8f ) : parameters %.8f, %.8f %.8f %.8f %.8f %.8f\n",ret,gaussian,exp_val,y[0],y[1],y[2],y[3],y[4],y[5]);
+// exit;
+   return ret;
+}
+
+
+Double_t Convolution( Double_t* x, Double_t* y )
+{
+   Double_t t = x[0];
+
+   Double_t offset = y[0];
+   Double_t t_peak = y[1];
+   Double_t peak_flux = y[2];
+   Double_t sigma = y[3];
+   Double_t tau = y[4];
+
+   TF1* pConvolution =  new TF1("convolution",gauss_exp_convol,t_peak-1.10,t_peak+1.00,6);
+   Double_t par[6];
+   par[0] = y[0];
+   par[1] = y[1];
+   par[2] = y[2];
+   par[3] = y[3];
+   par[4] = y[4];
+   par[5] = t;
+   pConvolution->SetParameters(par);
+   pConvolution->FixParameter(0,0.00);
+ 
+   double ret = pConvolution->Integral( t_peak-1.00, t , 1e-9 );
+   delete pConvolution;
+
+   return ret;   
+}
+
+
+
+Double_t Convolution_MyIntegral( Double_t* x, Double_t* y )
+{
+   Double_t t = x[0];
+
+   Double_t offset = y[0];
+   Double_t t_peak = y[1];
+   Double_t peak_flux = y[2];
+   Double_t sigma = y[3];
+   Double_t tau = y[4];
+
+   double norm = peak_flux*(1.00/sqrt(sigma*2*TMath::Pi()));
+   double sigma2 = sigma*sigma;
+
+
+   Double_t infinity_value = 0.1;
+   Double_t t_prim = t_peak - infinity_value;
+   Double_t dt = 1e-5; // -9 ???
+ 
+
+   // Pulse_with_gauss_onset
+   // Pulse_with_linear_onset
+
+   // integral from -INF to t 
+   double calka = 0.00;
+   while( t_prim <= t ){
+//      double onset = exp(-0.5*(t_prim - t_peak)*(t_prim - t_peak)/(sigma2) );
+//      double exp_tail = exp( - (t-t_prim) / tau );   
+
+      // Gaussian onset :
+      calka += exp( -0.5*(t_prim - t_peak)*(t_prim - t_peak)/(sigma2) - (t-t_prim) / tau );
+
+      t_prim += dt;
+   }
+   calka = norm*calka*dt;
+
+   return calka + offset;   
+}
+
+Double_t LinearPulse( Double_t* x, Double_t* y )
+{
+   Double_t t = x[0];
+
+   Double_t offset = y[0];
+   Double_t t0 = y[1];           // start of the pulse
+   Double_t t_peak = y[2];
+   Double_t peak_flux = y[3];
+   Double_t tau = y[4];
+
+   double delta_t = fabs(t_peak - t0);
+   double t1 = t_peak + delta_t;
+
+   double flux = 0.00;
+   if( fabs(t-t_peak) <= delta_t ){
+      if( t<t_peak ){
+         double a = peak_flux / ( t_peak - t0 );
+         flux = a*( t - t0 );  
+      }else{
+//         double a = peak_flux / ( t1 - t_peak );
+//         flux = a*( t1 - t );
+         flux = 0.00;
+      }
+   }
+
+   return flux + offset;
+}
+
+Double_t Convolution_MyIntegral_LinearOnset( Double_t* x, Double_t* y )
+{
+   Double_t t = x[0];
+
+   Double_t offset = y[0];
+   Double_t t0 = y[1];           // start of the pulse
+   Double_t t_peak = y[2];
+   Double_t peak_flux = y[3];
+   Double_t tau = y[4];
+
+//   double norm = peak_flux*(1.00/sqrt(sigma*2*TMath::Pi()));
+//   double sigma2 = sigma*sigma;
+
+
+   Double_t infinity_value = 0.1;
+   Double_t t_prim = t_peak - infinity_value;
+   Double_t dt = 1e-4; // -9 ???
+ 
+
+   // Pulse_with_gauss_onset
+   // Pulse_with_linear_onset
+
+// WORKING :
+/*   if( t > t0 ){
+      if( t <= t_peak ){
+         double a = peak_flux / ( t_peak - t0 );
+         double flux = a*(t - t0 );      
+
+         return flux + offset;
+      }else{
+         double exp_tail = peak_flux*exp( - (t-t_peak) / tau );
+         return exp_tail + offset;
+      }
+   }*/
+  
+/*   if( t <= t0 ){ 
+      return offset;
+   }*/
+
+//   return LinearPulse( x, y );
+
+   if( t <= t_peak ){
+//      double a = peak_flux / ( t_peak - t0 );
+//      double flux = a*(t - t0 );
+
+//      return flux + offset;
+      return LinearPulse( x, y );
+   }
+
+   // integral from -INF to t 
+   double calka = 0.00;
+   while( t_prim <= t_peak ){
+//      double a = peak_flux / ( t_peak - t0 );
+//      double flux = a*(t_prim - t0 );  
+     
+//      calka += flux*exp( - (t-t_prim) / tau );
+      
+      double flux = LinearPulse( x, y );
+      calka += flux*exp( - (t-t_prim) / tau );
+
+      t_prim += dt;
+   }
+   calka = calka*dt;
+
+   return calka;   
+}
+
+
 
 
 Double_t Pulse_with_gauss_onset_original( Double_t* x, Double_t* y )
@@ -337,7 +553,6 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
          line->SetParName(4,"#tau");
       }
 
-
       if( strcmp( fit_func_name, "pulse_gauss" )==0 ){
          printf("Fitting pulsar pulse_gauss profile in the range : %.6f - %.6f\n",fit_min_x,fit_max_x);
          line = new TF1("fit_func",Pulse_with_gauss_onset,fit_min_x,fit_max_x,5);
@@ -366,6 +581,76 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
          line->SetParName(4,"#tau");
 
       }
+
+      if( strcmp( fit_func_name, "convolution" )==0 ){
+         printf("Fitting pulsar Gauss-convolved-exp profile in the range : %.6f - %.6f\n",fit_min_x,fit_max_x);
+         line = new TF1("fit_func",Convolution_MyIntegral,fit_min_x,fit_max_x,5);
+         line_draw = new TF1("fit_func2",Convolution_MyIntegral,minX,maxX,5);
+         local_func=1;
+
+         // Gaussian 
+         par[0] = 0.00; // offset (mean off-pulse)
+         par[1] = maxYarg; // t_peak  0.53 for the MWA data
+         par[2] = maxY; // peak flux 
+         par[3] = 0.001; // sigma 
+         par[4] = 0.002; // very long decay ... - 10 for MWA fit 
+
+         // Linear onset : 
+/*         par[0] = 0.00; // offset (mean off-pulse)
+         par[1] = maxYarg - 0.001/2.00;
+         par[2] = maxYarg;        
+         par[3] = maxY;
+         par[4] = 0.002;*/
+ 
+
+/*         if( init_params ){
+            par[0] = init_params[0];
+            par[1] = init_params[1];
+            par[2] = init_params[2];
+            par[3] = init_params[3];
+            par[4] = init_params[4];
+         }*/
+
+         line->SetParName(0,"SNR offset");
+         line->SetParName(1,"t_{peak}");
+         line->SetParName(2,"f_{peak}");
+         line->SetParName(3,"#sigma_{gauss}");
+         line->SetParName(4,"#tau");
+
+      }
+
+      if( strcmp( fit_func_name, "convolution_lin_onset" )==0 ){
+         printf("Fitting pulsar Gauss-convolved-exp profile in the range : %.6f - %.6f\n",fit_min_x,fit_max_x);
+         line = new TF1("fit_func",Convolution_MyIntegral_LinearOnset,fit_min_x,fit_max_x,5);
+         line_draw = new TF1("fit_func2",Convolution_MyIntegral_LinearOnset,minX,maxX,5);
+         local_func=1;
+
+         // Linear onset : 
+         par[0] = 0;
+         par[1] = maxYarg - 0.005;
+         par[2] = maxYarg;
+         par[3] = maxY*0.5;
+         par[4] = 0.002; // very long decay ...
+
+ 
+
+/*         if( init_params ){
+            par[0] = init_params[0];
+            par[1] = init_params[1];
+            par[2] = init_params[2];
+            par[3] = init_params[3];
+            par[4] = init_params[4];
+         }*/
+
+         line->SetParName(0,"SNR offset");
+         line->SetParName(1,"t_0");
+         line->SetParName(2,"t_{peak}");
+         line->SetParName(3,"f_{peak}");
+         line->SetParName(4,"#tau");
+
+      }
+
+
 
       if( strcmp( fit_func_name, "pulse_gauss_only" )==0 ){
          printf("Fitting pulsar pulse_gauss profile in the range : %.6f - %.6f ( %.8f - %.8f )\n",fit_min_x,fit_max_x,fit_min_x,fit_max_x);
@@ -435,7 +720,7 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
       }
 
       if( strstr(fit_func_name,"line") || fit_func_name[0]=='l' || fit_func_name[0]=='L'
-          || fit_func_name[0]=='h' || fit_func_name[0]=='H' || strstr(fit_func_name,"pulse") || fit_func_name[0]=='p' || strstr(fit_func_name,"pulse_gauss") || strstr(fit_func_name,"pulse_gauss_only")
+          || fit_func_name[0]=='h' || fit_func_name[0]=='H' || strstr(fit_func_name,"pulse") || fit_func_name[0]=='p' || strstr(fit_func_name,"pulse_gauss") || strstr(fit_func_name,"convolution") || strstr(fit_func_name,"pulse_gauss_only")
         ){
          pGraph->Fit("fit_func","R");
          printf("DEBUG : fitted fit_func (%s)\n",fit_func_name);
@@ -506,7 +791,7 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
       }
       fclose(out_f);     
 
-
+   }
    pGraph->GetXaxis()->SetTitleOffset(1.00);
    pGraph->GetYaxis()->SetTitleOffset(0.60);
    pGraph->GetXaxis()->SetTitleSize(0.05);
@@ -531,152 +816,8 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
    lat.SetTextAlign(23);
    lat.SetTextSize(0.05);
                                                                                 
-   char szDesc[255];
-   sprintf(szDesc,"sigma/mean = %.8f\n",r);
-   
-   return pGraph;
-       
-
-      double mean_resid = sum_resid / count_resid;
-      double rms_resid = sqrt( sum_resid2/count_resid - mean_resid*mean_resid);
-      printf("Checking residuals of the fit:\n");
-      printf("\tMean residual = %.6f\n",mean_resid);
-      printf("\tRMS  residual = %.6f\n",rms_resid);
-
-      // calculate W10 
-      int n_bins = numVal;
-      double max_flux = -1000;
-      double phase=0.00;
-      double delta_phase=(1.00/n_bins); // 0.001;
-      double fluence = 0.00;
-      double sum_profile = 0.00; // fit 
-      int n_bins_fit=0;
-      while( phase < 1.00 ){ // was 2.0
-         double flux = line_draw->Eval( phase );
-         printf("DEBUG : phase = %.3f -> flux = %.4f\n",phase,flux);
-         if( flux > max_flux ){
-            max_flux = flux;            
-         }
-         fluence += flux*delta_phase;
-         sum_profile += flux;
-
-         phase += delta_phase;
-         n_bins_fit += 1;
-      }
-      printf("DEBUG : max_flux = %.8f\n",max_flux);
-
-      if( n_bins_fit != n_bins ){
-         printf("WARNING : n_bins_fit = %d != %d = n_bins -> should stick to the same number of bins, as in the data !!!\n",n_bins_fit,n_bins);
-      }
-
-      double sum_profile_data = 0.00;
-      for(int i=0;i<numVal;i++){
-         if( x_values[i] >= gNoiseEnd ){
-            sum_profile_data += y_values[i];
-            // printf("DEBUG = %e\n",y_values[i]);
-         }
-      }
-      double sum_profile_data_before_rescale =  sum_profile_data*gOriginalRMS;
-
-      printf("Max flux = %.6f [units]\n",max_flux);
-      printf("Mean flux = %.6f [units] (or %.6f) = %.8f / %.8f\n",(fluence/phase),(sum_profile/n_bins),fluence,phase);
-      printf("Fluence  = %.6f [units*phase]\n",fluence);
-      printf("Sum profile = %.8f\n",sum_profile);
-      printf("Sum profile data = %e (before re-scaling = %e)\n",sum_profile_data,sum_profile_data_before_rescale);
-
-      double w10_start=-1;
-      double w10_end=-1;
-
-      phase=0.00;
-      double prev_phase=-1;
-      double prev_ratio=-1;
-      while( phase < 2.00 ){
-         double flux = line_draw->Eval( phase );
-         double ratio = flux/max_flux;
-         if( ratio >= 0.1 && prev_ratio < 0.1 ){
-            printf("Start phase for W10 = %.6f\n",phase);
-            w10_start = phase;
-         }
-         if( ratio < 0.1 && prev_ratio >= 0.1 ){
-            printf("End phase for W10 = %.6f\n",phase);
-            w10_end = phase;
-         }
-         
-         prev_phase = phase;
-         prev_ratio = ratio;
-         phase += delta_phase;
-      }
-
-      double w10 = (w10_end - w10_start);
-      printf("W10 phase range = %.8f - %.8f\n",w10_start,w10_end);
-      printf("W10 = %.6f [ms]\n",(w10*gPulsarPeriodMS));
-
-//      int n_bins = numVal;
-      double mean_flux = (sum_profile*gSigmaSimulated)/(gOriginalRMS*n_bins);
-      double peak_flux_jy = max_flux*(gSigmaSimulated/gOriginalRMS);
-
-      if( gNormaliseInputData ){
-         // if normalised by RMS -> sum_profile is already = sum_profile_ORIGNAL/gOriginalRMS -> no need to divide by gOriginalRMS again
-         mean_flux = (sum_profile*gSigmaSimulated)/(n_bins);
-         printf("DEBUG : mean_flux = %.8f * %.8f / %d\n",sum_profile,gSigmaSimulated,n_bins);
-
-         // same applies to peak flux :
-         peak_flux_jy = max_flux*gSigmaSimulated; // max_flux = max_flux_original/gOriginalRMS
-
-         if( gUseFitResidualsRMS ){
-            printf("INFO : using residuals of the FIT to calculate zeta\n");
-            mean_flux = (sum_profile*gSigmaSimulated)/(n_bins*rms_resid);
-            peak_flux_jy = max_flux*gSigmaSimulated/rms_resid;
-         }
-      }
-
-      // double norm = peak_flux*(1.00/sqrt(sigma*2*TMath::Pi()));
-      double fitted_peak = par[2]/sqrt(2*TMath::Pi()*par[3]);
-      printf("Fitted peak flux: SNR = %.8f [no units]\n",fitted_peak);
- 
-      printf("Mean flux density = %.6f Jy\n",mean_flux);
-      printf("Peak flux density = %.6f Jy\n",peak_flux_jy);
-
-      FILE* out2_f = fopen("final_flux.txt","a+");
-      fprintf(out2_f,"%s %.8f %.8f\n",gInputFileName,mean_flux,peak_flux_jy);
-      fclose(out2_f);
-
-      printf("DEBUG - before re-scaling:\n");
-      double mean_flux_no_rescale = (sum_profile_data_before_rescale*gSigmaSimulated)/(n_bins*gOriginalRMS);
-      printf("\tDEBUG : Mean flux density without rescaling = %e\n",mean_flux_no_rescale);
-      double zeta_debug = gSigmaSimulated/gOriginalRMS;
-      printf("\tDEBUG : sum_profile_data*zeta / n_bins = %.8f * %.8f / %d = %.8f\n",sum_profile_data,zeta_debug,n_bins,(sum_profile_data*zeta_debug / n_bins));
-      double mean_flux_data = (sum_profile_data*gSigmaSimulated)/(n_bins*gOriginalRMS);
-      printf("\tDEBUG : Mean flux density data = %e\n",mean_flux_data);
-      printf("\tDEBUG : zeta = %.8f\n",(gSigmaSimulated/gOriginalRMS));
-   }   
-
-   pGraph->GetXaxis()->SetTitleOffset(1.00);
-   pGraph->GetYaxis()->SetTitleOffset(0.60);
-   pGraph->GetXaxis()->SetTitleSize(0.05);
-   pGraph->GetXaxis()->SetLabelSize(0.05);
-   pGraph->GetYaxis()->SetTitleSize(0.05);
-   pGraph->GetYaxis()->SetLabelSize(0.05);
-
-
-   if( szDescX && szDescX[0] ){
-      pGraph->GetHistogram()->SetXTitle( szDescX );
-   }else{
-      pGraph->GetHistogram()->SetXTitle("Channel");
-   }
-   if( szDescY && szDescY[0] ){
-       pGraph->GetHistogram()->SetYTitle( szDescY );
-   }else{
-      pGraph->GetHistogram()->SetYTitle("Power");
-   }
-   // pGraph->GetHistogram()->SetYTitle("sigmaG1_homeo/SigmaG1");
-
-   TLatex lat;
-   lat.SetTextAlign(23);
-   lat.SetTextSize(0.05);
-                                                                                
-   char szDesc[255];
-   sprintf(szDesc,"sigma/mean = %.8f\n",r);
+//   char szDesc[255];
+//   sprintf(szDesc,"sigma/mean = %.8f\n",r);
    
    return pGraph;
 }
@@ -963,7 +1104,7 @@ double normalise_y_minmax( Double_t* x_values, Double_t* y_values, int cnt, doub
 
 
 
-void plot_psr_profile( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", int bNormaliseInputData=2, bool bShowOriginalDataWithFit=false,
+void plot_psr_profile_TEST( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", int bNormaliseInputData=2, bool bShowOriginalDataWithFit=false,
                        const char* fit_func_name="pulse_gauss", // pulse, pulse_gauss, pulse_gauss_only
                        double noise_start=0, double noise_end=0.4, 
                        double sigma_simulated=0.1120, // simulated sigma of noise in Jy , sigma_Stokes_I - for the entire duration of the observation !!!
@@ -1070,7 +1211,7 @@ void plot_psr_profile( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", in
 
    
    // drawing background graphs here :
-   TGraphErrors* pGraph1 = DrawGraph( x_value1, y_value1, lq1, 1, NULL, fit_func_name, min_y, max_y, szTitle,
+   TGraphErrors* pGraph1 = DrawGraph( x_value1, y_value1, lq1, 1, NULL, NULL, min_y, max_y, szTitle,
                                       basename, bLog, szDescX, szDescY, fit_min_x, fit_max_x, y_value1_err );
    
    if( gNormaliseInputData > 0 ){
@@ -1147,9 +1288,9 @@ void plot_psr_profile( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", in
 
       TF1* line_original_data = new TF1("fit_func_test",Pulse_with_gauss_onset_original,gMinX,gMaxX,gFittedParametersN);
 //   TF1* line_original_data = new TF1("fit_func_test",Pulse_with_gauss_onset_original,0,1,gFittedParametersN);
-      line_original_data->SetParameters(gFittedParametersOriginalScaling);
-      printf("DEBUG : %.8f\n",line_original_data->Eval( x_value1_original[0] ));
-      line_original_data->Draw("same");
+//      line_original_data->SetParameters(gFittedParametersOriginalScaling);
+//      printf("DEBUG : %.8f\n",line_original_data->Eval( x_value1_original[0] ));
+//      line_original_data->Draw("same");
       c2->Update();
 
       sprintf(szFittedFile,"%s.refit",basename);

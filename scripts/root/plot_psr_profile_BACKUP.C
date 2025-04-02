@@ -24,14 +24,14 @@
 #include <TComplex.h>
 #include <TFile.h>
 
-
+double gFinalChi2 = -1.00;
 int gLog=0;
 int gVerb=0;
 int gNormaliseInputData=1;
 double gPulsarPeriodMS = 89.328385024;
 double gOriginalRMS=1.00;
 double gOriginalMean=0.00;
-double gSigmaSimulated=0.1120;
+double gSigmaSimulated=1.00;
 double gNoiseStart=0.00;
 double gNoiseEnd=1e20;
 bool   gUseFitResidualsRMS=false;
@@ -40,6 +40,25 @@ char   gInputFileName[256];
 #define MAX_ROWS 10000000
 
 Double_t Amplitude = 0.00;
+
+// original before any re-scaling 
+Double_t gMinX = 1e20;
+Double_t gMaxX = -1e20;
+Double_t gMinY = 1e20;
+
+Double_t gXaxisNormFactor = 1.00;
+Double_t gYaxisNormFactor = 1.00;
+Double_t gYaxisOffset = 0.00;
+Double_t gXaxisOffset = 0.00;
+
+// fitted parameters re-scaled back to physical units:
+double gScatteringTimeTauMS = -1000;
+double gPulseWidthMS = -1000;
+Double_t gFittedParameters[100];
+Double_t gFittedParametersErrors[100];
+Double_t gFittedParametersOriginalScaling[100];
+Double_t gFittedParametersOriginalScalingErrors[100];
+int      gFittedParametersN=5;
 
 // No scattering tau = 0.050
 // Scattering tau = 2 seconds ?
@@ -114,8 +133,34 @@ Double_t Pulse_with_gauss_onset( Double_t* x, Double_t* y )
 //   }
 
 
-   return flux;
+   return flux + offset;
 }
+
+
+Double_t Pulse_with_gauss_onset_original( Double_t* x, Double_t* y )
+{
+   Double_t t = x[0];
+
+   Double_t offset = y[0];
+   Double_t t_peak = y[1];
+   Double_t peak_flux = y[2];
+   Double_t sigma = y[3];
+   Double_t tau = y[4];
+
+   double flux = offset;
+   double norm = peak_flux*(1.00/sqrt(sigma*2*TMath::Pi()));
+   double gaussian = norm*exp(-0.5*(t - t_peak)*(t - t_peak)/(sigma*sigma) );
+
+   if( t < t_peak ){
+      flux = gaussian;
+   }else{
+      // exponential decay
+      flux = norm*exp( - (t-t_peak) / tau );
+   }
+
+   return flux + offset;
+}
+
 
 Double_t Pulse_gauss( Double_t* x, Double_t* y )
 {
@@ -161,7 +206,9 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
          const char* szStarName="", const char* fname="default",
          int bLog=0, const char* szDescX=NULL, const char* szDescY=NULL,
          double fit_min_x=-100000, double fit_max_x=-100000, 
-         Double_t* y_values_errors=NULL )
+         Double_t* y_values_errors=NULL,
+         Double_t* init_params=NULL,
+         double bIgnorePeak=0.2 )
 {
     int MarkerType = 20;
     int ColorNum = kRed;
@@ -173,6 +220,7 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
    TF1 *part2 = NULL;
     Double_t maxX=-100000,maxY=-100000;
     Double_t minX=100000,minY=100000;
+    Double_t maxYarg=-1;
 
 
     TGraphErrors* pGraph = new TGraphErrors(q);
@@ -189,8 +237,10 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
 
         if(x_values[i]>maxX)
             maxX = x_values[i];
-        if(y_values[i]>maxY)
+        if(y_values[i]>maxY){
             maxY = y_values[i];
+            maxYarg = x_values[i];
+        }
       
         if(x_values[i]<minX)
             minX = x_values[i];
@@ -241,7 +291,7 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
     pGraph->SetTitle( szStarName );
 // WORKS 
 //    pGraph->GetXaxis()->SetLimits(0,1);
-    pGraph->Draw("APL");
+    pGraph->Draw("AP");
 
    if( fit_min_x<=-100000 ){
       fit_min_x = minX;
@@ -267,18 +317,18 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
          local_func=1;
 
          par[0] = 0;
-         par[1] = 11.00;
-         par[2] = 15.0;
-         par[3] = 17.0;
-         par[4] = 7.00; // very long decay ...
+         par[1] = maxYarg - 0.005;
+         par[2] = maxYarg;
+         par[3] = maxY*0.5;
+         par[4] = 2.00; // very long decay ...
 
-         if( gNormaliseInputData ){
+/*         if( gNormaliseInputData ){
             par[1] = par[1] / numVal;
             par[2] = par[2] / numVal;
          }else{
             par[0] = 15685190000000.000000;
             par[3] = 15.692*1e12;
-         }
+         }*/
 
          line->SetParName(0,"Offset");
          line->SetParName(1,"#t_{start}");
@@ -295,28 +345,25 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
          local_func=1;
 
          par[0] = 0.00; // offset (mean off-pulse)
-         par[1] = 0.2; // t_peak  0.53 for the MWA data
-         par[2] = 5; // peak flux 
-         par[3] = 0.112; // sigma 
-         par[4] = 0.3; // very long decay ... - 10 for MWA fit 
-         par[5] = 0.5; // tau 
+         par[1] = 0.5; // t_peak  0.53 for the MWA data
+         par[2] = 1; // peak flux 
+         par[3] = 0.1; // sigma 
+         par[4] = 0.1; // very long decay ... - 10 for MWA fit 
+         par[5] = 0.1; // tau 
 
-/*         if( gNormaliseInputData ){
-            par[1] = par[1] / numVal;
-            par[2] = par[2] / numVal;
-         }else{
-            par[0] = 15685190000000.000000;
-            par[3] = 15.692*1e12;
-         }*/
+         if( init_params ){
+            par[0] = init_params[0];
+            par[1] = init_params[1];
+            par[2] = init_params[2];
+            par[3] = init_params[3];
+            par[4] = init_params[4];
+         }
 
          line->SetParName(0,"SNR offset");
          line->SetParName(1,"t_{peak}");
          line->SetParName(2,"f_{peak}");
          line->SetParName(3,"#sigma_{gauss}");
          line->SetParName(4,"#tau");
-
-//         line->SetParName(1,"T_start");
-//         line->SetParName(4,"#tau");
 
       }
 
@@ -406,23 +453,42 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
          printf("\tpar[1] = %.8f\n",par[1]);
          printf("\tpar[2] = %.8f\n",par[2]);
          printf("\tpar[3] = %.8f\n",par[3]);
+         printf("\tpar[4] = %.8f\n",par[4]);
          printf("TEST VALUE = %.8f vs. %.8f\n",line->Eval(0.5),line_draw->Eval(0.5));
+
+         gFittedParametersN = 5;
+         gFittedParameters[0] = par[0];
+         gFittedParameters[1] = par[1];
+         gFittedParameters[2] = par[2];
+         gFittedParameters[3] = par[3];
+         gFittedParameters[4] = par[4];
+
+         gFittedParametersErrors[0] = line->GetParError(0);
+         gFittedParametersErrors[1] = line->GetParError(1);
+         gFittedParametersErrors[2] = line->GetParError(2);
+         gFittedParametersErrors[3] = line->GetParError(3);
+         gFittedParametersErrors[4] = line->GetParError(4);
       }
 
+      double chi2 = line->GetChisquare();
+      double ndf = line->GetNDF();
+      double chi2_ndf = chi2/ndf;
+      double par0_err = line->GetParError(0);
+      printf("Chi2 = %.8f , ndf = %.1f , chi2_ndf = %.8f , isnan(par[0] error) = %d\n",chi2,ndf,chi2_ndf,isnan(par0_err));
+      gFinalChi2 = chi2_ndf;
 
       double sum_resid=0.00;
       double sum_resid2=0.00;
       int count_resid=0;
-      bool bIgnorePeak=true;
       FILE* out_f = fopen("fit.txt","w"); 
       for(int i=0;i<numVal;i++){
          bool bInclude=true;
          double x = x_values[i];
          double y = y_values[i];
 
-         if( bIgnorePeak ){
+         if( bIgnorePeak>0 ){
             double dist_from_peak = fabs( x - par[1] );
-            if( dist_from_peak <= 0.2 ){
+            if( dist_from_peak <= bIgnorePeak ){
                printf("WARNING : ignoring phase bin %.8f - too close to the peak at %.8f\n",x,par[1]);
                bInclude=false;
             }
@@ -439,6 +505,36 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
          }
       }
       fclose(out_f);     
+
+
+   pGraph->GetXaxis()->SetTitleOffset(1.00);
+   pGraph->GetYaxis()->SetTitleOffset(0.60);
+   pGraph->GetXaxis()->SetTitleSize(0.05);
+   pGraph->GetXaxis()->SetLabelSize(0.05);
+   pGraph->GetYaxis()->SetTitleSize(0.05);
+   pGraph->GetYaxis()->SetLabelSize(0.05);
+
+
+   if( szDescX && szDescX[0] ){
+      pGraph->GetHistogram()->SetXTitle( szDescX );
+   }else{
+      pGraph->GetHistogram()->SetXTitle("Channel");
+   }
+   if( szDescY && szDescY[0] ){
+       pGraph->GetHistogram()->SetYTitle( szDescY );
+   }else{
+      pGraph->GetHistogram()->SetYTitle("Power");
+   }
+   // pGraph->GetHistogram()->SetYTitle("sigmaG1_homeo/SigmaG1");
+
+   TLatex lat;
+   lat.SetTextAlign(23);
+   lat.SetTextSize(0.05);
+                                                                                
+   char szDesc[255];
+   sprintf(szDesc,"sigma/mean = %.8f\n",r);
+   
+   return pGraph;
        
 
       double mean_resid = sum_resid / count_resid;
@@ -602,8 +698,9 @@ int ReadResultsFile( const char* fname, Double_t* x_values, Double_t* y_values,
    Int_t all = 0;
    Double_t fval1,fval2,fval3,fval4,fval5,fval6,mag,x,y;
    long lval1,lval2,lval3,lval4;
-   double max_val=-100000;
-   double max_x = -100000;
+   double max_val=-1e20, min_val = 1e20;
+   double max_x = -1e20;
+   double min_x = 1e20;
 
    all=0;
    int ncols=-1;
@@ -672,8 +769,14 @@ int ReadResultsFile( const char* fname, Double_t* x_values, Double_t* y_values,
      if( y_val > max_val ){
         max_val = y_val;
      }
+     if( y_val < min_val ){
+        min_val = y_val;
+     }
      if( x_val > max_x ){
         max_x = x_val;
+     }
+     if( x_val < min_x ){
+        min_x = x_val;
      }
      if( gVerb || 0 ){
         printf("values : %f %f\n",x_val,y_val);
@@ -683,17 +786,12 @@ int ReadResultsFile( const char* fname, Double_t* x_values, Double_t* y_values,
    }
    fclose(fcd);
 
-  
+   gMinX = min_x;
+   gMaxX = max_x;
+   gMinY = min_val;
 
+ 
    printf("max_val = %.4f\n",max_val);
-   if( max_x > 1 ){
-      printf("max_x = %.8f -> normalising to 0 - 1 phase range\n");
-      for(int i=0;i<all;i++){
-         x_values[i] = x_values[i]/max_x;
-      }
-    }
-
-//   exit(0);   
    return all;
 }  
 
@@ -719,19 +817,71 @@ double calc_rms( Double_t* x_values, Double_t* y_values, int cnt, double start=-
 
    double rms = sqrt( sum2/count - (sum/count)*(sum/count) );
    double mean = (sum/count);
-   printf("MEAN = %e\n",mean);
+   printf("MEAN = %e = %e/%d\n",mean,sum,count);
+   printf("RMS  = %e\n",rms);
+  
+   return rms;
+}
+
+double calc_rms_bins( Double_t* x_values, Double_t* y_values, int cnt, int start_bin=0, int end_bin=10 )
+{
+   double sum=0,sum2=0;
+   double maxX=-1000000000;
+   int count=0;
+
+   for(int i=0;i<cnt;i++){
+      double x_val = x_values[i];
+
+      if( i>=start_bin && i<=end_bin ){
+         sum += y_values[i];
+         sum2 += (y_values[i])*(y_values[i]);
+         count++;
+      }
+
+      if( x_val > maxX ){
+         maxX = x_val;
+      }
+   }
+
+   double rms = sqrt( sum2/count - (sum/count)*(sum/count) );
+   double mean = (sum/count);
+   printf("MEAN = %e = %e/%d\n",mean,sum,count);
    printf("RMS  = %e\n",rms);
   
    return rms;
 }
 
 
-double normalise( Double_t* x_values, Double_t* y_values, int cnt, double start=-1, double end=-1, int bSubtractBaseline=false )
+
+void normalise_x( Double_t* x_values, int cnt )
+{
+   double minX = 1e20;
+   double maxX = -1e20;
+
+   for(int i=0;i<cnt;i++){
+      double x_val = x_values[i];
+
+      if( x_val > maxX ){
+         maxX = x_val;
+      }
+      if( x_val < minX ){
+         minX = x_val;
+      }
+   }
+
+   gXaxisNormFactor = (maxX-minX);
+   gXaxisOffset = minX;
+   for(int i=0;i<cnt;i++){
+      x_values[i] = (x_values[i] - gXaxisOffset)/gXaxisNormFactor;
+   }   
+}
+
+
+double normalise_y_meanrms( Double_t* x_values, Double_t* y_values, int cnt, double start=0.00, double end=0.4 )
 {
    double sum=0,sum2=0;
-   double maxX=-1000000000;
-   double maxY=-1000000000;
-   double minX=1e20,minY=1e20;
+   double minY=1e20;
+   double maxY=-1e20;
    int count=0;
 
    for(int i=0;i<cnt;i++){
@@ -743,12 +893,6 @@ double normalise( Double_t* x_values, Double_t* y_values, int cnt, double start=
          count++;
       }    
 
-      if( x_val > maxX ){
-         maxX = x_val;
-      }
-      if( x_val < minX ){
-         minX = x_val;
-      }
       if( y_values[i] > maxY ){
          maxY = y_values[i];
       }
@@ -761,32 +905,67 @@ double normalise( Double_t* x_values, Double_t* y_values, int cnt, double start=
    double mean = (sum/count);
    printf("MEAN = %e (count = %d)\n",mean,count);
    printf("RMS  = %e (count = %d)\n",rms,count);
-   printf("X-axis range : %.8f - %.8f\n",minX,maxX);
    printf("Y-axis range : %.8f - %.8f\n",minY,maxY);
 
-   if( bSubtractBaseline==1 ){
-      for(int i=0;i<cnt;i++){
-         y_values[i] = (y_values[i] - mean)/rms;
-//         x_values[i] = x_values[i]/maxX;
-      }
-   }else{
-     if( bSubtractBaseline == 2 ){
-         for(int i=0;i<cnt;i++){
-            y_values[i] = (y_values[i] - minY)/(maxY-minY);
-            x_values[i] = (x_values[i] - minX)/(maxX-minX);
-         }
-     }
+   for(int i=0;i<cnt;i++){
+      y_values[i] = (y_values[i] - mean)/rms;
    }
 
    gOriginalMean = mean;
    gOriginalRMS = rms;
+   gYaxisOffset = mean;
+   gYaxisNormFactor = rms;
 
    return rms;
 }
 
-void plot_psr_profile( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", int bNormaliseInputData=1, 
-                       const char* fit_func_name="pulse", // pulse, pulse_gauss, pulse_gauss_only
-                       double noise_start=0, double noise_end=10, 
+double normalise_y_minmax( Double_t* x_values, Double_t* y_values, int cnt, double start=0.00, double end=0.4 )
+{
+   double sum=0,sum2=0;
+   double minY=1e20;
+   double maxY=-1e20;
+   int count=0;
+
+   for(int i=0;i<cnt;i++){
+      double x_val = x_values[i];
+
+      if( (start<0 || x_val >= start) && (end<0 || x_val <= end) ){
+         sum += y_values[i];
+         sum2 += (y_values[i])*(y_values[i]);
+         count++;
+      }    
+
+      if( y_values[i] > maxY ){
+         maxY = y_values[i];
+      }
+      if( y_values[i] < minY ){
+         minY = y_values[i];
+      }
+   }
+
+   double rms = sqrt( sum2/count - (sum/count)*(sum/count) );
+   double mean = (sum/count);
+   printf("MEAN = %e (count = %d)\n",mean,count);
+   printf("RMS  = %e (count = %d)\n",rms,count);
+   printf("Y-axis range : %.8f - %.8f\n",minY,maxY);
+
+   gYaxisNormFactor = (maxY-minY);
+   for(int i=0;i<cnt;i++){
+      y_values[i] = (y_values[i] - minY)/gYaxisNormFactor;
+   }
+
+   gOriginalMean = mean;
+   gOriginalRMS = rms;
+   gYaxisOffset = minY;
+
+   return rms;
+}
+
+
+
+void plot_psr_profile( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", int bNormaliseInputData=2, bool bShowOriginalDataWithFit=false,
+                       const char* fit_func_name="pulse_gauss", // pulse, pulse_gauss, pulse_gauss_only
+                       double noise_start=0, double noise_end=0.4, 
                        double sigma_simulated=0.1120, // simulated sigma of noise in Jy , sigma_Stokes_I - for the entire duration of the observation !!!
                        bool bIsSigmaSimulPerPhaseBin=false, // if this is true no need to multiply sigma_simulated by sqrt(n_bins)
                        bool bUseFitResidualsRMS=false, // use residuals of the FIT to calculate Sigma_obs which may be slightly different than 1.00 (after normalisation)
@@ -797,6 +976,12 @@ void plot_psr_profile( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", in
       double fit_min_x=-100000, double fit_max_x=-100000,
       int x_col=0, int y_col=1, const char* outpngfile=NULL )
 {
+   int index;
+   double snr,time;
+   if( sscanf(basename,"pulse%d_snr%lf_time%lfsec.txt",&index,&snr,&time) == 3){
+      printf("SSCANF OK : %d , %.1f %.8f\n",index,snr,time);
+   }
+
    if( !szTitle){
       szTitle = basename;
    }
@@ -837,6 +1022,8 @@ void plot_psr_profile( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", in
 
    Double_t* x_value1 = new Double_t[MAX_ROWS];
    Double_t* y_value1 = new Double_t[MAX_ROWS];
+   Double_t* x_value1_original = new Double_t[MAX_ROWS];
+   Double_t* y_value1_original = new Double_t[MAX_ROWS];
    Double_t* y_value1_err = new Double_t[MAX_ROWS];
    Double_t maxX=-100000,maxY=-100000;   
    Double_t minX=100000,minY=100000;
@@ -847,39 +1034,131 @@ void plot_psr_profile( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", in
 
 
    lq1 = ReadResultsFile( basename, x_value1, y_value1, -1, -1, x_col, y_col ); 
+   for(int i=0;i<lq1;i++){
+      x_value1_original[i] = x_value1[i];
+      y_value1_original[i] = y_value1[i];
+   }
    
    int n_bins = lq1;
-   printf("DEBUG : number of bins = %d\n",n_bins);   
-   gSigmaSimulated = sigma_simulated*sqrt(n_bins); // multiply by sqrt(n_bins) to calculated simulated sigma for single time bin in phase !!!
-   if( bIsSigmaSimulPerPhaseBin ){ 
-      // however if sigma provided is already per phase bin total_obs_time/n_bins seconds -> no need to multiply by number of phase bins:
-      gSigmaSimulated = sigma_simulated;
-      printf("DEBUG : using sigma_simul as provided (per phase bin) = %.6f [Jy]\n",gSigmaSimulated);
+   printf("DEBUG : number of bins = %d\n",n_bins);     
+   double rms = calc_rms_bins( x_value1, y_value1, lq1, 0 , 12 );
+   double rms_original = rms;
+
+   // normalisation of X-axis to [0,1] range is required always to make it
+   // easier to find peak of the flux (~0.5)
+   normalise_x( x_value1, lq1 );
+
+   // normalise by Y-MEAN/RMS
+   if( bNormaliseInputData == 1 ){
+      rms = normalise_y_meanrms( x_value1, y_value1, lq1, 0.00, 0.4  );
    }else{
-      gSigmaSimulated = sigma_simulated*sqrt(n_bins); // multiply by sqrt(n_bins) to calculated simulated sigma for single time bin in phase !!!
-      printf("DEBUG : using provided sigma_simul x sqrt(n_bins=%d) = %.6f * %.6f = %.6f [Jy]\n",n_bins,sigma_simulated,sqrt(double(n_bins)),gSigmaSimulated);
+      if( bNormaliseInputData == 2 ){
+         rms = normalise_y_minmax( x_value1, y_value1, lq1, 0.00, 0.4  );
+      }else{
+         printf("UNKNOWN VALUE of bNormaliseInputData = %d\n",bNormaliseInputData);
+      }
    }
    
-
-   double rms = normalise( x_value1, y_value1, lq1, noise_start, noise_end, bNormaliseInputData );
-
-   printf("DEBUG : zeta0 = %e\n",(gSigmaSimulated/gOriginalRMS));
-   if( bNormaliseInputData ){
-      for(int i=0;i<lq1;i++){
-         y_value1_err[i] = 1.00;
-      }
-   }else{
-     y_value1_err = NULL;
-   }
    printf("Control RMS after re-scaling:\n");
    double rms_new = calc_rms( x_value1, y_value1, lq1, noise_start, noise_end );
+   printf("RMS after rescaling = %.6f in range %.6f - %.6f\n",rms_new,noise_start,noise_end);
+
+   for(int i=0;i<lq1;i++){
+     y_value1_err[i] = rms_new;
+   }
+
 
    
    // drawing background graphs here :
    TGraphErrors* pGraph1 = DrawGraph( x_value1, y_value1, lq1, 1, NULL, fit_func_name, min_y, max_y, szTitle,
                                       basename, bLog, szDescX, szDescY, fit_min_x, fit_max_x, y_value1_err );
    
+   if( gNormaliseInputData > 0 ){
+      double scattering_time_sec = gFittedParameters[4]*gXaxisNormFactor;
+      gScatteringTimeTauMS = scattering_time_sec*1000.00;
+      printf("Scattering time par[4] = %.8f -> re-scaled back = %.8f [sec] = %.8f [ms]\n",gFittedParameters[4],scattering_time_sec,gScatteringTimeTauMS);
+
+      double pulse_width_sec = gFittedParameters[3]*gXaxisNormFactor; 
+      gPulseWidthMS = pulse_width_sec*1000.00;
+      printf("Pulse width par[3] = %.8f -> re-scaled back = %.8f [sec] = %.8f [ms]\n",gFittedParameters[3],pulse_width_sec,gPulseWidthMS);
+   }
+
    c1->Update();
+
+   char szFittedFile[128];
+   sprintf(szFittedFile,"%s.fit",basename);
+   FILE* outf = fopen(szFittedFile,"w");
+   fprintf(outf,"%.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f\n",gFittedParameters[0],gFittedParametersErrors[0],gFittedParameters[1],gFittedParametersErrors[1],gFittedParameters[2],gFittedParametersErrors[2],gFittedParameters[3],gFittedParametersErrors[3],gFittedParameters[4],gFittedParametersErrors[4]);
+   fclose(outf);
+
+//   normalise_x( x_value1_original, lq1 );
+//   normalise_y_minmax( x_value1_original, y_value1_original, lq1, 0.00, 0.4  );
+
+   gFittedParametersOriginalScaling[0] = gFittedParameters[0]*gYaxisNormFactor; // + gYaxisOffset;
+   gFittedParametersOriginalScaling[1] = gFittedParameters[1]*gXaxisNormFactor + gXaxisOffset;
+   gFittedParametersOriginalScaling[2] = gFittedParameters[2]*gYaxisNormFactor/5;
+   gFittedParametersOriginalScaling[3] = gFittedParameters[3]*gXaxisNormFactor;
+   gFittedParametersOriginalScaling[4] = gFittedParameters[4]*gXaxisNormFactor;
+
+   gFittedParametersOriginalScalingErrors[0] = gFittedParametersErrors[0]*gYaxisNormFactor;
+   gFittedParametersOriginalScalingErrors[1] = gFittedParametersErrors[1]*gXaxisNormFactor;
+   gFittedParametersOriginalScalingErrors[2] = gFittedParametersErrors[2]*gYaxisNormFactor;
+   gFittedParametersOriginalScalingErrors[3] = gFittedParametersErrors[3]*gXaxisNormFactor;
+   gFittedParametersOriginalScalingErrors[4] = gFittedParametersErrors[4]*gXaxisNormFactor;
+
+   printf("PARAMETERS SCALED BACK:\n");
+   printf("par[0] = %.8f (SNR_offset)\n",gFittedParametersOriginalScaling[0]);
+   printf("par[1] = %.8f [sec] (peak time)\n",gFittedParametersOriginalScaling[1]);
+   printf("par[2] = %.8f (peak flux)\n",gFittedParametersOriginalScaling[2]);
+   printf("par[3] = %.8f [sec] (sigma_gauss = pulse width)\n",gFittedParametersOriginalScaling[3]);
+   printf("par[4] = %.8f [sec] (scattering time, decay tau)\n",gFittedParametersOriginalScaling[4]);
+
+   sprintf(szFittedFile,"%s.fit_scaled_back",basename);
+   outf = fopen(szFittedFile,"w");
+   fprintf(outf,"%.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f\n",gFittedParametersOriginalScaling[0],gFittedParametersOriginalScalingErrors[0],gFittedParametersOriginalScaling[1],gFittedParametersOriginalScalingErrors[1],gFittedParametersOriginalScaling[2],gFittedParametersOriginalScalingErrors[2],gFittedParametersOriginalScaling[3],gFittedParametersOriginalScalingErrors[3],gFittedParametersOriginalScaling[4],gFittedParametersOriginalScalingErrors[4]);
+   fclose(outf);
+
+   printf("Scaling factors for:\n");
+   printf("X-axis %.8f\n",gXaxisNormFactor);
+   printf("Y-axis %.8f\n",gYaxisNormFactor);
+
+   if( bShowOriginalDataWithFit ){
+      // plot original data:
+      TCanvas* c2 = new TCanvas("c2","xxxx",200,10,700,500);
+      c2->SetGridx();
+      c2->SetGridy();
+      c2->SetFillColor(0);
+      c2->SetFillStyle(0);
+      if( bLog ){
+         c2->SetLogy(1);
+      }
+      // just subtract baselines :
+      for(int i=0;i<lq1;i++){
+         y_value1_original[i] = y_value1_original[i] - gYaxisOffset;
+      }
+
+      for(int i=0;i<lq1;i++){
+         y_value1_err[i] = rms_original;
+      }
+
+      printf("DEBUG : using rms_original = %.8f\n",rms_original);
+      TGraphErrors* pGraph2 = DrawGraph( x_value1_original, y_value1_original, lq1, 1, NULL, fit_func_name, 0.00, max_y, szTitle,
+                                         basename, bLog, szDescX, szDescY, fit_min_x, fit_max_x, y_value1_err, gFittedParametersOriginalScaling, 0.01/2.00 ); // gFittedParametersOriginalScaling[4]*2.00 );
+
+      TF1* line_original_data = new TF1("fit_func_test",Pulse_with_gauss_onset_original,gMinX,gMaxX,gFittedParametersN);
+//   TF1* line_original_data = new TF1("fit_func_test",Pulse_with_gauss_onset_original,0,1,gFittedParametersN);
+      line_original_data->SetParameters(gFittedParametersOriginalScaling);
+      printf("DEBUG : %.8f\n",line_original_data->Eval( x_value1_original[0] ));
+      line_original_data->Draw("same");
+      c2->Update();
+
+      sprintf(szFittedFile,"%s.refit",basename);
+      outf = fopen(szFittedFile,"w");
+      fprintf(outf,"%.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.1f %.2f\n",gFittedParameters[0],gFittedParametersErrors[0],gFittedParameters[1],gFittedParametersErrors[1],gFittedParameters[2],gFittedParametersErrors[2],gFittedParameters[3],gFittedParametersErrors[3],gFittedParameters[4],gFittedParametersErrors[4],snr,gFinalChi2);
+      fclose(outf);
+   }
+
+
 
    TString szPngName1="images/";
    if( outpngfile ){
