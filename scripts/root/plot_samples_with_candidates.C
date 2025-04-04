@@ -327,7 +327,7 @@ int ReadResultsFile( const char* fname, Double_t* x_values, Double_t* y_values,
 
    Int_t all = 0;
    Double_t fval1,fval2,fval3,fval4,fval5,fval6,mag,x,y;
-   long lval1,lval2,lval3,lval4;
+   long lval1=0,lval2=0,lval3=0,lval4=0;
 
    all=0;
    int ncols=-1;

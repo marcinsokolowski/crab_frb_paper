@@ -374,7 +374,7 @@ int ReadResultsFile( const char* fname, Double_t* x_values, Double_t* y_values,
      if( y_val > max_val ){
        max_val = y_val;
      }
-     if( gVerb || 0 ){
+     if( gVerb ){
            printf("values : %f %f\n",x_val,y_val);
           }
 

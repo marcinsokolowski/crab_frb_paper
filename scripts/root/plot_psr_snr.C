@@ -498,7 +498,9 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
          if( bIgnorePeak>0 ){
             double dist_from_peak = fabs( x - par[1] );
             if( dist_from_peak <= bIgnorePeak ){
-               printf("WARNING : ignoring phase bin %.8f - too close to the peak at %.8f\n",x,par[1]);
+               if( gVerb > 0 ){
+                  printf("WARNING : ignoring phase bin %.8f - too close to the peak at %.8f\n",x,par[1]);
+               }
                bInclude=false;
             }
          }
@@ -539,7 +541,7 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
       double sum=0.00;
       for(int i=0;i<numVal;i++){
           if( x_values[i]>=minX && x_values[i]<=maxX ){
-             printf("DEBUG2 : %d %.8f %.8f\n",i,x_values[i],y_values[i]);
+             if(0){printf("DEBUG2 : %d %.8f %.8f\n",i,x_values[i],y_values[i]);}
              sum += y_values[i];
           }
       }
@@ -565,7 +567,7 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
       double x_left = -1;
       double x_right = -1;      
       double t = start_x;
-      while( t < end_x ){
+/*      while( t < end_x ){
          double fitval = line_draw->Eval( t );
          printf("SEARCH : %.6f %.8f\n",t,fitval);
 
@@ -585,7 +587,7 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
          }
 
          t += dt;
-      }
+      }*/
       printf("PULSE FWHM %.8f - %.8f -> width = %.8f [ms]\n",x_left,x_right,(x_right-x_left)*1000.00);
 
    if( bSaveFit ){
@@ -871,7 +873,7 @@ int ReadResultsFile( const char* fname, Double_t* x_values, Double_t* y_values,
      if( x_val < min_x ){
         min_x = x_val;
      }
-     if( gVerb || 1 ){
+     if( gVerb || false ){
         printf("values : %f %f\n",x_val,y_val);
      }
 

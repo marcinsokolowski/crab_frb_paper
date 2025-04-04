@@ -90,7 +90,7 @@ void rfifind( const char* fname, double rfi_threshold=10.00, double low=0, doubl
             char* ptr=NULL;
             char* search_ptr=buff;
             int col=0;
-            while( ptr = strtok(search_ptr," \t") ){
+            while( (ptr = strtok(search_ptr," \t")) ){
                search_ptr = NULL;
                if( gVerb ){
                   printf("ptr = %s\n",ptr);
@@ -166,7 +166,7 @@ void rfifind( const char* fname, double rfi_threshold=10.00, double low=0, doubl
             char* ptr=NULL;
             char* search_ptr=buff;
             int col=0;
-            while( ptr = strtok(search_ptr," \t") ){
+            while( (ptr = strtok(search_ptr," \t")) ){
                search_ptr = NULL;
                if( gVerb ){
                   printf("ptr = %s\n",ptr);
@@ -199,7 +199,7 @@ void rfifind( const char* fname, double rfi_threshold=10.00, double low=0, doubl
      }
    }
 
-   printf("Number of rejected (Power > -35 dBm) = %d out of %d = %.8f \%\n",rejected,cnt,((double)rejected)/((double)cnt));
+//   printf("Number of rejected (Power > -35 dBm) = %d out of %d = %.8f \%\n",rejected,cnt,((double)rejected)/((double)cnt));
 
 
    TCanvas* c1 = new TCanvas("c1","plot",200,10,1800,1200);
@@ -286,7 +286,7 @@ void rfifind( const char* fname, double rfi_threshold=10.00, double low=0, doubl
    }else{
       FILE* out = fopen("sigma.txt","a+");
       // filename SIGMA MEAN NORMALIZATION AVG RMS
-      fprintf(out,"%s %.8f %.8f %.8f %.8f %.8f %d\n",flag,0,histo->GetMean(),histo->GetRMS(),histo->GetMean(),histo->GetRMS(),unix_time);
+      fprintf(out,"%s %.8f %.8f %.8f %.8f %.8f %d\n",flag,0.00,histo->GetMean(),histo->GetRMS(),histo->GetMean(),histo->GetRMS(),unix_time);
       fclose(out);
    }
 

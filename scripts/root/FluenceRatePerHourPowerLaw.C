@@ -200,7 +200,7 @@ void FluenceRatePerHourPowerLaw( const char* fname, double TotalTimeInHours=0.99
          char* ptr=NULL;
          char* search_ptr=buff;
          int col=0;
-         while( ptr = strtok(search_ptr," \t") ){
+         while( (ptr = strtok(search_ptr," \t")) ){
             search_ptr = NULL;
             if( gVerb ){
                printf("ptr = %s\n",ptr);
@@ -265,7 +265,7 @@ void FluenceRatePerHourPowerLaw( const char* fname, double TotalTimeInHours=0.99
             char* ptr=NULL;
             char* search_ptr=buff;
             int col=0;
-            while( ptr = strtok(search_ptr," \t") ){
+            while( (ptr = strtok(search_ptr," \t")) ){
                search_ptr = NULL;
                if( gVerb ){
                   printf("ptr = %s\n",ptr);
@@ -302,7 +302,7 @@ void FluenceRatePerHourPowerLaw( const char* fname, double TotalTimeInHours=0.99
    // normalise to have number of pulses per hour
    histo->Scale(1/TotalTimeInHours);
 
-   printf("Number of rejected (Power > -35 dBm) = %d out of %d = %.8f \%\n",rejected,cnt,((double)rejected)/((double)cnt));
+   printf("Number of rejected (Power > -35 dBm) = %d out of %d = %.8f %%\n",rejected,cnt,((double)rejected)/((double)cnt));
         printf("DEBUG : ok2 ???\n");
 
 
@@ -363,7 +363,7 @@ void FluenceRatePerHourPowerLaw( const char* fname, double TotalTimeInHours=0.99
    printf("Histogram exported to file %s\n",gOutHistoFile);
 
    double par[3];
-   Double_t parerrors=NULL;
+   Double_t parerrors=0.00;
    Double_t fit_norm=0.00,fit_exp=0.00;
    Double_t fit_norm_err=0.00,fit_exp_err=0.00;
 
@@ -392,7 +392,7 @@ void FluenceRatePerHourPowerLaw( const char* fname, double TotalTimeInHours=0.99
       
       max_bin = histo->GetMaximumBin();
       max_value = histo->GetBinContent( max_bin );
-      printf("max_value = %d\n",max_value);
+      printf("max_value = %.8f\n",max_value);
       char szDesc[256];
       fit_norm = par[0];
       fit_exp  = par[1];
@@ -422,7 +422,7 @@ void FluenceRatePerHourPowerLaw( const char* fname, double TotalTimeInHours=0.99
    }else{
       FILE* out = fopen("sigma.txt","a+");
       // filename SIGMA MEAN NORMALIZATION AVG RMS
-      fprintf(out,"%s %.8f %.8f %.8f %.8f %.8f %d\n",flag,0,histo->GetMean(),histo->GetRMS(),histo->GetMean(),histo->GetRMS(),unix_time);
+      fprintf(out,"%s %.8f %.8f %.8f %.8f %.8f %d\n",flag,0.00,histo->GetMean(),histo->GetRMS(),histo->GetMean(),histo->GetRMS(),unix_time);
       fclose(out);
    }
 

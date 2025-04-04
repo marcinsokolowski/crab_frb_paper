@@ -255,6 +255,33 @@ Double_t Convolution_MyIntegral( Double_t* x, Double_t* y )
    return calka + offset;   
 }
 
+Double_t LinearPulse( Double_t* x, Double_t* y )
+{
+   Double_t t = x[0];
+
+   Double_t offset = y[0];
+   Double_t t0 = y[1];           // start of the pulse
+   Double_t t_peak = y[2];
+   Double_t peak_flux = y[3];
+   Double_t tau = y[4];
+
+   double delta_t = fabs(t_peak - t0);
+   double t1 = t_peak + delta_t;
+
+   double flux = 0.00;
+   if( fabs(t-t_peak) <= delta_t ){
+      if( t<t_peak ){
+         double a = peak_flux / ( t_peak - t0 );
+         flux = a*( t - t0 );  
+      }else{
+//         double a = peak_flux / ( t1 - t_peak );
+//         flux = a*( t1 - t );
+         flux = 0.00;
+      }
+   }
+
+   return flux + offset;
+}
 
 Double_t Convolution_MyIntegral_LinearOnset( Double_t* x, Double_t* y )
 {
@@ -278,24 +305,42 @@ Double_t Convolution_MyIntegral_LinearOnset( Double_t* x, Double_t* y )
    // Pulse_with_gauss_onset
    // Pulse_with_linear_onset
 
-   if( t <= t_peak ){
-      double a = peak_flux / ( t_peak - t0 );
-      double flux = a*(t - t0 );      
+// WORKING :
+/*   if( t > t0 ){
+      if( t <= t_peak ){
+         double a = peak_flux / ( t_peak - t0 );
+         double flux = a*(t - t0 );      
 
-      return flux;
+         return flux + offset;
+      }else{
+         double exp_tail = peak_flux*exp( - (t-t_peak) / tau );
+         return exp_tail + offset;
+      }
+   }*/
+  
+/*   if( t <= t0 ){ 
+      return offset;
+   }*/
+
+//   return LinearPulse( x, y );
+
+   if( t <= t_peak ){
+//      double a = peak_flux / ( t_peak - t0 );
+//      double flux = a*(t - t0 );
+
+//      return flux + offset;
+      return LinearPulse( x, y );
    }
 
    // integral from -INF to t 
    double calka = 0.00;
    while( t_prim <= t_peak ){
-//      double onset = exp(-0.5*(t_prim - t_peak)*(t_prim - t_peak)/(sigma2) );
-//      double exp_tail = exp( - (t-t_prim) / tau );   
-
-      // Gaussian onset :
-//      calka += exp( -0.5*(t_prim - t_peak)*(t_prim - t_peak)/(sigma2) - (t-t_prim) / tau );
-      double a = peak_flux / ( t_peak - t0 );
-      double flux = a*(t - t0 );  
+//      double a = peak_flux / ( t_peak - t0 );
+//      double flux = a*(t_prim - t0 );  
      
+//      calka += flux*exp( - (t-t_prim) / tau );
+      
+      double flux = LinearPulse( x, y );
       calka += flux*exp( - (t-t_prim) / tau );
 
       t_prim += dt;
@@ -541,8 +586,6 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
          printf("Fitting pulsar Gauss-convolved-exp profile in the range : %.6f - %.6f\n",fit_min_x,fit_max_x);
          line = new TF1("fit_func",Convolution_MyIntegral,fit_min_x,fit_max_x,5);
          line_draw = new TF1("fit_func2",Convolution_MyIntegral,minX,maxX,5);
-//         line = new TF1("fit_func",Convolution_MyIntegral_LinearOnset,fit_min_x,fit_max_x,5);
-//         line_draw = new TF1("fit_func2",Convolution_MyIntegral_LinearOnset,minX,maxX,5);
          local_func=1;
 
          // Gaussian 
@@ -575,6 +618,39 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
          line->SetParName(4,"#tau");
 
       }
+
+      if( strcmp( fit_func_name, "convolution_lin_onset" )==0 ){
+         printf("Fitting pulsar Gauss-convolved-exp profile in the range : %.6f - %.6f\n",fit_min_x,fit_max_x);
+         line = new TF1("fit_func",Convolution_MyIntegral_LinearOnset,fit_min_x,fit_max_x,5);
+         line_draw = new TF1("fit_func2",Convolution_MyIntegral_LinearOnset,minX,maxX,5);
+         local_func=1;
+
+         // Linear onset : 
+         par[0] = 0;
+         par[1] = maxYarg - 0.005;
+         par[2] = maxYarg;
+         par[3] = maxY*0.5;
+         par[4] = 0.002; // very long decay ...
+
+ 
+
+/*         if( init_params ){
+            par[0] = init_params[0];
+            par[1] = init_params[1];
+            par[2] = init_params[2];
+            par[3] = init_params[3];
+            par[4] = init_params[4];
+         }*/
+
+         line->SetParName(0,"SNR offset");
+         line->SetParName(1,"t_0");
+         line->SetParName(2,"t_{peak}");
+         line->SetParName(3,"f_{peak}");
+         line->SetParName(4,"#tau");
+
+      }
+
+
 
       if( strcmp( fit_func_name, "pulse_gauss_only" )==0 ){
          printf("Fitting pulsar pulse_gauss profile in the range : %.6f - %.6f ( %.8f - %.8f )\n",fit_min_x,fit_max_x,fit_min_x,fit_max_x);

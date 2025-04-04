@@ -196,7 +196,7 @@ void SNRRatePerHourPowerLaw( const char* fname, double TotalTimeInHours=0.998768
          char* ptr=NULL;
          char* search_ptr=buff;
          int col=0;
-         while( ptr = strtok(search_ptr," \t") ){
+         while( (ptr = strtok(search_ptr," \t")) ){
             search_ptr = NULL;
             if( gVerb ){
                printf("ptr = %s\n",ptr);
@@ -261,7 +261,7 @@ void SNRRatePerHourPowerLaw( const char* fname, double TotalTimeInHours=0.998768
             char* ptr=NULL;
             char* search_ptr=buff;
             int col=0;
-            while( ptr = strtok(search_ptr," \t") ){
+            while( (ptr = strtok(search_ptr," \t")) ){
                search_ptr = NULL;
                if( gVerb ){
                   printf("ptr = %s\n",ptr);
@@ -298,7 +298,7 @@ void SNRRatePerHourPowerLaw( const char* fname, double TotalTimeInHours=0.998768
 // normalise to have number of pulses per hour
    histo->Scale(1/TotalTimeInHours);
 
-   printf("Number of rejected (Power > -35 dBm) = %d out of %d = %.8f \%\n",rejected,cnt,((double)rejected)/((double)cnt));
+   printf("Number of rejected (Power > -35 dBm) = %d out of %d = %.8f %%\n",rejected,cnt,((double)rejected)/((double)cnt));
         printf("DEBUG : ok2 ???\n");
 
 

@@ -919,7 +919,7 @@ int ReadResultsFile( const char* fname, Double_t* x_values, Double_t* y_values,
      if( x_val < min_x ){
         min_x = x_val;
      }
-     if( gVerb || 0 ){
+     if( gVerb ){
         printf("values : %f %f\n",x_val,y_val);
      }
 
@@ -1104,7 +1104,7 @@ double normalise_y_minmax( Double_t* x_values, Double_t* y_values, int cnt, doub
 
 
 
-void plot_psr_profile_TEST( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", int bNormaliseInputData=2, bool bShowOriginalDataWithFit=false,
+void plot_psr_profile( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", int bNormaliseInputData=2, bool bShowOriginalDataWithFit=false,
                        const char* fit_func_name="pulse_gauss", // pulse, pulse_gauss, pulse_gauss_only
                        double noise_start=0, double noise_end=0.4, 
                        double sigma_simulated=0.1120, // simulated sigma of noise in Jy , sigma_Stokes_I - for the entire duration of the observation !!!
@@ -1211,7 +1211,7 @@ void plot_psr_profile_TEST( const char* basename="sigmaG1_vs_lapSigmaG1_for_root
 
    
    // drawing background graphs here :
-   TGraphErrors* pGraph1 = DrawGraph( x_value1, y_value1, lq1, 1, NULL, NULL, min_y, max_y, szTitle,
+   TGraphErrors* pGraph1 = DrawGraph( x_value1, y_value1, lq1, 1, NULL, fit_func_name, min_y, max_y, szTitle,
                                       basename, bLog, szDescX, szDescY, fit_min_x, fit_max_x, y_value1_err );
    
    if( gNormaliseInputData > 0 ){

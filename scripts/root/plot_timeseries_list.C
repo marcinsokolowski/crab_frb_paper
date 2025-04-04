@@ -165,7 +165,7 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
 
     TGraphErrors* pGraph = new TGraphErrors(q);
     for(int i=0;i<numVal;i++){
-       if( gVerb && 0 ){
+       if( gVerb && false ){
            printf("DrawGraph : %d : %f %f\n",i, x_values[i], y_values[i] );
         }
 
@@ -458,7 +458,7 @@ int ReadResultsFile( const char* fname, Double_t* x_values, Double_t* y_values, 
 
    Int_t all = 0;
    Double_t fval1,fval2,fval3,fval4,fval5,fval6,mag,x,y;
-   long lval1,lval2,lval3,lval4;
+   long lval1=0,lval2=0,lval3=0,lval4=0;
 
    double sum20mhz=0.00;
    double total_sum=0.00;
@@ -487,7 +487,7 @@ int ReadResultsFile( const char* fname, Double_t* x_values, Double_t* y_values, 
       char* ptr=NULL;
       char* search_ptr=buff;
       int col=0;
-      while( ptr = strtok(search_ptr," \t") ){
+      while( (ptr = strtok(search_ptr," \t")) ){
          search_ptr = NULL;
          if( gVerb ){
               printf("ptr = %s\n",ptr);
@@ -618,7 +618,7 @@ int ReadResultsFileMerged( const char* fname, Double_t* x_values, Double_t* y_va
       char* ptr=NULL;
       char* search_ptr=buff;
       int col=0;      
-      while( ptr = strtok(search_ptr," \t") ){
+      while( (ptr = strtok(search_ptr," \t")) ){
          search_ptr = NULL;
          if( gVerb ){
               printf("ptr = %s\n",ptr);
@@ -769,7 +769,7 @@ void plot_timeseries_list( const char* basename="list.txt",
       double min_x=-100, double max_x=1e20 )
 {
    if( maxRows >= MAX_ROWS ){
-      printf("ERROR : maxRows = %ld >= limit = %ld -> decrease the second parameter or edit the script and increase MAX_ROWS value\n",maxRows,MAX_ROWS);
+      printf("ERROR : maxRows = %d >= limit = %ld -> decrease the second parameter or edit the script and increase MAX_ROWS value\n",maxRows,(long int)MAX_ROWS);
       return;
    }
 
