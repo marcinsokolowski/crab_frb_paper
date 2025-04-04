@@ -142,14 +142,14 @@ cd merged/
 mkdir -p images/
 # plot distribution of calibrated mean peak flux density :
 cp  ~/github/crab_frb_paper/scripts/root/FluRatePerHourPowerLaw.C .
-root -l "FluRatePerHourPowerLaw.C(\"presto_norfi_fluxcal.cand_normal\",${total_time_hour})"
+root -l "FluRatePerHourPowerLaw.C(\"presto_norfi_fluxcal.cand_normal\",${total_time_hour},0,500,100000)"
 
 cp ~/github/crab_frb_paper/scripts/root/SpectralLuminosity_DistrPowerLaw.C .
-root -l "SpectralLuminosity_DistrPowerLaw.C(\"presto_norfi_fluxcal.cand_normal\",${total_time_hour})"
+root -l "SpectralLuminosity_DistrPowerLaw.C(\"presto_norfi_fluxcal.cand_normal\",${total_time_hour},1.5e23,2e25,100,2e24,2e25)"
 
 # plots SNR distribution 
 cp  ~/github/crab_frb_paper/scripts/root/SNRRatePerHourPowerLaw.C .
-root -l "SNRRatePerHourPowerLaw.C(\"presto.cand_normal_snr\",${total_time_hour})"
+root -l "SNRRatePerHourPowerLaw.C(\"presto.cand_normal_snr\",${total_time_hour},0,10,500)"
 
 # plot N GPs vs. time :
 cp ~/github/crab_frb_paper/scripts/root/plot_ngps_vs_time_error.C .
