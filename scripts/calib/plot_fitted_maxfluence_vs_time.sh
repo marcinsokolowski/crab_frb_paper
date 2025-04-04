@@ -1,6 +1,6 @@
 #!/bin/bash
 
-postfix=fitmin600.00_fitted_fluence_1col.txt
+postfix=fitmin800.00_fitted_fluence_1col.txt
 if [[ -n "$1" && "$1" != "-" ]]; then
    postfix="$1"
 fi
