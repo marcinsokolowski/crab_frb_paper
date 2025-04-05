@@ -140,7 +140,8 @@ const char* change_ext(const char* name,const char* new_ext,char* out)
 
 void SpectralLuminosity_DistrPowerLaw( const char* fname, double TotalTimeInHours=0.998768602,
                 double low=1.5e23, double up=2e25, int bin_no=100,
-                double fit_min_x=1e24, double fit_max_x=2e25,
+                double fit_min_x=1e24, double fit_max_x=2e25, bool bAutoFitRange=false,
+                double fit_min_flux=500,
                 int column=0,
                 int dofit=1, int dDbm2DbmPerHz=1,
                 const char* szExtDesc=NULL, int shift_text=0, int channel=0,
@@ -182,6 +183,12 @@ void SpectralLuminosity_DistrPowerLaw( const char* fname, double TotalTimeInHour
 
    // Crab pulsar parameters : 
    double jy2erg = 4.31941*1e21;   
+
+   if( bAutoFitRange ){
+      printf("Minimum fitting range is calculated automatically:\n");
+      fit_min_x = fit_min_flux*jy2erg;
+      printf("Minimum Spectral Luminosity : %e (AUTO-calculated)\n",fit_min_x);
+   }
    
    while (1) {
          if(fgets(buff,lSize,fcd)==0)
@@ -310,8 +317,8 @@ void SpectralLuminosity_DistrPowerLaw( const char* fname, double TotalTimeInHour
 // normalise to have number of pulses per hour
    histo->Scale(1/TotalTimeInHours);
 
-   printf("Number of rejected (Power > -35 dBm) = %d out of %d = %.8f \%\n",rejected,cnt,((double)rejected)/((double)cnt));
-        printf("DEBUG : ok2 ???\n");
+//   printf("Number of rejected (Power > -35 dBm) = %d out of %d = %.8f \%\n",rejected,cnt,((double)rejected)/((double)cnt));
+//        printf("DEBUG : ok2 ???\n");
 
 
    TCanvas* c1 = new TCanvas("c1","plot",10,10,3500,1200);

@@ -21,6 +21,10 @@ if [[ -n "$4" && "$4" != "-" ]]; then
    base_path="$4"
 fi
 
+fluence_completness_threshold=1400 # Jy ms see 20250405_tests_of_completness_threshold.odt Figures 1 and 4 
+flux_completness_threshold=500 # Jy see 20250405_tests_of_completness_threshold.odt Figure 3 
+snr_completness_threshold=10
+
 echo "###################################"
 echo "PARAMETERS:"
 echo "###################################"
@@ -28,6 +32,10 @@ echo "analysis_dir = $analysis_dir"
 echo "outdir    = $outdir"
 echo "min_good_time = $min_good_time"
 echo "base_path = $base_path"
+echo "Completness thresholds for fitting power laws to distributions :"
+echo "    Fluence >= $fluence_completness_threshold [Jy ms]"
+echo "    Flux    >= flux_completness_threshold [Jy]"
+echo "    SNR     >= $snr_completness_threshold"
 echo "###################################"
 
 
@@ -43,7 +51,8 @@ total_time_sec=`grep "Time per file" 202?_??_??_pulsars_msok/${analysis_dir}/upd
 total_time_hour=`grep "Time per file" 202?_??_??_pulsars_msok/${analysis_dir}/updated.hdr | awk -v sum=0.00 '{sum+=$7;}END{print sum/3600.00;}'`
 
 echo "Total observing time = $total_time_hour [hours]"
-# sleep 5
+echo "PLEASE DOUBLE CHECK THIS"
+sleep 5
 
 mkdir -p ${outdir}/merged/
 
@@ -142,14 +151,14 @@ cd merged/
 mkdir -p images/
 # plot distribution of calibrated mean peak flux density :
 cp  ~/github/crab_frb_paper/scripts/root/FluRatePerHourPowerLaw.C .
-root -l "FluRatePerHourPowerLaw.C(\"presto_norfi_fluxcal.cand_normal\",${total_time_hour},0,500,100000)"
+root -l "FluRatePerHourPowerLaw.C(\"presto_norfi_fluxcal.cand_normal\",${total_time_hour},0,${flux_completness_threshold},100000)"
 
 cp ~/github/crab_frb_paper/scripts/root/SpectralLuminosity_DistrPowerLaw.C .
-root -l "SpectralLuminosity_DistrPowerLaw.C(\"presto_norfi_fluxcal.cand_normal\",${total_time_hour},1.5e23,2e25,100,2e24,2e25)"
+root -l "SpectralLuminosity_DistrPowerLaw.C(\"presto_norfi_fluxcal.cand_normal\",${total_time_hour},1.5e23,2e25,100,2e24,2e25,true,${flux_completness_threshold})"
 
 # plots SNR distribution 
 cp  ~/github/crab_frb_paper/scripts/root/SNRRatePerHourPowerLaw.C .
-root -l "SNRRatePerHourPowerLaw.C(\"presto.cand_normal_snr\",${total_time_hour},0,10,500)"
+root -l "SNRRatePerHourPowerLaw.C(\"presto.cand_normal_snr\",${total_time_hour},0,${snr_completness_threshold},500)"
 
 # plot N GPs vs. time :
 cp ~/github/crab_frb_paper/scripts/root/plot_ngps_vs_time_error.C .
@@ -177,8 +186,9 @@ read -p "Show plots of fluence distribution for every night ? [y/n]: " answer
 if [[ $answer == "n" || $answer == "N" ]]; then
    root_options="-l -q -b"
 fi
-echo "~/github/crab_frb_paper/scripts/calib/replot_fluence_vs_time.sh - \"${root_options}\""
-~/github/crab_frb_paper/scripts/calib/replot_fluence_vs_time.sh - "${root_options}"
+
+echo "~/github/crab_frb_paper/scripts/calib/replot_fluence_vs_time.sh - \"${root_options}\" - ${fluence_completness_threshold}"
+~/github/crab_frb_paper/scripts/calib/replot_fluence_vs_time.sh - "${root_options}" - ${fluence_completness_threshold}
 
 
 # Plot max fluence vs. time :
@@ -200,4 +210,8 @@ cd ${base_path}/crab_full_analysis_final/merged
 awk '{print $1" "$3}' taumean_vs_time.txt > taumean_vs_time_2col.txt
 correlate_files taumean_vs_time_2col.txt merged-ngps_vs_uxtime.txt Ngps_vs_taufit.txt -i 3600 -c 2
 root -l "plot_ngps_vs_tau.C(\"Ngps_vs_taufit.txt\")"
+
+# MPs and IPs :
+echo "~/github/crab_frb_paper/scripts/calib/plot_fluence_mp_and_ip_all.sh - ${total_time_hour} ${fluence_completness_threshold}"
+~/github/crab_frb_paper/scripts/calib/plot_fluence_mp_and_ip_all.sh - ${total_time_hour} ${fluence_completness_threshold}
 
