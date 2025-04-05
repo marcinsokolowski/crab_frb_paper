@@ -443,7 +443,7 @@ void plot_maxfluence_vs_time( const char* basename="sigmaG1_vs_lapSigmaG1_for_ro
                            const char* basename2=NULL,
                            int min_local_time=-1e6, int max_local_time=1e6,
                const char* fit_func_name=NULL, double min_y=0, 
-               double max_y=20000, int bLog=1,
+               double max_y=100000, int bLog=1,
       const char* szDescX="Local Time",const char* szDescY="Max fluence [Jy ms]", const char* szTitle=NULL,
       int b_percent=0,
       double fit_min_x=-100000, double fit_max_x=-100000,

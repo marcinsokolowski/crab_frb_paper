@@ -201,14 +201,14 @@ echo "~/github/crab_frb_paper/scripts/calib/plot_fitted_maxfluence_vs_time.sh"
 
 
 # Scattering vs. time :
-cd ${base_path}/
+# cd ${base_path}/
+cd ${base_path}/${outdir}/merged
 echo "~/github/crab_frb_paper/scripts/calib/scattering_time_from_all_fits.sh"
 ~/github/crab_frb_paper/scripts/calib/scattering_time_from_all_fits.sh 
 
 # scattering vs. number of GPs :
-cd ${base_path}/crab_full_analysis_final/merged
 awk '{print $1" "$3}' taumean_vs_time.txt > taumean_vs_time_2col.txt
-correlate_files taumean_vs_time_2col.txt merged-ngps_vs_uxtime.txt Ngps_vs_taufit.txt -i 3600 -c 2
+correlate_files taumean_vs_time_2col.txt ngps_vs_uxtime.txt Ngps_vs_taufit.txt -i 3600 -c 2
 root -l "plot_ngps_vs_tau.C(\"Ngps_vs_taufit.txt\")"
 
 # MPs and IPs :

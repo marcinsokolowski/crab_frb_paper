@@ -25,6 +25,7 @@ if [[ -n "$1" && "$1" != "-" ]]; then
    maxsnr_template="$1"
 fi
 
+curr_path=`pwd`
 
 for dir in `ls -d ${template}`
 do
@@ -73,7 +74,7 @@ do
      cd -
 done
 
-
+cd $curr_path
 
 path=/media/msok/5508b34c-040a-4dce-a8ff-2c4510a5d1a3/eda2/202?_??_??_pulsars_msok/J0534+2200_flagants_ch40_ch256/256/filterbank_msok_64ch/merged_channels_??????????/presto_sps_thresh5_numdms10_dmstep0.01/merged/pulses_snr5_calibrated/
 cat ${path}/taufit.txt | awk '{if($1!="#"){print  $7" 86400 "$3*1000" "$2*1000;}}' > taugauss_vs_time.txt
