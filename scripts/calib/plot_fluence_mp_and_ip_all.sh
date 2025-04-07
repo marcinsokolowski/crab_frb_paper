@@ -14,6 +14,8 @@ if [[ -n "$3" && "$3" != "-" ]]; then
    fluence_completness_threshold=$3
 fi
 
+root_options="-l"
+
 echo "cat ${template}/mp_fluence.txt > mp_fluence_all.txt"
 cat ${template}/mp_fluence.txt > mp_fluence_all.txt
 

@@ -20,6 +20,14 @@ if [[ -n "$4" && "$4" != "-" ]]; then
    fluence_completness_threshold=$4
 fi
 
+min_good_time=1300 # or perhaps should be 3000 seconds ? Allow 2024-12-14 to be used !
+# TotalGoodTimeInSec.txt
+if [[ -n "$5" && "$5" != "-" ]]; then
+   min_good_time="$5"
+fi
+
+
+
 FullTotalTimeInSec=0
 
 if [[ $do_fitting -gt 0 ]]; then
@@ -49,7 +57,7 @@ if [[ $do_fitting -gt 0 ]]; then
          
       cd -
 
-      if [[ $TotalTimeSeconds -gt 2500 ]]; then      
+      if [[ $TotalTimeSeconds -gt $min_good_time ]]; then      
          cat ${dir}/fitted_fluence_1col.txt >> fitted_fluence.all
          cat ${dir}/calibrated_fluence.txt >> calibrated_fluence.all
          
@@ -57,6 +65,9 @@ if [[ $do_fitting -gt 0 ]]; then
          echo "DEBUG : FullTotalTimeInSec = $FullTotalTimeInSec [sec]"
       fi
    done
+   
+   echo "DEBUG : fitting of all fluence distributions completed, Total Time = $FullTotalTimeInSec [sec]"
+   sleep 5
 else 
    echo "WARNING : fitting is not required"
 fi   

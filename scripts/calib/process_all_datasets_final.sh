@@ -47,10 +47,12 @@ ls -ald 202?_??_??_pulsars_msok/${analysis_dir}/updated.hdr
 # sleep 5
 
 # calculate total time :
-total_time_sec=`grep "Time per file" 202?_??_??_pulsars_msok/${analysis_dir}/updated.hdr | awk -v sum=0.00 '{sum+=$7;}END{print sum;}'`
-total_time_hour=`grep "Time per file" 202?_??_??_pulsars_msok/${analysis_dir}/updated.hdr | awk -v sum=0.00 '{sum+=$7;}END{print sum/3600.00;}'`
+total_time_sec=`cat 202?_??_??_pulsars_msok/${analysis_dir}/TotalGoodTimeInSec.txt | awk -v sum=0.00 -v min_good_time=$min_good_time '{if($1>=min_good_time){sum+=$1;}}END{print sum;}'`
+total_time_hour=`cat 202?_??_??_pulsars_msok/${analysis_dir}/TotalGoodTimeInSec.txt | awk -v sum=0.00 -v min_good_time=$min_good_time '{if($1>=min_good_time){sum+=$1;}}END{print sum/3600.00;}'`
+all_obs_total_time_sec=`grep "Time per file" 202?_??_??_pulsars_msok/${analysis_dir}/updated.hdr | awk -v sum=0.00 -v min_good_time=$min_good_time '{sum+=$7;}END{print sum;}'`
+all_obs_total_time_hours=`echo $all_obs_total_time_sec | awk '{print $1/3600.00;}'`
 
-echo "Total observing time = $total_time_hour [hours]"
+echo "Total observing time = $total_time_hour [hours] (of of all time $all_obs_total_time_hours [hours])"
 echo "PLEASE DOUBLE CHECK THIS"
 sleep 5
 
@@ -60,10 +62,18 @@ for dataset in `ls -d 202?_??_??_pulsars_msok/${analysis_dir}`
 do
    cd ${dataset}
    echo
-   merged_dir=`ls -d ../J0534+2200_flagants_ch40_ch256/256/filterbank_msok_64ch/merged_channels_??????????/presto_sps_thresh5_numdms10_dmstep0.01/merged | tail -1`
-   pwd
-   echo "ln -sf ${merged_dir}" 
-   ln -sf ${merged_dir}
+   count_dir=`ls -d ../J0534+2200_flagants_ch40_ch256/256/filterbank_msok_64ch/merged_channels_??????????/presto_sps_thresh5_numdms10_dmstep0.01/merged 2>/dev/null | wc -l`
+   if [[ $count_dir -gt 0 ]]; then
+      merged_dir=`ls -d ../J0534+2200_flagants_ch40_ch256/256/filterbank_msok_64ch/merged_channels_??????????/presto_sps_thresh5_numdms10_dmstep0.01/merged | tail -1`
+      pwd
+      echo "ln -sf ${merged_dir}" 
+      ln -sf ${merged_dir}      
+   else
+      echo "WARNING : directory ../J0534+2200_flagants_ch40_ch256/256/filterbank_msok_64ch/merged_channels_??????????/presto_sps_thresh5_numdms10_dmstep0.01/merged does not exist in :"
+      pwd
+      echo " -> skipped"
+      sleep 1
+   fi
    cd -   
 done
 
@@ -84,6 +94,7 @@ echo "# UXTIME  FLUX_NORM FLUX_POWER_LAW_IDX NORM_ERR IDX_ERR - - OBSTIME" > ${o
 echo "# UXTIME  LUMIN_NORM LUMIN_POWER_LAW_IDX NORM_ERR IDX_ERR - - OBSTIME" > ${outdir}/merged/lumin_vs_time.txt
 echo "# UXTIME  SNR_NORM SNR_POWER_LAW_IDX NORM_ERR IDX_ERR - - OBSTIME" > ${outdir}/merged/snr_vs_time.txt
 
+FullTotalTimeInSec=0
 for dir in `ls -d 202?_??_??_pulsars_msok/${analysis_dir}/`
 do
 #   dir=`dirname $snrfile`
@@ -91,6 +102,9 @@ do
    total_good_time=`cat ${dir}/TotalGoodTimeInSec.txt | awk '{print int($1);}'`
 
    if [[ $total_good_time -gt $min_good_time ]]; then   
+      FullTotalTimeInSec=$(($FullTotalTimeInSec+$total_good_time))
+      echo "DEBUG : FullTotalTimeInSec = $FullTotalTimeInSec [sec]"
+   
       echo 
       echo "Processing dataset = $dataset, dir = $dir"
       obsduration_hours=`cat ${dir}/updated.hdr | grep "Time per file" | awk '{print $6/3600.00;}'`
@@ -151,14 +165,14 @@ cd merged/
 mkdir -p images/
 # plot distribution of calibrated mean peak flux density :
 cp  ~/github/crab_frb_paper/scripts/root/FluRatePerHourPowerLaw.C .
-root -l "FluRatePerHourPowerLaw.C(\"presto_norfi_fluxcal.cand_normal\",${total_time_hour},0,${flux_completness_threshold},100000)"
+root -l "FluRatePerHourPowerLaw.C(\"presto_norfi_fluxcal.cand_normal\",${total_time_hour},0,${flux_completness_threshold},20000,1,1,90,20000)"
 
 cp ~/github/crab_frb_paper/scripts/root/SpectralLuminosity_DistrPowerLaw.C .
-root -l "SpectralLuminosity_DistrPowerLaw.C(\"presto_norfi_fluxcal.cand_normal\",${total_time_hour},1.5e23,2e25,100,2e24,2e25,true,${flux_completness_threshold})"
+root -l "SpectralLuminosity_DistrPowerLaw.C(\"presto_norfi_fluxcal.cand_normal\",${total_time_hour},1.5e23,1e26,100,2e24,1e26,true,${flux_completness_threshold})"
 
 # plots SNR distribution 
 cp  ~/github/crab_frb_paper/scripts/root/SNRRatePerHourPowerLaw.C .
-root -l "SNRRatePerHourPowerLaw.C(\"presto.cand_normal_snr\",${total_time_hour},0,${snr_completness_threshold},500)"
+root -l "SNRRatePerHourPowerLaw.C(\"presto.cand_normal_snr\",${total_time_hour},0,${snr_completness_threshold},500,1,1,0,300)"
 
 # plot N GPs vs. time :
 cp ~/github/crab_frb_paper/scripts/root/plot_ngps_vs_time_error.C .
