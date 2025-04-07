@@ -81,7 +81,7 @@ cat ${template}/fitted_fluence_1col.txt.fit_results_fit_range_${fluence_completn
 
 # root -l "plot_plidx_vs_time_error.C(\"fittedfluence_index_vs_time_fit_range_1000-10000.txt\",-6,0,\"Fluence index (fit range >1000 Jy ms) [Integral of fit]\")"
 # root -l "plot_plidx_vs_time_error.C(\"fittedfluence_index_vs_time_fit_range_600-10000.txt\",-6,0,\"Fluence index (fit range >600 Jy ms) [Integral of fit]\")"
-root -l "plot_plidx_vs_time_error.C(\"fittedfluence_index_vs_time_fit_range_${fluence_completness_threshold}-10000.txt\",-6,0,\"Fluence index (fit range >${fluence_completness_threshold} Jy ms) [Integral of fit]\")"
+root -l "plot_plidx_vs_time_error.C(\"fittedfluence_index_vs_time_fit_range_${fluence_completness_threshold}-10000.txt\",-6,0,\"Fluence index (fit range >${fluence_completness_threshold} Jy ms) [Integral of fit]\",0,2,3)"
 
 # cat ${template}/calibrated_fluence.txt.fit_results_fit_range_600.00-10000.00 | awk '{print $7" "1800" "$2" "$4}' > calibratedfluence_index_vs_time_fit_range_600-10000.txt
 # cat ${template}/calibrated_fluence.txt.fit_results_fit_range_800.00-10000.00 | awk '{print $7" "1800" "$2" "$4}' > calibratedfluence_index_vs_time_fit_range_800-10000.txt
@@ -89,7 +89,7 @@ cat ${template}/calibrated_fluence.txt.fit_results_fit_range_${fluence_completne
 
 # root -l "plot_plidx_vs_time_error.C(\"calibratedfluence_index_vs_time_fit_range_1000-10000.txt\",-6,0,\"Fluence index (fit range >1000 Jy ms) [fluence from data]\")"
 # root -l "plot_plidx_vs_time_error.C(\"calibratedfluence_index_vs_time_fit_range_600-10000.txt\",-6,0,\"Fluence index (fit range >600 Jy ms) [fluence from data]\")"
-root -l "plot_plidx_vs_time_error.C(\"calibratedfluence_index_vs_time_fit_range_${fluence_completness_threshold}-10000.txt\",-6,0,\"Fluence index (fit range >${fluence_completness_threshold} Jy ms) [fluence from data]\")"
+root -l "plot_plidx_vs_time_error.C(\"calibratedfluence_index_vs_time_fit_range_${fluence_completness_threshold}-10000.txt\",-6,0,\"Fluence index (fit range >${fluence_completness_threshold} Jy ms) [fluence from data]\",0,2,3)"
 
 
 # plot and fit ditribution of fluence from all nights :
