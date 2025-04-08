@@ -234,6 +234,8 @@ Double_t Convolution_MyIntegral( Double_t* x, Double_t* y )
    Double_t infinity_value = 0.1;
    Double_t t_prim = t_peak - infinity_value;
    Double_t dt = 1e-5; // -9 ???
+   Double_t pi = TMath::Pi();
+   Double_t tau_d = TMath::Power( tau, 3.00/5.00 );
  
 
    // Pulse_with_gauss_onset
@@ -244,9 +246,12 @@ Double_t Convolution_MyIntegral( Double_t* x, Double_t* y )
    while( t_prim <= t ){
 //      double onset = exp(-0.5*(t_prim - t_peak)*(t_prim - t_peak)/(sigma2) );
 //      double exp_tail = exp( - (t-t_prim) / tau );   
+      
+//      double exp_tail = sqrt( pi*tau*tau*tau / 4.00 )* TMath::Power( (t-t_prim) , 5.00/2.00 )*exp( -(pi*pi)*tau/(4.00*(t-t_prim)) );
+//      double exp_tail = TMath::Power( tau_d/(t-t_prim) , 5.00/2.00 )*exp( -(pi*pi)*tau/(4.00*(t-t_prim)) );
 
       // Gaussian onset :
-      calka += exp( -0.5*(t_prim - t_peak)*(t_prim - t_peak)/(sigma2) - (t-t_prim) / tau );
+      calka += exp( -0.5*(t_prim - t_peak)*(t_prim - t_peak)/(sigma2) - (t-t_prim) / tau ); // 1/tau here is absorbed into norm or rather peak_flux (y[2]) parameter 
 
       t_prim += dt;
    }
@@ -254,6 +259,52 @@ Double_t Convolution_MyIntegral( Double_t* x, Double_t* y )
 
    return calka + offset;   
 }
+
+Double_t ConvolutionB_MyIntegral( Double_t* x, Double_t* y )
+{
+   Double_t t = x[0];
+
+   Double_t offset = y[0];
+   Double_t t_peak = y[1];
+   Double_t peak_flux = y[2];
+   Double_t sigma = y[3];
+   Double_t tau = y[4];
+
+   double norm = peak_flux*(1.00/sqrt(sigma*2*TMath::Pi()));
+   double sigma2 = sigma*sigma;
+
+
+   Double_t infinity_value = 0.1;
+   Double_t t_prim = t_peak - infinity_value;
+   Double_t dt = 1e-5; // -9 ???
+   Double_t pi = TMath::Pi();
+   Double_t tau_d = TMath::Power( tau, 3.00/5.00 );
+ 
+
+   // Pulse_with_gauss_onset
+   // Pulse_with_linear_onset
+
+   // integral from -INF to t 
+   double calka = 0.00;
+   while( t_prim <= t ){
+      double onset = exp(-0.5*(t_prim - t_peak)*(t_prim - t_peak)/(sigma2) );
+//      double exp_tail = exp( - (t-t_prim) / tau );   
+      
+//      double exp_tail = sqrt( pi*tau*tau*tau / 4.00 )* TMath::Power( (t-t_prim) , 5.00/2.00 )*exp( -(pi*pi)*tau/(4.00*(t-t_prim)) );
+      double exp_tail = TMath::Power( tau_d/(t-t_prim) , 5.00/2.00 )*exp( -(pi*pi)*tau/(4.00*(t-t_prim)) );
+
+      // Gaussian onset :
+//      calka += exp( -0.5*(t_prim - t_peak)*(t_prim - t_peak)/(sigma2) - (t-t_prim) / tau ); // 1/tau here is absorbed into norm or rather peak_flux (y[2]) parameter 
+      calka += onset * exp_tail;
+
+      t_prim += dt;
+   }
+   calka = norm*calka*dt;
+
+   return calka + offset;   
+}
+
+
 
 Double_t LinearPulse( Double_t* x, Double_t* y )
 {
@@ -586,6 +637,43 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
          printf("Fitting pulsar Gauss-convolved-exp profile in the range : %.6f - %.6f\n",fit_min_x,fit_max_x);
          line = new TF1("fit_func",Convolution_MyIntegral,fit_min_x,fit_max_x,5);
          line_draw = new TF1("fit_func2",Convolution_MyIntegral,minX,maxX,5);
+         local_func=1;
+
+         // Gaussian 
+         par[0] = 0.00; // offset (mean off-pulse)
+         par[1] = maxYarg; // t_peak  0.53 for the MWA data
+         par[2] = maxY; // peak flux 
+         par[3] = 0.001; // sigma 
+         par[4] = 0.002; // very long decay ... - 10 for MWA fit 
+
+         // Linear onset : 
+/*         par[0] = 0.00; // offset (mean off-pulse)
+         par[1] = maxYarg - 0.001/2.00;
+         par[2] = maxYarg;        
+         par[3] = maxY;
+         par[4] = 0.002;*/
+ 
+
+/*         if( init_params ){
+            par[0] = init_params[0];
+            par[1] = init_params[1];
+            par[2] = init_params[2];
+            par[3] = init_params[3];
+            par[4] = init_params[4];
+         }*/
+
+         line->SetParName(0,"SNR offset");
+         line->SetParName(1,"t_{peak}");
+         line->SetParName(2,"f_{peak}");
+         line->SetParName(3,"#sigma_{gauss}");
+         line->SetParName(4,"#tau");
+
+      }
+
+      if( strcmp( fit_func_name, "convolution_b" )==0 ){
+         printf("Fitting pulsar Gauss-convolved-exp profile in the range : %.6f - %.6f\n",fit_min_x,fit_max_x);
+         line = new TF1("fit_func",ConvolutionB_MyIntegral,fit_min_x,fit_max_x,5);
+         line_draw = new TF1("fit_func2",ConvolutionB_MyIntegral,minX,maxX,5);
          local_func=1;
 
          // Gaussian 
@@ -1213,7 +1301,7 @@ void plot_psr_profile_TEST( const char* basename="sigmaG1_vs_lapSigmaG1_for_root
    // drawing background graphs here :
    TGraphErrors* pGraph1 = DrawGraph( x_value1, y_value1, lq1, 1, NULL, NULL, min_y, max_y, szTitle,
                                       basename, bLog, szDescX, szDescY, fit_min_x, fit_max_x, y_value1_err );
-   
+
    if( gNormaliseInputData > 0 ){
       double scattering_time_sec = gFittedParameters[4]*gXaxisNormFactor;
       gScatteringTimeTauMS = scattering_time_sec*1000.00;
