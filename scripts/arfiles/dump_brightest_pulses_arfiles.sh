@@ -10,6 +10,11 @@ if [[ -n "$2" && "$2" != "-" ]]; then
    template="$2"
 fi
 
+remote_drive="/data_archive/"
+if [[ -n "$3" && "$3" != "-" ]]; then
+   remote_drive="$3"
+fi
+
 
 # was presto.txt in merged/
 presto_pulse_file=_DM56.72.singlepulse
@@ -55,8 +60,8 @@ do
          subdir=`echo $merged_dir | awk '{i=index($0,"20");print substr($0,i,59);}'`
       
          if [[ $do_scp -gt 0 ]]; then
-            echo "rsync -avP MAX_SNR_LINE*txt aavs@nimbus4:/data_archive/${subdir}/"
-            rsync -avP MAX_SNR_LINE*txt aavs@nimbus4:/data_archive/${subdir}/
+            echo "rsync -avP MAX_SNR_LINE*txt aavs@nimbus4:${remote_drive}/${subdir}/"
+            rsync -avP MAX_SNR_LINE*txt aavs@nimbus4:${remote_drive}/${subdir}/
             
             echo "sleep 10"
             sleep 10
