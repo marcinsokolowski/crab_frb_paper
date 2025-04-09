@@ -14,18 +14,24 @@ root_options="-l -b -q" # -b -q
 curr_path=`pwd`
 for datadir in `ls -d ${template}`
 do
+   dir_up=`dirname $datadir`
+
    echo
    cd $datadir
    good_time=-1
-   if [[ -s ../TotalGoodTimeInSec.txt ]]; then
-      good_time=`cat ../TotalGoodTimeInSec.txt | awk '{printf("%d\n",$1);}'`
+   if [[ -s ${dir_up}/TotalGoodTimeInSec.txt ]]; then
+      good_time=`cat ${dir_up}/TotalGoodTimeInSec.txt | awk '{printf("%d\n",$1);}'`
    else
-      echo "WARNING : unknown good time -> dataset skipped"
+      echo "ERROR : unknown good time -> dataset skipped"
+      exit;
    fi
    
    uxtime=-1
-   if [[ -s ../../J0534+2200_flagants_ch40_ch256/256/UNIXTIME.txt ]]; then
-      uxtime=`cat ../../J0534+2200_flagants_ch40_ch256/256/UNIXTIME.txt`
+   if [[ -s ${dir_up}/../J0534+2200_flagants_ch40_ch256/256/UNIXTIME.txt ]]; then
+      uxtime=`cat ${dir_up}/../J0534+2200_flagants_ch40_ch256/256/UNIXTIME.txt`
+   else
+      echo "ERROR : could not find file ${dir_up}/../J0534+2200_flagants_ch40_ch256/256/UNIXTIME.txt"
+      exit
    fi
    ut=`date2date -ux2ut=${uxtime}`
    
