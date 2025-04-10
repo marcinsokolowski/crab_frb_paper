@@ -90,8 +90,8 @@ def main() :
    ax1.set_ylabel(r'Scattering Time ($\tau$) [ms]',fontsize=20)
    ax1.plot( x_arr, y_arr, color=color, marker='+', linestyle='None' )
    
-   corr_pearsons, _ = pearsonr( x_arr, y_arr )    
-   print('Pearsons correlation: %.3f' % corr_pearsons)
+   corr_pearsons, pvalue = pearsonr( x_arr, y_arr )    
+   print('Pearsons correlation: %.3f, pvalue = %.3f' % (corr_pearsons,pvalue))
    
    corr_spearmans, _ = spearmanr( x_arr, y_arr )
    print('Spearmans correlation: %.3f' % corr_spearmans)
