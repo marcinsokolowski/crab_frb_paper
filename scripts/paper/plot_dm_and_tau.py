@@ -7,7 +7,7 @@ import pylab
 
 pylab.rc('font', family='serif', size=20)
 
-def read_data_file( filename ) :
+def read_data_file( filename, errors=True ) :
    print("read_data(%s) ..." % (filename))
    file=open(filename,'r')
 
@@ -31,15 +31,21 @@ def read_data_file( filename ) :
       
       if line[0] != "#" :
 #         print line[:-1]
-         x=float(words[0+0])
-         x_err=float(words[1+0])
-         y=float(words[2+0])
-         y_err=float(words[3+0])
+         if errors : 
+            x=float(words[0+0])
+            x_err=float(words[1+0])
+            y=float(words[2+0])
+            y_err=float(words[3+0])
+         else :
+            x=float(words[0+0])
+            y=float(words[1+0])
 
          x_arr.append(x)
          y_arr.append(y)
-         x_err_arr.append(x_err)
-         y_err_arr.append(y_err)
+         
+         if errors : 
+            x_err_arr.append(x_err)
+            y_err_arr.append(y_err)
          cnt += 1
 
          if x > max_x :
@@ -47,7 +53,10 @@ def read_data_file( filename ) :
          if x < min_x :
             min_x = x
 
-   return (np.array(x_arr),np.array(x_err),np.array(y_arr),np.array(y_err),min_x,max_x)
+   if errors :
+      return (np.array(x_arr),np.array(x_err),np.array(y_arr),np.array(y_err),min_x,max_x)
+   else :
+      return (np.array(x_arr),np.array(y_arr),min_x,max_x)
 
 def ux2mjd( ux_arr ) :
    t_arr = Time( ux_arr, format='unix')      
@@ -64,13 +73,16 @@ def main() :
    if len(sys.argv) > 2:
       tau_filename1 = sys.argv[2]
 
-      
+   jodrell_bank="jodrell_bank_crab_dm_vs_ux.txt"      
       
    (x_arr,x_err,y_arr,y_err,min_x,max_x) = read_data_file( filename )   
    x_arr_mjd = ux2mjd( x_arr )
    
    (tau1_t_arr,tau1_t_err,tau1_arr,tau1_err,tau1_min,tau1_max) = read_data_file( tau_filename1 )
    tau1_arr_mjd = ux2mjd( tau1_t_arr )
+   
+   (jb_ux,jb_ux_err,jb_dm,jb_dm_err,jb_dm_max,jb_dm_min) = read_data_file( jodrell_bank, errors=True )
+   jb_mjd = ux2mjd( jb_ux )
 #   tau1_arr = tau1_arr - 5.00
 
    # Create some mock data
@@ -89,6 +101,9 @@ def main() :
    ax1.set_ylabel('DM - 56.705825 [pc/cm$^3$]', color=color, fontsize=20)
 #   ax1.plot(t, data1, color=color, marker='+', linestyle='None' )
    ax1.errorbar( x_arr_mjd, y_arr, yerr=y_err, fmt='o', color=color )
+#   if len(jb_mjd) > 0 :
+#   ax1.plot( jb_mjd, jb_dm, fmt='o', color='tab:black' )
+   ax1.plot( jb_mjd, jb_dm, marker='*', color=color, markersize=12 )
    ax1.tick_params(axis='y', labelcolor=color)
 #   ax1.yaxis.get_label().set_fontsize(40)
    #adjust position of x-axis label
@@ -103,6 +118,8 @@ def main() :
    ax2.tick_params(axis='y', labelcolor=color)
 #   ax2.yaxis.get_label().set_fontsize(40)
    ax2.yaxis.set_label_coords(+1.09, .5)
+   
+   
 
    fig.tight_layout()  # otherwise the right y-label is slightly clipped
    plt.show()
