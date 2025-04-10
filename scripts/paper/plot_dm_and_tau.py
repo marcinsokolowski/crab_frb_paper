@@ -86,7 +86,7 @@ def main() :
 
    color = 'tab:red'
    ax1.set_xlabel('MJD [days]',fontsize=20)
-   ax1.set_ylabel('DM - 56.72 [pc/cm$^3$]', color=color, fontsize=20)
+   ax1.set_ylabel('DM - 56.705825 [pc/cm$^3$]', color=color, fontsize=20)
 #   ax1.plot(t, data1, color=color, marker='+', linestyle='None' )
    ax1.errorbar( x_arr_mjd, y_arr, yerr=y_err, fmt='o', color=color )
    ax1.tick_params(axis='y', labelcolor=color)
