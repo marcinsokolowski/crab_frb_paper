@@ -2,6 +2,10 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import sys
+from astropy.time import Time
+import pylab
+
+pylab.rc('font', family='serif', size=20)
 
 def read_data_file( filename ) :
    print("read_data(%s) ..." % (filename))
@@ -45,6 +49,12 @@ def read_data_file( filename ) :
 
    return (np.array(x_arr),np.array(x_err),np.array(y_arr),np.array(y_err),min_x,max_x)
 
+def ux2mjd( ux_arr ) :
+   t_arr = Time( ux_arr, format='unix')      
+   mjd_arr = t_arr.to_value('mjd')
+   
+   return mjd_arr
+
 def main() :
    filename="DM_vs_UX.txt"
    if len(sys.argv) > 1:
@@ -57,7 +67,10 @@ def main() :
       
       
    (x_arr,x_err,y_arr,y_err,min_x,max_x) = read_data_file( filename )   
+   x_arr_mjd = ux2mjd( x_arr )
+   
    (tau1_t_arr,tau1_t_err,tau1_arr,tau1_err,tau1_min,tau1_max) = read_data_file( tau_filename1 )
+   tau1_arr_mjd = ux2mjd( tau1_t_arr )
 #   tau1_arr = tau1_arr - 5.00
 
    # Create some mock data
@@ -73,18 +86,23 @@ def main() :
 
    color = 'tab:red'
    ax1.set_xlabel('MJD [days]',fontsize=20)
-   ax1.set_ylabel('DM - 56.72 [pc/cm^3]', color=color, fontsize=20)
+   ax1.set_ylabel('DM - 56.72 [pc/cm$^3$]', color=color, fontsize=20)
 #   ax1.plot(t, data1, color=color, marker='+', linestyle='None' )
-   ax1.errorbar(x_arr, y_arr, yerr=y_err, fmt='o', color=color )
+   ax1.errorbar( x_arr_mjd, y_arr, yerr=y_err, fmt='o', color=color )
    ax1.tick_params(axis='y', labelcolor=color)
+#   ax1.yaxis.get_label().set_fontsize(40)
+   #adjust position of x-axis label
+   ax1.yaxis.set_label_coords(-0.1, .5)
 
    ax2 = ax1.twinx()  # instantiate a second Axes that shares the same x-axis
 
    color = 'tab:blue'
-   ax2.set_ylabel('Scattering Time #tau [ms]', color=color, fontsize=20)  # we already handled the x-label with ax1
+   ax2.set_ylabel(r'Scattering Time ($\tau$) [ms]', color=color, fontsize=20)  # we already handled the x-label with ax1
 #   ax2.plot(t, data2, color=color)
-   ax2.errorbar(tau1_t_arr, tau1_arr, yerr=tau1_err, fmt='+', color=color )
+   ax2.errorbar( tau1_arr_mjd, tau1_arr, yerr=tau1_err, fmt='+', color=color )
    ax2.tick_params(axis='y', labelcolor=color)
+#   ax2.yaxis.get_label().set_fontsize(40)
+   ax2.yaxis.set_label_coords(+1.09, .5)
 
    fig.tight_layout()  # otherwise the right y-label is slightly clipped
    plt.show()
