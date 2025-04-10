@@ -1,0 +1,94 @@
+# https://matplotlib.org/stable/gallery/subplots_axes_and_figures/two_scales.html
+import matplotlib.pyplot as plt
+import numpy as np
+import sys
+
+def read_data_file( filename ) :
+   print("read_data(%s) ..." % (filename))
+   file=open(filename,'r')
+
+   # reads the entire file into a list of strings variable data :
+   data=file.readlines()
+   # print data
+
+   # initialisation of empty lists :
+   x_arr=[]
+   y_arr=[]
+   x_err_arr=[]
+   y_err_arr=[]
+   min_x=1e20
+   max_x=-1e20
+   cnt=0
+   for line in data : 
+      words = line.split(' ')
+
+      if line[0] == '#' or line[0]=='\n' or len(line) <= 0 or len(words)<2 :
+         continue
+      
+      if line[0] != "#" :
+#         print line[:-1]
+         x=float(words[0+0])
+         x_err=float(words[1+0])
+         y=float(words[2+0])
+         y_err=float(words[3+0])
+
+         x_arr.append(x)
+         y_arr.append(y)
+         x_err_arr.append(x_err)
+         y_err_arr.append(y_err)
+         cnt += 1
+
+         if x > max_x :
+            max_x = x
+         if x < min_x :
+            min_x = x
+
+   return (np.array(x_arr),np.array(x_err),np.array(y_arr),np.array(y_err),min_x,max_x)
+
+def main() :
+   filename="DM_vs_UX.txt"
+   if len(sys.argv) > 1:
+      filename = sys.argv[1]
+      
+   tau_filename1="taumean_vs_time.txt"
+   if len(sys.argv) > 2:
+      tau_filename1 = sys.argv[2]
+
+      
+      
+   (x_arr,x_err,y_arr,y_err,min_x,max_x) = read_data_file( filename )   
+   (tau1_t_arr,tau1_t_err,tau1_arr,tau1_err,tau1_min,tau1_max) = read_data_file( tau_filename1 )
+#   tau1_arr = tau1_arr - 5.00
+
+   # Create some mock data
+#   t = np.arange(0.01, 10.0, 0.01)
+#   data1 = np.exp(t)
+#   data2 = np.sin(2 * np.pi * t)
+   t = x_arr
+   data1 = y_arr
+   data2 = np.sin(2 * np.pi * x_arr ) 
+   
+
+   fig, ax1 = plt.subplots()
+
+   color = 'tab:red'
+   ax1.set_xlabel('MJD [days]',fontsize=20)
+   ax1.set_ylabel('DM - 56.72 [pc/cm^3]', color=color, fontsize=20)
+#   ax1.plot(t, data1, color=color, marker='+', linestyle='None' )
+   ax1.errorbar(x_arr, y_arr, yerr=y_err, fmt='o', color=color )
+   ax1.tick_params(axis='y', labelcolor=color)
+
+   ax2 = ax1.twinx()  # instantiate a second Axes that shares the same x-axis
+
+   color = 'tab:blue'
+   ax2.set_ylabel('Scattering Time #tau [ms]', color=color, fontsize=20)  # we already handled the x-label with ax1
+#   ax2.plot(t, data2, color=color)
+   ax2.errorbar(tau1_t_arr, tau1_arr, yerr=tau1_err, fmt='+', color=color )
+   ax2.tick_params(axis='y', labelcolor=color)
+
+   fig.tight_layout()  # otherwise the right y-label is slightly clipped
+   plt.show()
+
+if __name__ == "__main__":
+   main()
+   
