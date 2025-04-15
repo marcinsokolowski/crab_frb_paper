@@ -13,7 +13,10 @@ import errno
 import getopt
 import optparse
 
+# is it useful ???
 import powerlaw
+
+import scipy.optimize as optimization
 
 pylab.rc('font', family='serif', size=20)
 
@@ -119,6 +122,9 @@ def ux2mjd( ux_arr ) :
    
    return mjd_arr
 
+def my_power_law(x, n, a):
+    return n*(x/10.00)**a
+
 def main() :
    mp_filename="mp_fluence_all_JyS.txt"
    if len(sys.argv) > 1:
@@ -147,7 +153,7 @@ def main() :
    mp_counts,mp_bin_edges = np.histogram(mp_arr,20)
    mp_bin_centres = (mp_bin_edges[:-1] + mp_bin_edges[1:])/2.
    mp_err=np.sqrt(mp_counts)
-   print("DEBUG : %d vs. %d vs. %d vs. %d" % (len(mp_arr),len(mp_bin_centres),len(mp_counts),len(mp_err)))
+   print("DEBUG : %d vs. %d vs. %d vs. %d" % (len(mp_arr),len(mp_bin_centres),len(mp_counts),len(mp_err)))   
 
    mp_fit_results = powerlaw.Fit( mp_arr , xmin=options.fit_min )
 #   mp_fit_results.power_law.plot_pdf( mp_arr )
@@ -184,6 +190,10 @@ def main() :
    
    # scaled by number of rotations -> to make it per rotation
    ax1.errorbar( mp_bin_centres, mp_counts/PulsarPeriods, yerr=mp_err/PulsarPeriods, fmt='o', color=color )
+#   print(optimization.curve_fit( my_power_law, mp_bin_centres, mp_counts/PulsarPeriods, [1e-7,-3], mp_err/PulsarPeriods))
+#   print(optimization.curve_fit( my_power_law, mp_bin_centres, mp_counts, [1.00,-3], mp_err )) # , bounds=(2,10000000.0)))
+#   print(mp_counts)
+   
    ax1.errorbar( ip_bin_centres, ip_counts/PulsarPeriods, yerr=ip_err/PulsarPeriods, fmt='o', color='blue' )
 #   ax1.errorbar( mp_bin_centres, mp_counts, yerr=mp_err, fmt='o', color=color )
 #   ax1.errorbar( ip_bin_centres, ip_counts, yerr=ip_err, fmt='o', color='blue' )
