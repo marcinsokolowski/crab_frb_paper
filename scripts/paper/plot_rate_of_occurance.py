@@ -26,6 +26,7 @@ def parse_options(idx):
    parser.add_option("--obstime","--total_time",dest="obstime",default=66.8028,help="Total observing time in hours [default: %default]",type="float")
    parser.add_option("--period","--pulsar_period_sec","--pp_sec",dest="pulsar_period_sec",default=0.0333924123,help="Pulsar period in seconds [default: %default]",type="float")
    parser.add_option("--fit_min","--fit_min_x","--xmin",dest="fit_min",default=2.00,help="Minimum of the fit [default: %default]",type="float")
+   parser.add_option("-n","--n_bins","--n_bin","--nbin","--nbins",dest="nbins",default=100,help="Number of histogram bins [default: %default]",type="int")
 
    (options,args)=parser.parse_args(sys.argv[idx:])
 
@@ -143,14 +144,13 @@ def main() :
    PulsarPeriods = (options.obstime*3600.00)/options.pulsar_period_sec;
    print("Number of pulsar rotations = %.4f" % (PulsarPeriods));
 
-   
-   
+      
    print("READ %d MPs from file %s" % (len(mp_arr),mp_filename))
    print("READ %d IPs from file %s" % (len(ip_arr),ip_filename))
 #   tau1_arr = tau1_arr - 5.00
 
    # MPs :
-   mp_counts,mp_bin_edges = np.histogram(mp_arr,20)
+   mp_counts,mp_bin_edges = np.histogram(mp_arr,options.nbins,range=(0.09,50))
    mp_bin_centres = (mp_bin_edges[:-1] + mp_bin_edges[1:])/2.
    mp_err=np.sqrt(mp_counts)
    print("DEBUG : %d vs. %d vs. %d vs. %d" % (len(mp_arr),len(mp_bin_centres),len(mp_counts),len(mp_err)))   
@@ -162,7 +162,7 @@ def main() :
    R_mp, p_mp = mp_fit_results.distribution_compare('power_law', 'lognormal')
 
    # IPs :
-   ip_counts,ip_bin_edges = np.histogram(ip_arr,20)
+   ip_counts,ip_bin_edges = np.histogram(ip_arr,options.nbins,range=(0.09,50))
    ip_bin_centres = (ip_bin_edges[:-1] + ip_bin_edges[1:])/2.
    ip_err=np.sqrt(ip_counts)
    print("DEBUG : %d vs. %d vs. %d vs. %d" % (len(ip_arr),len(ip_bin_centres),len(ip_counts),len(ip_err)))
@@ -229,6 +229,24 @@ def main() :
          
       plt.text(1100,y,s)
 
+   # over plot fitted power laws see : page 2 in /home/msok/Desktop/SKA/papers/2024/EDA2_FRBs/20250411_rate_of_occurance_PAPER.odt 
+   # fits are in ROOT because they give proper errors, while I cannot see it in package powerlaw ...
+   # MP fit:
+   # /media/msok/5508b34c-040a-4dce-a8ff-2c4510a5d1a3/eda2/crab_full_analysis_final/merged/PAPER_PLOTS/Fluence_distrib/RateOfOccurance
+   # root [2] .x FluenceRateOfOccurancePowerLaw_PAPER.C("mp_fluence_all_JyS.txt",66.8028,0,1.40,100.000)
+   # 1  p0           3.98003e-06   1.18788e-07  -1.18578e-07   1.18990e-07
+   # 2  p1          -2.80297e+00   2.16837e-02  -2.18970e-02   2.14783e-02
+   plt.plot( mp_bin_centres[1:], my_power_law(mp_bin_centres[1:],3.98003e-06,-2.80297), color="red" )
+   
+   # IP fit:
+   # page 3 in /home/msok/Desktop/SKA/papers/2024/EDA2_FRBs/20250411_rate_of_occurance_PAPER-ONE-PLOT.odt
+   # /media/msok/5508b34c-040a-4dce-a8ff-2c4510a5d1a3/eda2/crab_full_analysis_final/merged/PAPER_PLOTS/Fluence_distrib/RateOfOccurance
+   # root [5] .x FluenceRateOfOccurancePowerLaw_PAPER.C("ip_fluence_all_JyS.txt",66.8028,0,1.40,100.000)
+   # 1  p0           2.22470e-07   2.59854e-08  -2.53392e-08   2.66137e-08
+   # 2  p1          -3.38870e+00   7.95878e-02  -8.16860e-02   7.76838e-02
+   plt.plot( ip_bin_centres[1:], my_power_law(ip_bin_centres[1:],2.22470e-07,-3.38870), color="blue" )
+
+
 
    # matplotlib histogram
 #   plt.hist( mp_arr, color = 'blue', edgecolor = 'black', bins = int(180/5), log=True)
@@ -236,7 +254,7 @@ def main() :
    # seaborn histogram
 #   sns.distplot( mp_arr, hist=True, kde=False, bins=int(180/5), color = 'blue', hist_kws={'edgecolor':'black'} )
    
-   plt.title(' Fluence of Giant Pulses in MP and IP')
+   plt.title(' Fluence of Giant Pulses in main pulse (MP) and inter-pulse (IP)')
 
 #   plt.legend(['GPs from main pulse', 'GPs from interpulse'], loc='best')
    plt.legend(loc='upper left')
