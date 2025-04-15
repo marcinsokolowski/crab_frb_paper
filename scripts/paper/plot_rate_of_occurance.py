@@ -141,10 +141,19 @@ def main() :
    print("READ %d IPs from file %s" % (len(ip_arr),ip_filename))
 #   tau1_arr = tau1_arr - 5.00
 
+   # MPs :
    mp_counts,mp_bin_edges = np.histogram(mp_arr,20)
    mp_bin_centres = (mp_bin_edges[:-1] + mp_bin_edges[1:])/2.
    mp_err=np.sqrt(mp_counts)
    print("DEBUG : %d vs. %d vs. %d vs. %d" % (len(mp_arr),len(mp_bin_centres),len(mp_counts),len(mp_err)))
+
+   # IPs :
+   ip_counts,ip_bin_edges = np.histogram(ip_arr,20)
+   ip_bin_centres = (ip_bin_edges[:-1] + ip_bin_edges[1:])/2.
+   ip_err=np.sqrt(ip_counts)
+   print("DEBUG : %d vs. %d vs. %d vs. %d" % (len(ip_arr),len(ip_bin_centres),len(ip_counts),len(ip_err)))
+
+
    
 #   pp.errorbar(mp_bin_centres, mp_counts, yerr=mp_err, fmt='o', log=True)
 
@@ -156,14 +165,15 @@ def main() :
    plt.xlim((1e-3,1e3))
    plt.ylim((1e-8,0.1))
 
-   color = 'black'
+   color = 'red'
    ax1.set_xlabel('Fluence [Jy s]',fontsize=20)
-   ax1.set_ylabel('Rate of Occurance (per rotation)', color=color, fontsize=20)
+   ax1.set_ylabel('Rate of Occurance (per rotation)', color='black', fontsize=20)
    
    # scaled by number of rotations -> to make it per rotation
    ax1.errorbar( mp_bin_centres, mp_counts/PulsarPeriods, yerr=mp_err/PulsarPeriods, fmt='o', color=color )
+   ax1.errorbar( ip_bin_centres, ip_counts/PulsarPeriods, yerr=ip_err/PulsarPeriods, fmt='o', color='blue' )
 #   ax1.plot( jb_mjd, jb_dm, marker='*', color=color, markersize=12 )
-   ax1.tick_params(axis='y', labelcolor=color)
+   ax1.tick_params(axis='y', labelcolor='black')
 #   ax1.yaxis.get_label().set_fontsize(40)
    #adjust position of x-axis label
    ax1.yaxis.set_label_coords(-0.1, .5)
@@ -176,10 +186,8 @@ def main() :
 #   sns.distplot( mp_arr, hist=True, kde=False, bins=int(180/5), color = 'blue', hist_kws={'edgecolor':'black'} )
    
    plt.title(' Fluence of Giant Pulses in MP and IP')
-#   plt.xlabel('Fluence [Jy ms]')
-#   plt.ylabel('Flights')
 
-
+   plt.legend(['GPs from main pulse', 'GPs from interpulse'], loc='best')
    plt.show()
 
 if __name__ == "__main__":   
