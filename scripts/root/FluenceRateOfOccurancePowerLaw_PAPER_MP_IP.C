@@ -455,6 +455,7 @@ void FluenceRateOfOccurancePowerLaw_PAPER_MP_IP( const char* fname_mp, const cha
 
 
    double fluence_of_oneperhour_pulse_mp = fit_histogram( histo_mp, fname_mp, gOutHistoFile, fit_min_x, fit_max_x, dofit, unix_time );
+   printf("\n\n\n\n\n\n\n\n\n\n");
    double fluence_of_oneperhour_pulse_ip = fit_histogram( histo_ip, fname_ip, gOutHistoFile, fit_min_x, fit_max_x, dofit, unix_time );
 
    if( szOutFile ){   
