@@ -189,12 +189,12 @@ def main() :
    ax1.set_ylabel('Rate of Occurance (per rotation)', color='black', fontsize=20)
    
    # scaled by number of rotations -> to make it per rotation
-   ax1.errorbar( mp_bin_centres, mp_counts/PulsarPeriods, yerr=mp_err/PulsarPeriods, fmt='o', color=color )
+   ax1.errorbar( mp_bin_centres, mp_counts/PulsarPeriods, yerr=mp_err/PulsarPeriods, fmt='o', color=color, label="GPs from main pulse" )
 #   print(optimization.curve_fit( my_power_law, mp_bin_centres, mp_counts/PulsarPeriods, [1e-7,-3], mp_err/PulsarPeriods))
 #   print(optimization.curve_fit( my_power_law, mp_bin_centres, mp_counts, [1.00,-3], mp_err )) # , bounds=(2,10000000.0)))
 #   print(mp_counts)
    
-   ax1.errorbar( ip_bin_centres, ip_counts/PulsarPeriods, yerr=ip_err/PulsarPeriods, fmt='o', color='blue' )
+   ax1.errorbar( ip_bin_centres, ip_counts/PulsarPeriods, yerr=ip_err/PulsarPeriods, fmt='o', color='blue' , label="GPs from inter-pulse")
 #   ax1.errorbar( mp_bin_centres, mp_counts, yerr=mp_err, fmt='o', color=color )
 #   ax1.errorbar( ip_bin_centres, ip_counts, yerr=ip_err, fmt='o', color='blue' )
 
@@ -207,6 +207,28 @@ def main() :
    
 #   mp_fit_results.power_law.plot_pdf( mp_arr, ax=ax1 )
 
+   # add lines at different rates:
+   intervals=[1,10,60,600,3600,36000] # per second
+   for interval in intervals :
+      y=options.pulsar_period_sec/interval
+      plt.axhline(y=y, color='grey', linestyle='--')
+
+
+      if interval == 1 :
+         s = "1 / sec"      
+      elif interval == 60 :
+         s = "1 / min"
+      elif interval == 600 :
+         s = "1 / 10min"
+      elif interval == 3600 :
+         s = "1 / hr"
+      elif interval == 36000 :
+         s = "1 / 10 hr"
+      else :
+         s=("1 / %d sec" % interval)
+         
+      plt.text(1100,y,s)
+
 
    # matplotlib histogram
 #   plt.hist( mp_arr, color = 'blue', edgecolor = 'black', bins = int(180/5), log=True)
@@ -216,7 +238,8 @@ def main() :
    
    plt.title(' Fluence of Giant Pulses in MP and IP')
 
-   plt.legend(['GPs from main pulse', 'GPs from interpulse'], loc='best')
+#   plt.legend(['GPs from main pulse', 'GPs from interpulse'], loc='best')
+   plt.legend(loc='upper left')
    plt.show()
 
 if __name__ == "__main__":   
