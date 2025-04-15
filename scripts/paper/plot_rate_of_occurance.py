@@ -254,7 +254,7 @@ def main() :
    # seaborn histogram
 #   sns.distplot( mp_arr, hist=True, kde=False, bins=int(180/5), color = 'blue', hist_kws={'edgecolor':'black'} )
    
-   plt.title(' Fluence of Giant Pulses in main pulse (MP) and inter-pulse (IP)')
+   plt.title(' Fluence of Giant Pulses (GPs) in main pulse (MP) and inter-pulse (IP)')
 
 #   plt.legend(['GPs from main pulse', 'GPs from interpulse'], loc='best')
    plt.legend(loc='upper left')
