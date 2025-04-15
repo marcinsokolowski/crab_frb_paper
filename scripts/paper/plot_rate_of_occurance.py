@@ -13,6 +13,7 @@ import errno
 import getopt
 import optparse
 
+import powerlaw
 
 pylab.rc('font', family='serif', size=20)
 
@@ -21,6 +22,7 @@ def parse_options(idx):
    parser.set_usage("""parse_pulsars.py""")
    parser.add_option("--obstime","--total_time",dest="obstime",default=66.8028,help="Total observing time in hours [default: %default]",type="float")
    parser.add_option("--period","--pulsar_period_sec","--pp_sec",dest="pulsar_period_sec",default=0.0333924123,help="Pulsar period in seconds [default: %default]",type="float")
+   parser.add_option("--fit_min","--fit_min_x","--xmin",dest="fit_min",default=2.00,help="Minimum of the fit [default: %default]",type="float")
 
    (options,args)=parser.parse_args(sys.argv[idx:])
 
@@ -147,11 +149,22 @@ def main() :
    mp_err=np.sqrt(mp_counts)
    print("DEBUG : %d vs. %d vs. %d vs. %d" % (len(mp_arr),len(mp_bin_centres),len(mp_counts),len(mp_err)))
 
+   mp_fit_results = powerlaw.Fit( mp_arr , xmin=options.fit_min )
+#   mp_fit_results.power_law.plot_pdf( mp_arr )
+   print(mp_fit_results.power_law.alpha)  
+   print(mp_fit_results.power_law.xmin)
+   R_mp, p_mp = mp_fit_results.distribution_compare('power_law', 'lognormal')
+
    # IPs :
    ip_counts,ip_bin_edges = np.histogram(ip_arr,20)
    ip_bin_centres = (ip_bin_edges[:-1] + ip_bin_edges[1:])/2.
    ip_err=np.sqrt(ip_counts)
    print("DEBUG : %d vs. %d vs. %d vs. %d" % (len(ip_arr),len(ip_bin_centres),len(ip_counts),len(ip_err)))
+   ip_fit_results = powerlaw.Fit( ip_arr , xmin=options.fit_min )
+   print(ip_fit_results.power_law.alpha)  
+   print(ip_fit_results.power_law.xmin)
+   R_ip, p_ip = ip_fit_results.distribution_compare('power_law', 'lognormal')
+
 
 
    
@@ -163,7 +176,7 @@ def main() :
    plt.xscale('log') # nonposy='clip')
    
    plt.xlim((1e-3,1e3))
-   plt.ylim((1e-8,0.1))
+#   plt.ylim((1e-8,0.1))
 
    color = 'red'
    ax1.set_xlabel('Fluence [Jy s]',fontsize=20)
@@ -172,11 +185,17 @@ def main() :
    # scaled by number of rotations -> to make it per rotation
    ax1.errorbar( mp_bin_centres, mp_counts/PulsarPeriods, yerr=mp_err/PulsarPeriods, fmt='o', color=color )
    ax1.errorbar( ip_bin_centres, ip_counts/PulsarPeriods, yerr=ip_err/PulsarPeriods, fmt='o', color='blue' )
+#   ax1.errorbar( mp_bin_centres, mp_counts, yerr=mp_err, fmt='o', color=color )
+#   ax1.errorbar( ip_bin_centres, ip_counts, yerr=ip_err, fmt='o', color='blue' )
+
+
 #   ax1.plot( jb_mjd, jb_dm, marker='*', color=color, markersize=12 )
    ax1.tick_params(axis='y', labelcolor='black')
 #   ax1.yaxis.get_label().set_fontsize(40)
    #adjust position of x-axis label
    ax1.yaxis.set_label_coords(-0.1, .5)
+   
+#   mp_fit_results.power_law.plot_pdf( mp_arr, ax=ax1 )
 
 
    # matplotlib histogram
