@@ -6,6 +6,9 @@ if [[ -n "$1" && "$1" != "-" ]]; then
 fi
 
 outdir=/media/msok/5508b34c-040a-4dce-a8ff-2c4510a5d1a3/eda2/crab_full_analysis/fluence_completness
+if [[ -n "$2" && "$2" != "-" ]]; then
+   outdir="$2"
+fi
 
 mkdir -p ${outdir}
 cd ${outdir}
