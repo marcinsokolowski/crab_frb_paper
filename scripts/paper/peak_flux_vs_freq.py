@@ -167,14 +167,14 @@ def main() :
    plt.xscale('log') # nonposy='clip')
    
    plt.xlim((10,10000))
-   plt.ylim((0.01,300))
+   plt.ylim((0.01,5500))
 
 
    # color = 'tab:black'
    ax1.set_xlabel( options.x_axis,fontsize=20)
    ax1.set_ylabel( options.y_axis,fontsize=20)
 #   ax1.plot(t, data1, color=color, marker='+', linestyle='None' )
-   ax1.errorbar( x_arr1, y_arr1, yerr=y_arr1_err, fmt='*', color="black", label="This work" )
+   ax1.errorbar( x_arr1, y_arr1, yerr=y_arr1_err, fmt='*', color="black", label="This work (~66 hr)" )
 
    ##############################################################################################################################
    # Bhat et al - MWA DEMO : see page 1 in /home/msok/Desktop/SKA/papers/2024/EDA2_FRBs/20250417_digitisation_and_plots_from_MWA-DEMO.odt
@@ -213,6 +213,16 @@ def main() :
    y_cordes = np.array([155,1.03,0.086,0.089,0.880])
    y_cordes_err = np.array([0.00,0.00,0.00,0.00,0.00])
    ax1.errorbar( x_cordes, y_cordes, yerr=y_cordes_err, fmt='o', color="red", label="Cordes et al., ApJ, 2004" )
+   
+   ##############################################################################################################################
+   # Bera et al, Monthly Notices of the Royal Astronomical Society: Letters, Volume 490, Issue 1, p.L12-L16
+   # https://ui.adsabs.harvard.edu/abs/2019MNRAS.490L..12B/abstract
+   x_bera = np.array([1330])
+   x_bera_err = np.array([0])
+   y_bera = np.array([4500])
+   y_bera_err = np.array([0.00])
+   ax1.errorbar( x_bera, y_bera, yerr=y_bera_err, fmt='D', color="orange", label="Bera et al., MNRAS, 2019 (~260 hr)" )
+
 
    
    
