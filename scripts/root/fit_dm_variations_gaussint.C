@@ -636,15 +636,19 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
          local_func=1;
 
 // WORKING:
-         par[0] = 5000.00; // ne
-         par[1] = 0.3; // transverse velocity of Crab 
-         par[2] = 5.00;
-         par[3] = 60.00;
+         par[0] = 0.028; // ne
+         par[1] = 1.00; // transverse velocity of Crab 
+         par[2] = 2.736;
+         par[3] = 62.49;
  
-        line->SetParName(0,"ne");
+         line->SetParName(0,"ne");
          line->SetParName(1,"#alpha");
          line->SetParName(2,"#sigma_{gauss} of ne distrib");
          line->SetParName(3,"t_peak [days]");
+
+//         line->SetParLimits(1,0.00,1000.00);
+         line->FixParameter(1,1.00);
+         line->SetParLimits(2,0.00,10000.00);
 
       }
 
