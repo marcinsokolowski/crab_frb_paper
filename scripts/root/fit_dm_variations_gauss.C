@@ -490,15 +490,16 @@ Double_t dm_vs_mjd( Double_t* x, Double_t* y )
 
    Double_t km2pc = 3.240e-14;
    Double_t v_crab = 120000; // km/s = 120km/s (Kaplan at al 2008, ApJ, 677, 1201) - transverse Crab velocity 
-   Double_t v_crab_pc = 3.888e-9;
+   Double_t v_crab_pc = 3.36e-7; // pc/day // 3.888e-9;
    Double_t v0 = alpha*v_crab_pc; 
 
 //   Double_t t_max = t0 + amax/v0;
    Double_t t_max = 90.00;
 
    Double_t dm = dm0;
-   if ( t>=t0 && t<=(t_max) ){
+//   if ( t>=t0 && t<=(t_max) ){
       Double_t dt = (t-t0); // time from the start of the blob entering the LoS
+//      Double_t dt = t;
       Double_t r = r0 - v0*dt;
 
       Double_t t_peak = t0 + r/v0; //(60.00-32.00);
@@ -510,7 +511,7 @@ Double_t dm_vs_mjd( Double_t* x, Double_t* y )
       if( sqrt_arg >= 0 ){
          dm += 2*ne*sqrt( sqrt_arg );
       }
-   }
+//   }
 
    return dm;
 }
@@ -654,7 +655,7 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
 // WORKING:
          par[0] = 5000.00; // ne
 //         par[1] = 0.0000001; // amax
-         par[1] = 30; // transverse velocity of Crab 
+         par[1] = 0.3; // transverse velocity of Crab 
          par[2] = 5.00;
          par[3] = 0.000001;
  
