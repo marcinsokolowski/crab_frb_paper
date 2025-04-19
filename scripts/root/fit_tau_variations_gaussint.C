@@ -704,9 +704,9 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
  
          line->SetParName(0,"peak_ne");
          line->SetParName(1,"a_pc");
-         line->SetParName(2,"#sigma_{gauss} of ne distrib");
-         line->SetParName(3,"t_peak [days]");
-         line->SetParName(4,"#tau_0");
+         line->SetParName(2,"#sigma_{gauss} of #Delta n_{e}");
+         line->SetParName(3,"t_{peak} [days]");
+         line->SetParName(4,"#tau_{0}");
 
 //         line->SetParLimits(1,0.00,1000.00);
 //         line->FixParameter(3,68.00);
