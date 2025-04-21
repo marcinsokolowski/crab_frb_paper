@@ -103,11 +103,12 @@ def main() :
    ax1.errorbar( x_arr_mjd, y_arr, yerr=y_err, fmt='o', color=color )
 #   if len(jb_mjd) > 0 :
 #   ax1.plot( jb_mjd, jb_dm, fmt='o', color='tab:black' )
-   ax1.plot( jb_mjd, jb_dm, marker='*', color=color, markersize=12 )
+   color2='tab:red'
+   ax1.plot( jb_mjd, jb_dm, marker='*', color=color2, markersize=12 )
    ax1.tick_params(axis='y', labelcolor=color)
 #   ax1.yaxis.get_label().set_fontsize(40)
    #adjust position of x-axis label
-   ax1.yaxis.set_label_coords(-0.1, .5)
+   ax1.yaxis.set_label_coords(-0.07, .5) # (-0.1, .5)
 
    ax2 = ax1.twinx()  # instantiate a second Axes that shares the same x-axis
 
@@ -117,7 +118,7 @@ def main() :
    ax2.errorbar( tau1_arr_mjd, tau1_arr, yerr=tau1_err, fmt='+', color=color )
    ax2.tick_params(axis='y', labelcolor=color)
 #   ax2.yaxis.get_label().set_fontsize(40)
-   ax2.yaxis.set_label_coords(+1.09, .5)
+   ax2.yaxis.set_label_coords(+1.06, .5) # (+1.09, .5)
    
    
 
