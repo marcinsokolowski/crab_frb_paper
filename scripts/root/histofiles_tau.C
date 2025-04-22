@@ -366,7 +366,7 @@ void histofiles_tau( const char* file_list, int column=0,
 
 
       char szLegend[64];
-      strcpy(szLegend,"Unknown data");
+      strcpy(szLegend,list[i].fname);
       if( strstr( list[i].fname , "tau610MHz.txt" ) ){
          strcpy(szLegend,"EDA2 #tau_{215MHz} scaled to 610 MHz");
       }

@@ -399,7 +399,7 @@ int ReadResultsFile( const char* fname, Double_t* x_values, Double_t* y_values,
 }  
 
 void plot_autocorr( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", 
-               const char* fit_func_name=NULL, double min_y=0.5, 
+               const char* fit_func_name=NULL, double min_y=0.6, 
                double max_y=1.00, int bLog=1,
       const char* szDescX="#Delta CH",const char* szDescY="Auto-correlation power", const char* szTitle=NULL,
       double fit_min_x=-100000, double fit_max_x=-100000,
