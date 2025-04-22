@@ -299,9 +299,51 @@ int find_peak( std::vector<double>& timeseries, int& min_t )
    return max_t;
 }
 
-void structure_function( CValueVector& timeseries )
+void structure_function( CValueVector& timeseries, double tolerance=0.2 )
 {
+   int size = timeseries.size();
+   double max_delta_time = timeseries[size-1].x - timeseries[0].x;
+   double half_delta_time = max_delta_time/2.00;
+   int half_delta_time_int = int(round(half_delta_time));
    
+   printf("DEBUG : structure_function : max_delta_time = %.6f days -> half_delta_time = %.6f days\n",max_delta_time,half_delta_time);
+   
+   CValueVector out;
+   out.init(half_delta_time_int);
+   
+   for(int delta_time=1;delta_time<half_delta_time_int;delta_time++){
+      
+      // 
+      double sum = 0.00;
+      bool bContinue = true;
+      for(int i=0;(i<size && bContinue);i++){
+         for(int j=(i+1);(j<size && bContinue);j++){
+            double delta_time_data = timeseries[j].x - timeseries[i].x;
+            
+            double error = (delta_time_data - delta_time);
+            printf("DEBUG : delta_time = %d vs. error = %.8f days ( %.6f and %.6f )\n",delta_time,error,timeseries[j].x,timeseries[i].x);
+            if (fabs(error)<tolerance){
+               double delta_dm = timeseries[j].y - timeseries[i].y;
+               sum += delta_dm*delta_dm;
+               printf("DEBUG : delta_time = %d -> added DM_%d - DM_%d (%.6f days)\n",delta_time,j,i,delta_time_data);
+            }else{
+               if( error > (2*delta_time) ){
+                  // Data are sorted by time so if we are already at error (i.e. difference) of 2*delta_time means we can move on to next i:
+                  break;
+               }
+            }
+         }
+      }
+      out[delta_time].x = delta_time;
+      out[delta_time].y = sum;                  
+   }
+
+   FILE* outf = fopen("DM_structure_function.txt","w");   
+   for(int i=0;i<out.size();i++){
+      printf("%.8f %.8f\n",out[i].x,out[i].y);      
+      fprintf(outf,"%.8f %.8f\n",out[i].x,out[i].y);
+   }
+   fclose(outf);
 }
 
 int main(int argc,char* argv[])
@@ -322,7 +364,7 @@ int main(int argc,char* argv[])
   printf("INFO : created directory %s\n",gOutputDir.c_str());
 
   CValueVector timeseries;
-  int n = timeseries.read_file( gInputFile.c_str(), 0, 0, 2 );
+  int n = timeseries.read_file( gInputFile.c_str(), 0, 0, 1 );
   printf("Read %d points from input file %s (first point = %.8f / %.8f)\n",n,gInputFile.c_str(),timeseries[0].x,timeseries[0].y );
 
   // calculate structure function:  
