@@ -171,7 +171,7 @@ TGraph* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
       if( strcmp( fit_func_name, "power_law" )==0 || fit_func_name[0]=='p' ){
          printf("Fitting power law\n");
          line = new TF1("fit_func",power_law,fit_min_x,fit_max_x,2);
-         line_draw = new TF1("fit_func2",power_law,minX,maxX,2);
+         line_draw = new TF1("fit_func2",power_law,fit_min_x,fit_max_x,2);
          local_func=1;
       }
    }
@@ -200,6 +200,7 @@ TGraph* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
 //         line->Draw("same");
          line_draw->SetParameters(par);
          line_draw->Draw("same");
+         line_draw->SetLineColor(kBlack);
       }
 
 
