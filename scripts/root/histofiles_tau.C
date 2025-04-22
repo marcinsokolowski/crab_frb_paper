@@ -14,6 +14,7 @@
 #include <TFile.h>   
 
 int gVerb=0;
+char gOutHistoFile[128];
 
 struct cFileDesc2
 {
@@ -88,6 +89,8 @@ TH1F* histofile( const char* fname, int column=0,
                 int DoBorder=1, const char* szTitle=NULL, const char* szOutFile=NULL,
                 const char* szOutPostfix="_histo", int unix_time=0, int bNormalise=1 )
 {
+   sprintf(gOutHistoFile,"%s_histo.txt",fname);
+
    FILE *fcd = fopen(fname,"r");
    char buff[2048];
    int lSize=2048;
@@ -191,6 +194,18 @@ TH1F* histofile( const char* fname, int column=0,
       printf("GAUSS MEAN  = %.8f\n",par[1]);
       printf("GAUSS SIGMA = %.8f\n",par[2]);
    }
+
+   FILE* outf = fopen(gOutHistoFile,"w");
+   for(int ch=0;ch<histo->GetNbinsX();ch++){
+      double val_histo = histo->GetBinContent(ch);
+
+      if( val_histo > 0 ){
+         fprintf(outf,"%.8f %.8f\n",histo->GetBinCenter(ch),val_histo);
+         printf("DEBUG : %.8f %.8f\n",histo->GetBinCenter(ch),val_histo);
+      }
+   }
+   fclose(outf);   
+   printf("Histogram exported to file %s\n",gOutHistoFile);
 
 
    if( szOutFile ){   
