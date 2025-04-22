@@ -199,6 +199,13 @@ root -l "rfifind.C(\"gptimes.txt\",100000000000000.00,0,${time_rounded_to_ten},$
 
 # 
 root -l "rfifind.C(\"rfitimes.txt\",10,0,${time_rounded_to_ten},${n_bins})"
+# 2025-04-21 : temporary disabled :
+# echo "mv rfi.ranges rfi.ranges.backup"
+# mv rfi.ranges rfi.ranges.backup
+
+# Create an empty file rfi.ranges :
+echo "touch rfi.ranges"
+touch rfi.ranges
 
 if [[ -s TotalGoodTimeInSec.txt ]]; then
    TotalTimeInHours=`cat TotalGoodTimeInSec.txt | awk '{print $1/3600.00}'`
