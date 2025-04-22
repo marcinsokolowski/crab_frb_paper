@@ -110,6 +110,7 @@ TH1F* histofile( const char* fname, int column=0,
 //   double border=(up-low)/10.00;
 //   if( DoBorder <= 0 )
    double border=0;
+   double bin_width = (up-low)/bin_no;
    TH1F*  histo = new TH1F(szHistoTitle,szTitle,bin_no,low-border,up+border);
    TH1F* h_px = histo;
    int rejected=0;
@@ -200,7 +201,7 @@ TH1F* histofile( const char* fname, int column=0,
       double val_histo = histo->GetBinContent(ch);
 
       if( val_histo > 0 ){
-         fprintf(outf,"%.8f %.8f\n",histo->GetBinCenter(ch),val_histo);
+         fprintf(outf,"%.8f %.8f %.8f %.8f\n",histo->GetBinCenter(ch),bin_width,val_histo,histo->GetBinError(ch));
          printf("DEBUG : %.8f %.8f\n",histo->GetBinCenter(ch),val_histo);
       }
    }
