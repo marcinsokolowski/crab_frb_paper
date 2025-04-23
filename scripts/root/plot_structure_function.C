@@ -61,8 +61,9 @@ TGraph* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
     TF1 *line_draw = NULL;
    TF1 *part1 = NULL;
    TF1 *part2 = NULL;
-    Double_t maxX=-100000,maxY=-100000;
+    Double_t maxX=-100000,maxY=-100000,maxYhalf=-100000;
     Double_t minX=100000,minY=100000;
+    Double_t maxYarg=-1000000;
 
 
     TGraph* pGraph = new TGraph(q);
@@ -75,16 +76,19 @@ TGraph* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
 
         if(x_values[i]>maxX)
             maxX = x_values[i];
-        if(y_values[i]>maxY)
+        if(y_values[i]>maxY){
             maxY = y_values[i];
+            maxYarg = x_values[i];
+        }
       
         if(x_values[i]<minX)
             minX = x_values[i];
         if(y_values[i]<minY)
             minY = y_values[i];
     }
-    printf("Found min_x=%.2f , max_x=%.2f\n",minX,maxX);
-    printf("Found min_y=%.2f , max_y=%.2f\n",minY,maxY);
+    maxYhalf = maxY/2.00;
+    printf("Found min_x=%.2f , max_x=%.8f\n",minX,maxX);
+    printf("Found min_y=%.2f , max_y=%.8f at %.8f -> maxYhalf = %.8f\n",minY,maxY,maxYarg,maxYhalf);
     Double_t stepX = (maxX-minX)/10.00;
     Double_t stepY = (maxY-minY)/10.00;
     printf("Found  stepX=%.2f , stepY=%.2f\n",stepX,stepY);
@@ -251,8 +255,25 @@ TGraph* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
       fclose(out_file);
    }*/
 
+
+   // find characteristic time scale:
+   double t = fit_min_x;
+   double dt = 0.1;
+   double prev_val = 0.00;
+   while( t < fit_max_x ){
+      double val = line_draw->Eval(t);
+
+      if( val>=maxYhalf && prev_val <= maxYhalf ){
+         printf("prev_val = %.8f <= maxYhalf = %.8f <= val = %.8f\n",prev_val,maxYhalf,val);
+         printf("Characterisitc timescale = %.8f [days]\n",t);
+         break;
+      }
+
+      prev_val = val;
+      t += dt;
+   }
    
-    return pGraph;
+   return pGraph;
 }
 
 int ReadResultsFile( const char* fname, Double_t* x_values, Double_t* y_values,
