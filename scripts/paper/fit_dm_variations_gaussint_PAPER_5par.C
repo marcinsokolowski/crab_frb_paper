@@ -642,10 +642,10 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
          par[3] = 0.003235;
          par[4] = 1.00; // alpha
  
-         line->SetParName(0,"Peak n_{e}");
-         line->SetParName(1,"#sigma_{gauss} of n_{e} distrib");
+         line->SetParName(0,"n_{e}^{peak}");
+         line->SetParName(1,"#sigma_{blob} of n_{e} distrib");
          line->SetParName(2,"t_peak [days]");
-         line->SetParName(3,"DM offset [pc/cm^{3}]");
+         line->SetParName(3,"DM_{offset} [pc/cm^{3}]");
 //         line->SetParName(4,"#alpha (v_{0} = #alpha v_{crab)})");
 //         line->SetParName(4,"#alpha (v_{0} #approx #alpha v_{crab})");
          line->SetParName(4,"#alpha");
