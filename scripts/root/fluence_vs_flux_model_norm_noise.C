@@ -247,7 +247,9 @@ void fluence_vs_flux_model_norm_noise( double F0 = 8000, double noise_multiplier
    fluence_distrib0->SetParameters(par); 
    fluence_distrib0->Draw();   
 
-   // re-normalise to make F0 a fluence with 1 / hour rate:
+   //-----------------------------------------------------------------------------------------------------------------------------
+   // TESTING : so that we can test different distributions with different F0 corresponding to 1 GP / hour rate:
+   // re-normalise to make F0 a fluence with 1 / hour rate 
    double F_1hour = gFluenceRef*TMath::Power( (1.00/par[0]) , (1.00/par[1]) );
    printf("DEBUG : 1 hour fluence (fluence with rate 1 GP / hour) = %.6f [Jy ms]\n",F_1hour);
    par[0] = 1.00/(TMath::Power( (F0/gFluenceRef) , par[1] ));
@@ -258,6 +260,7 @@ void fluence_vs_flux_model_norm_noise( double F0 = 8000, double noise_multiplier
    fluence_distrib->SetLineColor(kBlack);
    F_1hour = gFluenceRef*TMath::Power( (1.00/par[0]) , (1.00/par[1]) );
    printf("DEBUG : 1 hour fluence (fluence with rate 1 GP / hour) = %.6f [Jy ms] (after re-normalisation)\n",F_1hour);
+   //-----------------------------------------------------------------------------------------------------------------------------
 
 
    
@@ -293,6 +296,7 @@ void fluence_vs_flux_model_norm_noise( double F0 = 8000, double noise_multiplier
    double calka_Jyms = calka*1000.00;
    printf("Integral = %.8f [Jy s] = %.8f [Jy ms]\n",calka,calka_Jyms);
 
+   // re-normalise the pulse profile with arbitrary normalisation so that that it has a fluence F0 (at 1 GP per hour rate)
    TF1* pulse2 = new TF1("Pulse_with_gauss_onset_NORM2",Pulse_with_gauss_onset_NORM,-0.02,0.02,5);
    par[2] = par[2]*(F0/calka_Jyms);
    pulse2->SetParameters(par);
@@ -303,8 +307,6 @@ void fluence_vs_flux_model_norm_noise( double F0 = 8000, double noise_multiplier
    calka_Jyms = calka*1000.00;
    printf("Renormalised Integral = %.8f [Jy s] = %.8f [Jy ms]\n",calka,calka_Jyms);
 
-
-// return;
 
    char szOutFile[128];
    sprintf(szOutFile,"peakflux_vs_tau_%dJyms_noise%.3fJy.txt",int(F0),sigma_n);

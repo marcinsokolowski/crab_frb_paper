@@ -347,7 +347,7 @@ void fluence_vs_flux_model_norm_noise_NEW( double p0 = 35.2438, double noise_mul
 // return;
 //      break;
       
-//      fprintf(outf,"%.8f %.8f %.8f %.8f %.8f\n",tau*1000.00,peak_flux,calka,F_min,N_gp);
+      fprintf(outf,"%.8f %.8f %.8f %.8f %.8f\n",tau*1000.00,max_nonorm,calka,F_min,N_gp);
       tau += tau_step;
 
    }
