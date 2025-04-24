@@ -97,7 +97,7 @@ double calc_max( TF1* pulse_norm, double t0, double t1 )
    while( t <= t1 ){
       double val = pulse_norm->Eval(t);
 
-      if( t > max ){
+      if( val > max ){
          max = val;
          t_max = t;
       }
@@ -109,6 +109,30 @@ double calc_max( TF1* pulse_norm, double t0, double t1 )
 
    return max;
 }
+
+double calc_max_real( TF1* pulse_norm, double sigma_n, double t0, double t1 )
+{
+   double max = -1e20, t_max = -1e20;
+   double dt = gTimeResolution; // 1e-6;
+   double t = t0;
+   while( t <= t1 ){
+      double val = pulse_norm->Eval(t);
+      double noise = gRandom->Gaus( 0.00, sigma_n );
+      val = val + noise;
+
+      if( val > max ){
+         max = val;
+         t_max = t;
+      }
+
+      t += dt;
+   }
+
+//   printf("# DEBUG : maximum %.6f [Jy] found at time = %.8f [sec]\n",max,t_max);
+
+   return max;
+}
+
 
 
 // count_gps( fluence_distrib, F_min, fluence_bin );
@@ -145,7 +169,8 @@ double count_gps_with_noise( TF1* fluence_distrib, double F_min, double fluence_
   
    while( F < 10000 ){
       double F_c = F + fluence_bin/2.00;
-      double n = fluence_distrib->Eval( F_c );
+      double n_double = fluence_distrib->Eval( F_c );
+      int n = int(round(n_double));
   
       // calculate peak flux density for a given value of fluence F_c 
       TF1* pulse_no_norm = new TF1("Pulse_with_gauss_onset_NONORM",Pulse_with_gauss_onset_NORM,-0.02,0.02,5);
@@ -164,17 +189,21 @@ double count_gps_with_noise( TF1* fluence_distrib, double F_min, double fluence_
 
       // apply effect of noise to detection :
       for(int i=0;i<n;i++){
-         double peak_flux = calc_max( pulse_no_norm,  -0.02, +0.02 );
-         double noise = gRandom->Gaus( 0.00, sigma_n );
-  
-         peak_flux += noise;
+//         double peak_flux = calc_max_real( pulse_no_norm,  sigma_n, -0.02, +0.02 );
+
+           double peak_flux = calc_max( pulse_no_norm, -0.02, +0.02 );
+           double noise = gRandom->Gaus( 0.00, sigma_n );  
+           peak_flux += noise;
+
          double snr = peak_flux / sigma_n;
          if( snr >= snr_threshold ){
-            N_gp = N_gp + 1.00; // only those added which satisfy condition SNR>=THRESHOLD (DETECTION IN THE PRESENCE OF NOISE SIMULATED);
+            N_gp = N_gp + double(1.00); // only those added which satisfy condition SNR>=THRESHOLD (DETECTION IN THE PRESENCE OF NOISE SIMULATED);
          }
       }
 
-      N_gp_nonoise += double(n); // all added 
+      N_gp_nonoise = N_gp_nonoise + n_double; // all detected
+//      N_gp = N_gp + double(n);
+
 //      printf("DEBUG count_gps : + %.8f = %.8f\n",n,N_gp);
 
       F += fluence_bin;
@@ -188,9 +217,9 @@ double count_gps_with_noise( TF1* fluence_distrib, double F_min, double fluence_
 
 
 
-void fluence_vs_flux_model_norm_noise( double F0 = 8000 ) // fluence is constant in Jy*ms as in Figure 7 in the paper at rate 1-GP/hour :
+void fluence_vs_flux_model_norm_noise( double F0 = 8000, double noise_multiplier=1.00 ) // fluence is constant in Jy*ms as in Figure 7 in the paper at rate 1-GP/hour :
 {
-   double sigma_n = sigma_noise( gSEFD, gTimeResolution, gBW , 1 );
+   double sigma_n = sigma_noise( gSEFD, gTimeResolution, gBW , 1 )*noise_multiplier; // noise_multiplier is here in case I underestimate the noise
 
    printf("Noise in data = %.6f [Jy]\n",sigma_n);
 
@@ -277,11 +306,11 @@ void fluence_vs_flux_model_norm_noise( double F0 = 8000 ) // fluence is constant
 // return;
 
    char szOutFile[128];
-   sprintf(szOutFile,"peakflux_vs_tau_%dJyms.txt",int(F0));
+   sprintf(szOutFile,"peakflux_vs_tau_%dJyms_noise%.3fJy.txt",int(F0),sigma_n);
    FILE* outf = fopen(szOutFile,"w");
    fprintf(outf,"# Tau[ms]   Peak_flux[Jy]  Integral   Fluence_min[Jy ms] N_gp\n");
    double tau = 0.0005;
-   double tau_step = 0.00001;
+   double tau_step = 0.00001*10.00;// *10.00 to get it faster
    double threshold = 5*sigma_n;  
 //   sleep(5);
 
