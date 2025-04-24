@@ -221,7 +221,7 @@ void fluence_vs_flux_model_norm( double F0 = 8000 ) // fluence is constant in Jy
    double tau = 0.0005;
    double tau_step = 0.00001;
    double threshold = 5*sigma_n;  
-   sleep(5);
+//   sleep(5);
 
    while( tau <= 0.010 ){
       TF1* pulse_norm = new TF1("Pulse_with_gauss_onset_NORM3",Pulse_with_gauss_onset_NORM,-0.02,0.02,5);

@@ -371,7 +371,7 @@ void fluence_vs_flux_model_norm_noise_convol( double F0 = 8000, double noise_mul
    */
    par[0] = 30.5335; // was 18.00;
    par[1] = -2.97932; // was -3.132;
-//   par[1] = -3.5;
+   par[1] = -3.5;
    fluence_distrib0->SetParameters(par); 
    fluence_distrib0->Draw();   
 

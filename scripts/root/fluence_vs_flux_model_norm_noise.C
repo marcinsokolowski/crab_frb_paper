@@ -366,6 +366,7 @@ void fluence_vs_flux_model_norm_noise( double F0 = 8000, double noise_multiplier
       double F_min = pulse_no_norm->Integral( -0.02, +0.02, 1e-10 )*1000.00;
       printf("DEBUG : F_min = %.8f [Jy ms]\n",F_min);
       
+      
 
 //      double N_gp = count_gps( fluence_distrib, F_min, fluence_bin );
 
@@ -374,7 +375,8 @@ void fluence_vs_flux_model_norm_noise( double F0 = 8000, double noise_multiplier
       double N_gp = count_gps_with_noise( fluence_distrib, F_min, fluence_bin, sigma_n, 5, par_norm_one);
 
       printf("Tau = %.6f [ms] : calka = %.6f [Jy ms] -> peak flux = %.8f [Jy] -> N_gp = %.4f\n",tau*1000.00,calka,peak_flux,N_gp);
-//      pulse_nonorm->Draw();
+//      pulse_no_norm->Draw();
+// return;
 //      break;
       
       fprintf(outf,"%.8f %.8f %.8f %.8f %.8f\n",tau*1000.00,peak_flux,calka,F_min,N_gp);
