@@ -28,11 +28,13 @@ double sigma_noise( double sefd, double delta_time, double delta_freq, int n_pol
    return sigma_n;
 }
 
+double gFluenceRef = 1000.00;
+
 Double_t Fluence_distrib_powerlaw( Double_t* x, Double_t* y )
 {
    Double_t fluence = x[0];
 
-   return y[0]*TMath::Power( (fluence/1000.00) , y[1] );
+   return y[0]*TMath::Power( (fluence/gFluenceRef) , y[1] );
 }
 
 Double_t Pulse_with_gauss_onset( Double_t* x, Double_t* y )
@@ -124,7 +126,7 @@ double calc_max( TF1* pulse_norm, double t0, double t1 )
    return max;
 }
 
-void fluence_vs_flux_model_norm()
+void fluence_vs_flux_model_norm( double F0 = 8000 ) // fluence is constant in Jy*ms as in Figure 7 in the paper at rate 1-GP/hour :
 {
    double sigma_n = sigma_noise( gSEFD, gTimeResolution, gBW , 1 );
 
@@ -137,8 +139,9 @@ void fluence_vs_flux_model_norm()
    c1->SetLogy(1);
    c1->cd();
 
+   // TODO : F0 must enter here too !!! - re-normalise so that F0 has 1/hour rate
    double fluence_bin = (5000-90)/100.00; 
-   TF1* fluence_distrib = new TF1("Fluence_distrib_powerlaw",Fluence_distrib_powerlaw,90,5000,2);
+   TF1* fluence_distrib0 = new TF1("Fluence_distrib_powerlaw0",Fluence_distrib_powerlaw,90,5000,2);
    // page 1 in : /home/msok/Desktop/EDA2/papers/2024/EDA2_FRBs/20250401_modelling_number_of_GPs_REPEAT.odt
    /* FCN=98.3902 FROM MINOS     STATUS=SUCCESSFUL     21 CALLS         181 TOTAL
                      EDM=4.5615e-07    STRATEGY= 1      ERROR MATRIX ACCURATE 
@@ -149,8 +152,23 @@ void fluence_vs_flux_model_norm()
    */
    par[0] = 30.5335; // was 18.00;
    par[1] = -2.97932; // was -3.132;
-   fluence_distrib->SetParameters(par);
-   fluence_distrib->Draw();   
+   fluence_distrib0->SetParameters(par); 
+   fluence_distrib0->Draw();   
+
+   // re-normalise to make F0 a fluence with 1 / hour rate:
+   double F_1hour = gFluenceRef*TMath::Power( (1.00/par[0]) , (1.00/par[1]) );
+   printf("DEBUG : 1 hour fluence (fluence with rate 1 GP / hour) = %.6f [Jy ms]\n",F_1hour);
+   par[0] = 1.00/(TMath::Power( (F0/gFluenceRef) , par[1] ));
+   printf("DEBUG : par[0] := %.8f\n",par[0]);
+   TF1* fluence_distrib = new TF1("Fluence_distrib_powerlaw",Fluence_distrib_powerlaw,90,5000,2);
+   fluence_distrib->SetParameters(par); 
+   fluence_distrib->Draw("same");   
+   fluence_distrib->SetLineColor(kBlack);
+   F_1hour = gFluenceRef*TMath::Power( (1.00/par[0]) , (1.00/par[1]) );
+   printf("DEBUG : 1 hour fluence (fluence with rate 1 GP / hour) = %.6f [Jy ms] (after re-normalisation)\n",F_1hour);
+
+
+   
 
    TCanvas* c2 = new TCanvas("c2","c2",200,10,2000,1000);
 //   c1->SetLogx(1);
@@ -166,9 +184,6 @@ void fluence_vs_flux_model_norm()
    par[2] = 500.00;
    par[3] = 0.0008;
    par[4] = 0.004;*/
-
-   // fluence is constant in Jy*ms as in Figure 7 in the paper at rate 1-GP/hour :
-   double F0 = 8000;
 
    // norm!=1 :
    // see page 2 in /home/msok/Desktop/EDA2/papers/2024/EDA2_FRBs/20250424_single_pulse_model_for_Ngp_vs_Tau_modelling.odt
@@ -199,11 +214,14 @@ void fluence_vs_flux_model_norm()
 
 // return;
 
-   FILE* outf = fopen("peakflux_vs_tau_1000Jyms.txt","w");
+   char szOutFile[128];
+   sprintf(szOutFile,"peakflux_vs_tau_%dJyms.txt",int(F0));
+   FILE* outf = fopen(szOutFile,"w");
    fprintf(outf,"# Tau[ms]   Peak_flux[Jy]  Integral   Fluence_min[Jy ms] N_gp\n");
    double tau = 0.0005;
    double tau_step = 0.00001;
    double threshold = 5*sigma_n;  
+   sleep(5);
 
    while( tau <= 0.010 ){
       TF1* pulse_norm = new TF1("Pulse_with_gauss_onset_NORM3",Pulse_with_gauss_onset_NORM,-0.02,0.02,5);
@@ -257,7 +275,7 @@ void fluence_vs_flux_model_norm()
 
       double N_gp = count_gps( fluence_distrib, F_min, fluence_bin );
 
-      printf("Tau = %.6f [ms] : calka = %.6f [Jy ms] -> peak flux = %.8f [Jy] -> N_gp = %.4f\n",tau*1000.00,calka,peak_flux,N_gp);
+//      printf("Tau = %.6f [ms] : calka = %.6f [Jy ms] -> peak flux = %.8f [Jy] -> N_gp = %.4f\n",tau*1000.00,calka,peak_flux,N_gp);
 //      pulse_nonorm->Draw();
 //      break;
       
@@ -268,5 +286,6 @@ void fluence_vs_flux_model_norm()
    }
 
    fclose(outf);
+   printf("N_gps vs. Tau saved to file %s\n",szOutFile);
 }
 
