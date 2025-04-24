@@ -98,7 +98,8 @@ Double_t Convolution( Double_t* x, Double_t* y )
    Double_t sigma = y[3];
    Double_t tau = y[4];
 
-   TF1* pConvolution =  new TF1("convolution",gauss_exp_convol,t_peak-1.10,t_peak+1.00,6);
+//   TF1* pConvolution =  new TF1("convolution",gauss_exp_convol,t_peak-1.10,t_peak+1.00,6);
+   TF1* pConvolution =  new TF1("convolution",gauss_exp_convol,t_peak-10*sigma,t_peak+20.00*tau,6);
    Double_t par[6];
    par[0] = y[0];
    par[1] = y[1];
@@ -109,7 +110,7 @@ Double_t Convolution( Double_t* x, Double_t* y )
    pConvolution->SetParameters(par);
 //   pConvolution->FixParameter(0,0.00);
 
-   double ret = pConvolution->Integral( t_peak-1.00, t , 1e-9 );
+   double ret = pConvolution->Integral( t_peak-1.00, t , 1e-12 );
    delete pConvolution;
 
    return ret;   
@@ -288,6 +289,8 @@ double count_gps_with_noise( TF1* fluence_distrib, double F_min, double fluence_
    par_local[2] = par[2];
    par_local[3] = par[3];
    par_local[4] = par[4];
+   Double_t tau = par_local[4];
+   Double_t sigma = par_local[3];
 
   
    while( F < 10000 ){
@@ -296,14 +299,14 @@ double count_gps_with_noise( TF1* fluence_distrib, double F_min, double fluence_
       int n = int(round(n_double));
   
       // calculate peak flux density for a given value of fluence F_c 
-      TF1* pulse_no_norm = new TF1("Pulse_with_gauss_onset_NONORM",Convolution_ROOTIntegral,-0.02,0.02,5);
+      TF1* pulse_no_norm = new TF1("Pulse_with_gauss_onset_NONORM",Convolution_ROOTIntegral,-10.00*sigma,20.00*tau,5); //0.02
       par_local[2] = 1.00;
       pulse_no_norm->SetParameters(par_local);
-      double F_test = pulse_no_norm->Integral( -0.02, +0.02, 1e-10  )*1000.00;
+      double F_test = pulse_no_norm->Integral( -10.00*sigma, 20.00*tau, 1e-12  )*1000.00;
       double N = F_c / F_test;
       par_local[2] = N;
       pulse_no_norm->SetParameters(par_local);
-      F_test = pulse_no_norm->Integral( -0.02, +0.02, 1e-10 )*1000.00;
+      F_test = pulse_no_norm->Integral( -10.00*sigma, 20.00*tau, 1e-12 )*1000.00;
        if( fabs(F_test-F_c) >= 0.5 ){
          printf("WARNING : in function count_gps_with_noise fluence F_c = %.6f [Jy ms] != %.6f [Jy ms] - while they should be the same after re-normalisation\n",F_c,F_test);
 //         return -1;
@@ -312,7 +315,7 @@ double count_gps_with_noise( TF1* fluence_distrib, double F_min, double fluence_
 
       // apply effect of noise to detection :
       for(int i=0;i<n;i++){
-           double peak_flux = calc_max_real( pulse_no_norm,  sigma_n, -0.02, +0.02 );
+           double peak_flux = calc_max_real( pulse_no_norm,  sigma_n, -10.00*sigma,20.00*tau );
 
 //           double peak_flux = calc_max( pulse_no_norm, -0.02, +0.02 );
 //           double noise = gRandom->Gaus( 0.00, sigma_n );  
