@@ -22,6 +22,8 @@ double gSEFD = 7930.00; // Jy
 double gTimeResolution = (1.08*64*14)/1000000.00;
 double gBW = 29629629.00; // Hz 
 
+double gIntegralError = 1e-6; // was 1e-9 and 1e-12
+
 double sigma_noise( double sefd, double delta_time, double delta_freq, int n_pol=1 )
 {
    double sigma_n = sefd/sqrt(n_pol*delta_time*delta_freq);
@@ -98,8 +100,8 @@ Double_t Convolution( Double_t* x, Double_t* y )
    Double_t sigma = y[3];
    Double_t tau = y[4];
 
-//   TF1* pConvolution =  new TF1("convolution",gauss_exp_convol,t_peak-1.10,t_peak+1.00,6);
-   TF1* pConvolution =  new TF1("convolution",gauss_exp_convol,t_peak-10*sigma,t_peak+20.00*tau,6);
+   TF1* pConvolution =  new TF1("convolution",gauss_exp_convol,t_peak-1.10,t_peak+1.00,6);
+//   TF1* pConvolution =  new TF1("convolution",gauss_exp_convol,t_peak-10*sigma,t_peak+20.00*tau,6);
    Double_t par[6];
    par[0] = y[0];
    par[1] = y[1];
@@ -110,7 +112,7 @@ Double_t Convolution( Double_t* x, Double_t* y )
    pConvolution->SetParameters(par);
 //   pConvolution->FixParameter(0,0.00);
 
-   double ret = pConvolution->Integral( t_peak-1.00, t , 1e-12 );
+   double ret = pConvolution->Integral( t_peak-1.00, t , gIntegralError );
    delete pConvolution;
 
    return ret;   
@@ -302,11 +304,11 @@ double count_gps_with_noise( TF1* fluence_distrib, double F_min, double fluence_
       TF1* pulse_no_norm = new TF1("Pulse_with_gauss_onset_NONORM",Convolution_ROOTIntegral,-10.00*sigma,20.00*tau,5); //0.02
       par_local[2] = 1.00;
       pulse_no_norm->SetParameters(par_local);
-      double F_test = pulse_no_norm->Integral( -10.00*sigma, 20.00*tau, 1e-12  )*1000.00;
+      double F_test = pulse_no_norm->Integral( -10.00*sigma,20.00*tau, gIntegralError  )*1000.00;
       double N = F_c / F_test;
       par_local[2] = N;
       pulse_no_norm->SetParameters(par_local);
-      F_test = pulse_no_norm->Integral( -10.00*sigma, 20.00*tau, 1e-12 )*1000.00;
+      F_test = pulse_no_norm->Integral( -10.00*sigma,20.00*tau, gIntegralError )*1000.00;
        if( fabs(F_test-F_c) >= 0.5 ){
          printf("WARNING : in function count_gps_with_noise fluence F_c = %.6f [Jy ms] != %.6f [Jy ms] - while they should be the same after re-normalisation\n",F_c,F_test);
 //         return -1;
@@ -317,7 +319,7 @@ double count_gps_with_noise( TF1* fluence_distrib, double F_min, double fluence_
       for(int i=0;i<n;i++){
            double peak_flux = calc_max_real( pulse_no_norm,  sigma_n, -10.00*sigma,20.00*tau );
 
-//           double peak_flux = calc_max( pulse_no_norm, -0.02, +0.02 );
+//           double peak_flux = calc_max( pulse_no_norm, -10.00*sigma,20.00*tau );
 //           double noise = gRandom->Gaus( 0.00, sigma_n );  
 //           peak_flux += noise;
 
@@ -395,7 +397,7 @@ void fluence_vs_flux_model_norm_noise_convol( double F0 = 8000, double noise_mul
 
 
 //   TF1* pulse = new TF1("Pulse_with_gauss_onset",Pulse_with_gauss_onset,-0.02,0.02,5);
-   TF1* pulse = new TF1("Convolution_ROOTIntegral",Convolution_ROOTIntegral,-0.02,0.02,5);
+   TF1* pulse = new TF1("Convolution_ROOTIntegral",Convolution_ROOTIntegral,-10*0.00059759,20.0*0.00188474,5);
 /* for norm=1 :  
    par[0] = 0.000;
    par[1] = 0.000;
@@ -424,22 +426,20 @@ void fluence_vs_flux_model_norm_noise_convol( double F0 = 8000, double noise_mul
    pulse->Draw();   
    pulse->SetLineColor(kBlack);
 
-   double calka = pulse->Integral( -0.02, +0.02, 1e-10 ); // in Jy seconds because all the time parameters are in seconds !!!   
+   double calka = pulse->Integral( -10.00*par[3], 20.0*par[4], 1e-12 ); // in Jy seconds because all the time parameters are in seconds !!!   
    double calka_Jyms = calka*1000.00;
    printf("Integral = %.8f [Jy s] = %.8f [Jy ms]\n",calka,calka_Jyms);
 
-   TF1* pulse2 = new TF1("Convolution_ROOTIntegral2",Convolution_ROOTIntegral,-0.02,0.02,5);
+   TF1* pulse2 = new TF1("Convolution_ROOTIntegral2",Convolution_ROOTIntegral, -10.00*par[3], 20.0*par[4] ,5);
    par[2] = par[2]*(F0/calka_Jyms);
    pulse2->SetParameters(par);
    pulse2->Draw("same");   
    pulse2->SetLineColor(kGreen);
 
-   calka = pulse2->Integral( -0.02, +0.02, 1e-10 ); // in Jy seconds because all the time parameters are in seconds !!!   
+   calka = pulse2->Integral( -10.00*par[3], 20.0*par[4], 1e-20 ); // in Jy seconds because all the time parameters are in seconds !!!   
    calka_Jyms = calka*1000.00;
    printf("Renormalised Integral = %.8f [Jy s] = %.8f [Jy ms]\n",calka,calka_Jyms);
 
-
-// return;
 
    char szOutFile[128];
    sprintf(szOutFile,"peakflux_vs_tau_%dJyms_noise%.3fJy_CONVOL.txt",int(F0),sigma_n);
@@ -448,29 +448,31 @@ void fluence_vs_flux_model_norm_noise_convol( double F0 = 8000, double noise_mul
    double tau = 0.0005;
    double tau_step = 0.00001*10.00;// *10.00 to get it faster
    double threshold = 5*sigma_n;  
-//   sleep(5);
+   sleep(5);
 
+//   tau = 0.005;
+   double sigma = par[4];
    while( tau <= 0.0052 ){
       printf("\n\n\nTau = %.4f [ms]\n",tau*1000.00);
 
-      TF1* pulse_norm = new TF1("Convolution_ROOTIntegral3",Convolution_ROOTIntegral,-0.02,0.02,5);
+      TF1* pulse_norm = new TF1("Convolution_ROOTIntegral3",Convolution_ROOTIntegral,-10.00*sigma,20.00*tau,5);
       par[4] = tau;
       pulse_norm->SetParameters(par);
-      double calka0 = pulse_norm->Integral( -0.02, +0.02, 1e-10 )*1000.00; // *1000 to make it Jy ms 
+      double calka0 = pulse_norm->Integral( -10.00*sigma,20.00*tau, gIntegralError )*1000.00; // *1000 to make it Jy ms 
       delete pulse_norm;
   
       // re-normalise pulse function to have fluence F0 (constant !!!)
       par[2] = par[2]*(F0/calka0);
-      pulse_norm = new TF1("Convolution_ROOTIntegral4",Convolution_ROOTIntegral,-0.02,0.02,5);
+      pulse_norm = new TF1("Convolution_ROOTIntegral4",Convolution_ROOTIntegral,-10.00*sigma,20.00*tau,5);
       pulse_norm->SetParameters(par);
-      double calka = pulse_norm->Integral( -0.02, +0.02, 1e-10 )*1000.00; // *1000 to make it Jy ms 
+      double calka = pulse_norm->Integral( -10.00*sigma, 20.00*tau, gIntegralError )*1000.00; // *1000 to make it Jy ms 
       printf("DEBUG : calka = %.8f [Jy ms] vs. before re-normalisation %.8f  [Jy ms]\n",calka,calka0);
  
 
       // peak flux corresponding to fluence F0 
       // double peak_flux = F0/calka;  
       // rather find peak flux as the maximum of the pulse_norm curve 
-      double peak_flux = calc_max( pulse_norm, -0.02, 0.02 );
+      double peak_flux = calc_max( pulse_norm, -10.00*sigma,20.00*tau );
      
       // what is the minimum detection threshold corresponding to our peak flux threshold (SNR) SNR >= 5 ?
       // double F_min = threshold*calka;
@@ -487,18 +489,18 @@ void fluence_vs_flux_model_norm_noise_convol( double F0 = 8000, double noise_mul
       par_norm_one[2] = 1.00;
       par_norm_one[3] = par[3];
       par_norm_one[4] = par[4];
-      TF1* pulse_no_norm = new TF1("Pulse_with_gauss_onset_NONORM",Convolution_ROOTIntegral,-0.02,0.02,5);
+      TF1* pulse_no_norm = new TF1("Pulse_with_gauss_onset_NONORM",Convolution_ROOTIntegral,-10.00*sigma,20.00*tau,5);
       pulse_no_norm->SetParameters(par_norm_one);
-      double max_nonorm = calc_max( pulse_no_norm, -0.02, 0.02 );
+      double max_nonorm = calc_max( pulse_no_norm, -10.00*sigma,20.00*tau );
       printf("MAX_NONORM = %.8f vs. 5*Sigma_noise = %.8f\n",max_nonorm,5.00*sigma_n);
       par_norm_one[2] = 5.00*sigma_n / max_nonorm;
       printf("NEW NORM = %.8f\n",par_norm_one[2]);
       pulse_no_norm->SetParameters(par_norm_one);
-      double max_nonorm2 = calc_max( pulse_no_norm, -0.02, 0.02 );
+      double max_nonorm2 = calc_max( pulse_no_norm, -10.00*sigma,20.00*tau );
       printf("NEW MAX_NONORM = %.8f vs. 5*Sigma_noise = %.8f\n",max_nonorm2,5.00*sigma_n);
 
       // calculate miminum detected Fluence (fluence threshold) corresponding to peak_flux/sigma_noise = 5 (i.e. peak flux threshold):
-      double F_min = pulse_no_norm->Integral( -0.02, +0.02, 1e-10 )*1000.00;
+      double F_min = pulse_no_norm->Integral( -10.00*sigma,20.00*tau, gIntegralError )*1000.00;
       printf("DEBUG : F_min = %.8f [Jy ms]\n",F_min);
       
       
@@ -510,14 +512,15 @@ void fluence_vs_flux_model_norm_noise_convol( double F0 = 8000, double noise_mul
       double N_gp = count_gps_with_noise( fluence_distrib, F_min, fluence_bin, sigma_n, 5, par_norm_one);
 
       printf("Tau = %.6f [ms] : calka = %.6f [Jy ms] -> peak flux = %.8f [Jy] -> N_gp = %.4f\n",tau*1000.00,calka,peak_flux,N_gp);
-//      pulse_no_norm->Draw();
-//return;
+      pulse_no_norm->Draw();
+// return;
 //      break;
       
       fprintf(outf,"%.8f %.8f %.8f %.8f %.8f\n",tau*1000.00,peak_flux,calka,F_min,N_gp);
       tau += tau_step;
 
       delete pulse_norm;
+      delete pulse_no_norm;
    }
 
    fclose(outf);
