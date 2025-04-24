@@ -189,7 +189,7 @@ double count_gps_with_noise( TF1* fluence_distrib, double F_min, double fluence_
 
       // apply effect of noise to detection :
       for(int i=0;i<n;i++){
-//         double peak_flux = calc_max_real( pulse_no_norm,  sigma_n, -0.02, +0.02 );
+//           double peak_flux = calc_max_real( pulse_no_norm,  sigma_n, -0.02, +0.02 );
 
            double peak_flux = calc_max( pulse_no_norm, -0.02, +0.02 );
            double noise = gRandom->Gaus( 0.00, sigma_n );  
