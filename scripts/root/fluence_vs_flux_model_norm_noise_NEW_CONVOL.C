@@ -353,7 +353,7 @@ double count_gps_with_noise( TF1* fluence_distrib, double F_min, double fluence_
 
 
 
-void fluence_vs_flux_model_norm_noise_NEW_CONVOL( double p0_mult = 1.00, double p1_index=-2.99970, double start_tau=0.0005, double noise_multiplier=1.00 ) // fluence is constant in Jy*ms as in Figure 7 in the paper at rate 1-GP/hour :
+void fluence_vs_flux_model_norm_noise_NEW_CONVOL( double p0_mult = 1.00, double p1_index=-2.99970, double start_tau=0.0005, double tau_step=0.0005, double noise_multiplier=1.00 ) // fluence is constant in Jy*ms as in Figure 7 in the paper at rate 1-GP/hour :
 {
    double sigma_n = sigma_noise( gSEFD, gTimeResolution, gBW , 1 )*noise_multiplier; // noise_multiplier is here in case I underestimate the noise
 
@@ -418,16 +418,16 @@ void fluence_vs_flux_model_norm_noise_NEW_CONVOL( double p0_mult = 1.00, double 
    printf("Integral = %.8f [Jy s] = %.8f [Jy ms]\n",calka,calka_Jyms);
 
    char szOutFile[128];
-   sprintf(szOutFile,"peakflux_vs_tau_%dJyms_noise%.3fJy.txt",int(F_1hour),sigma_n);
+   sprintf(szOutFile,"peakflux_vs_tau_%dJyms_noise%.3fJy_NEW.txt",int(F_1hour),sigma_n);
    FILE* outf = fopen(szOutFile,"w");
    fprintf(outf,"# Tau[ms]   Peak_flux[Jy]  Integral   Fluence_min[Jy ms] N_gp\n");
    double tau = start_tau;
-   double tau_step = 0.00001*10.00;// *10.00 to get it faster
+//   double tau_step = 0.00001*10.00;// *10.00 to get it faster   
    double threshold = 5*sigma_n;  
 //   sleep(5);
  
 //   tau = 0.002;
-   while( tau <= 0.010 ){
+   while( tau <= 0.0051 ){
       printf("\n\n\nTau = %.4f [ms]\n",tau*1000.00);
 
       // what is the minimum detection threshold corresponding to our peak flux threshold (SNR) SNR >= 5 ?
@@ -466,8 +466,8 @@ void fluence_vs_flux_model_norm_noise_NEW_CONVOL( double p0_mult = 1.00, double 
       double N_gp = count_gps_with_noise( fluence_distrib, F_min, fluence_bin, sigma_n, 5, par_norm_one);
 
       printf("Tau = %.6f [ms] : calka = %.6f [Jy ms] -> N_gp = %.4f\n",tau*1000.00,calka,N_gp);
-      pulse_no_norm->Draw();
-return;
+//      pulse_no_norm->Draw();
+//return;
 //      break;
       
       fprintf(outf,"%.8f %.8f %.8f %.8f %.8f\n",tau*1000.00,max_nonorm,calka,F_min,N_gp);

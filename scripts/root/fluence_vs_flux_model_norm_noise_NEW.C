@@ -292,7 +292,7 @@ void fluence_vs_flux_model_norm_noise_NEW( double p0_mult = 1.00, double p1_inde
    printf("Integral = %.8f [Jy s] = %.8f [Jy ms]\n",calka,calka_Jyms);
 
    char szOutFile[128];
-   sprintf(szOutFile,"peakflux_vs_tau_%dJyms_noise%.3fJy.txt",int(F_1hour),sigma_n);
+   sprintf(szOutFile,"peakflux_vs_tau_%dJyms_noise%.3fJy_NEW_NOCONVOL.txt",int(F_1hour),sigma_n);
    FILE* outf = fopen(szOutFile,"w");
    fprintf(outf,"# Tau[ms]   Peak_flux[Jy]  Integral   Fluence_min[Jy ms] N_gp\n");
    double tau = start_tau;
@@ -340,8 +340,8 @@ void fluence_vs_flux_model_norm_noise_NEW( double p0_mult = 1.00, double p1_inde
       double N_gp = count_gps_with_noise( fluence_distrib, F_min, fluence_bin, sigma_n, 5, par_norm_one);
 
       printf("Tau = %.6f [ms] : calka = %.6f [Jy ms] -> N_gp = %.4f\n",tau*1000.00,calka,N_gp);
-      pulse_no_norm->Draw();
-return;
+//      pulse_no_norm->Draw();
+//return;
 //      break;
       
       fprintf(outf,"%.8f %.8f %.8f %.8f %.8f\n",tau*1000.00,max_nonorm,calka,F_min,N_gp);
