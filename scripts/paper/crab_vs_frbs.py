@@ -32,6 +32,10 @@ def main() :
       print("FRB spectral luminosity = %e erg/Hz/s" % (crab_lumin))
       print("FRB rate = %e / day /  sky" % (N_frb_rate))
       
+      n_days = 1.00/N_frb_rate
+      n_years = n_days/365.00
+      print("1 FRB in %e years = %.6f bln years" % (n_years,n_years/1e9))
+      
    
    
 
