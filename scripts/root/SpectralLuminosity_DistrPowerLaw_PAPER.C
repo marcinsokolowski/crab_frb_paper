@@ -552,10 +552,13 @@ void SpectralLuminosity_DistrPowerLaw_PAPER( const char* fname, double TotalTime
 
 
 
-   printf("PROBABILITIES of bright pulses are:\n");
-//   printf("10^6 Jy : %e\n",pPowerLawDistrib->Eval(1000000.00));
-//   printf("10^7 Jy : %e\n",pPowerLawDistrib->Eval(10000000.00));
-//   printf("10^8 Jy : %e\n",pPowerLawDistrib->Eval(100000000.00));
+   printf("Rates of bright pulses are:\n");
+   printf("10^23 erg/Hz/s : %e / hour\n",pPowerLawDistrib->Eval(1e23));
+   printf("10^25 erg/Hz/s : %e / hour\n",pPowerLawDistrib->Eval(1e25));
+   printf("10^28 erg/Hz/s : %e / hour\n",pPowerLawDistrib->Eval(1e28));
+   printf("10^30 erg/Hz/s : %e / hour\n",pPowerLawDistrib->Eval(1e30));
+   printf("10^35 erg/Hz/s : %e / hour\n",pPowerLawDistrib->Eval(1e35));
+   printf("10^40 erg/Hz/s : %e / hour\n",pPowerLawDistrib->Eval(1e40));
 
    
 }
