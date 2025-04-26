@@ -557,6 +557,7 @@ void SpectralLuminosity_DistrPowerLaw_PAPER( const char* fname, double TotalTime
    printf("10^25 erg/Hz/s : %e / hour\n",pPowerLawDistrib->Eval(1e25));
    printf("10^28 erg/Hz/s : %e / hour\n",pPowerLawDistrib->Eval(1e28));
    printf("10^30 erg/Hz/s : %e / hour\n",pPowerLawDistrib->Eval(1e30));
+   printf("10^34 erg/Hz/s : %e / hour\n",pPowerLawDistrib->Eval(1e34));
    printf("10^35 erg/Hz/s : %e / hour\n",pPowerLawDistrib->Eval(1e35));
    printf("10^40 erg/Hz/s : %e / hour\n",pPowerLawDistrib->Eval(1e40));
 
