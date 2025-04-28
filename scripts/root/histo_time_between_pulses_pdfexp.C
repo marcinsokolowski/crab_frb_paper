@@ -148,10 +148,11 @@ const char* change_ext(const char* name,const char* new_ext,char* out)
 }
 
 
-void histo_time_between_pulses_pdfexp( const char* fname, int column=0,
-                double fit_min_x=0, double fit_max_x=500, 
+void histo_time_between_pulses_pdfexp( const char* fname, 
+                int column=0,
+                double fit_min_x=0, double fit_max_x=1000, 
                 int dofit=1, int dDbm2DbmPerHz=1,
-                double low=0, double up=1000, int bin_no=100,
+                double low=0, double up=1000, int bin_no=1000, double unixtime=-1,
                 const char* szExtDesc=NULL, int shift_text=0, int channel=0,
                 int bLog=1, const char* szTitleX="Time between pulses [seconds]", const char* szTitleY="Occurance ", 
                 int DoBorder=1, const char* szTitle=NULL, const char* szOutFile=NULL,
@@ -419,7 +420,8 @@ void histo_time_between_pulses_pdfexp( const char* fname, int column=0,
 //    if( bPrintHeader > 0 ){
 //       fprintf(out,"# FILE FIT_SIGMA FIT_MEAN FIT_NORM MEAN RMS\n");
 //    }
-//      fprintf(out,"%.20f %.20f %.20f %.20f %.4f %d\n",fit_norm,fit_exp,fit_norm_err,fit_exp_err,((double)gChannel)*(480.00/4096.00),gChannel);
+      fit_lambda = par[0];      
+      fprintf(out,"%.8f %.20f %.20f\n",unixtime,fit_lambda,fit_lambda_err);
       fclose(out);      
 
 
