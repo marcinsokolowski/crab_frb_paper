@@ -322,13 +322,14 @@ void histo_time_between_pulses_pdfexp( const char* fname, int column=0,
    gStyle->SetFillColor(0);
    gStyle->SetFillStyle(0);
    gStyle->SetOptFit(111);
+   gStyle->SetOptStat("ne");
    c1->SetLogx(1);
    c1->SetLogy(1);
 
  
 
    // X axis 
-   histo->GetXaxis()->SetTitleOffset(0.60);
+   histo->GetXaxis()->SetTitleOffset(1.00);
    histo->GetXaxis()->SetTitleSize(0.048);
    histo->GetXaxis()->SetLabelSize(0.05);
 
@@ -379,6 +380,7 @@ void histo_time_between_pulses_pdfexp( const char* fname, int column=0,
       par[0] = 0.9; // 0.01 - calculated
  
       pFitFunc->SetParameters(par);
+      pFitFunc->SetParName(0,"Fitted #lambda");
       histo->Fit("exponential_distrib","E,V","",fit_min_x,fit_max_x);
 //      histo->GetFunction("power_law_distrib")->SetParameters(par);
 //      histo->Fit("power_law_distrib","E,V","",fit_min_x,fit_max_x);
