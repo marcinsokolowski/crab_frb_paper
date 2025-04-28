@@ -49,3 +49,6 @@ done
 
 cat ${template}/time_between_pulses_fit_results_EXP.txt > ALL_time_between_pulses_fit_results_EXP_FIT.txt
 awk '{print $1" "43200" "$2" "$3;}' ALL_time_between_pulses_fit_results_EXP_FIT.txt > ALL_time_between_pulses_fit_results_EXP_FIT_ERR.txt
+
+mkdir -p images/
+root -l "plot_lambda_vs_time.C(\"ALL_time_between_pulses_fit_results_EXP_FIT_ERR.txt\")"
