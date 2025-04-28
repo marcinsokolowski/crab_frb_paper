@@ -252,7 +252,8 @@ void histo_time_between_pulses_pdfexp( const char* fname, int column=0,
    double start_x = 1000;
    double   border=0;
    printf("DEBUG : histo bin_no = %d, range = %.6f - %.6f",bin_no,low-border,up+border);
-   TH1F*  histo = new TH1F(szHistoTitle,szTitle,bin_no,start_x-border,up+border);        
+   TH1F*  histo = new TH1F(szHistoTitle,szTitle,bin_no,low,up);
+//   TH1F*  histo = new TH1F(szHistoTitle,szTitle,bin_no,start_x-border,up+border);        
 //   TH1F*  histo = new TH1F(szHistoTitle,szTitle,bin_no,5,110);
    histo->Sumw2(); //
 
