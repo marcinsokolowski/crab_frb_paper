@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
+show=False
 debug = False
 
 obstime = 3600.00 # second observations
@@ -37,7 +38,8 @@ if __name__ == '__main__':
    print("DEBUG : s[0] = %.6f , s[1] = %.6f" % (s[0],s[1]))
    count, bins, ignored = plt.hist(s, 10, log=True ) # , density=True)
 
-   plt.show()
+   if show :
+      plt.show()
 
    # time_between_pulses = np.zeros( n_samples-1 )
    time_between_pulses = []
@@ -65,7 +67,9 @@ if __name__ == '__main__':
    outf.close()      
        
    count2, bins2, ignored2 = plt.hist(time_between_pulses, 50, log=True )      
-   plt.show()
+   
+   if show :
+      plt.show()
 
 
 # pulse_times = np.zeros(len(s))
