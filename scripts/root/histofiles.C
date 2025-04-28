@@ -255,8 +255,10 @@ void histofiles( const char* file_list, int column=0,
    gStyle->SetFillStyle(0);
  
    TPad* p1 = new TPad("p1","p1",0,0,1,1,-1);
-   if(bLog)
+   if( bLog ){
+      p1->SetLogx(1);
       p1->SetLogy(1);
+   }
    p1->SetFillColor(0);
    p1->SetFillStyle(0);
    p1->Draw();
@@ -328,6 +330,7 @@ void histofiles( const char* file_list, int column=0,
    }
 
 
+   int colors[10] = { kBlack,kRed,kCyan,kBlue,kGreen,kOrange,kYellow,kGray,kPink,kMagenta };
    for(int i=0;i<file_count;i++){
       histo_tab[i] = histofile( list[i].fname , column, dofit, low, up, bin_no, bLog, szTitleX, szTitleY, DoBorder, szTitle, szOutFile, szOutPostfix, unix_time, bNormalise );
       TH1F* histo = histo_tab[i];
@@ -336,8 +339,10 @@ void histofiles( const char* file_list, int column=0,
       
       if( i == 0 ){
          histo->Draw();
+         histo->SetLineColor( colors[i%10] );
       }else{
          histo->Draw("same");
+         histo->SetLineColor( colors[i%10] );
       }
 
 /*      TLatex*  lat = new TLatex();
