@@ -639,7 +639,7 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
          local_func=1;
 
 // WORKING:
-         par[0] = 10000.00; // as calculated on 2025-04-29 (see notebook), previously wrong was : 0.028; // ne
+         par[0] = 2340.00; // as calculated on 2025-04-29 (see notebook), previously wrong was : 0.028; // ne
          par[1] = 4.53e-6;
          par[2] = 62.49;
          par[3] = 0.003235;
@@ -654,7 +654,7 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
          line->SetParName(4,"#alpha");
 
 //         line->SetParLimits(1,0.00,1000.00);
-         line->FixParameter(1,1.00);
+//         line->FixParameter(1,1.00);
          line->SetParLimits(2,0.00,10000.00);
 
       }
