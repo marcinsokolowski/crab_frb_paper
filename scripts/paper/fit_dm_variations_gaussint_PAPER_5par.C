@@ -491,11 +491,14 @@ Double_t dm_vs_mjd( Double_t* x, Double_t* y )
    Double_t v_crab = 120000; // km/s = 120km/s (Kaplan at al 2008, ApJ, 677, 1201) - transverse Crab velocity 
    Double_t v_crab_pc = 3.36e-7; // pc/day // 3.888e-9;
    Double_t v0 = alpha*v_crab_pc; 
+   Double_t pi = TMath::Pi();
 
 
    Double_t yy = v0*(t-t_peak);
 
-   Double_t dm = dm0 +  peak_ne*exp(-(yy*yy)/(2.00*sigma*sigma)); // *sqrt(sigma)
+// ERROR !!! Lacks dl !!!
+   Double_t delta_dm = peak_ne*sqrt(2.00*pi)*sigma*exp(-(yy*yy)/(2.00*sigma*sigma)); // was : peak_ne*exp(-(yy*yy)/(2.00*sigma*sigma))
+   Double_t dm = dm0 +  delta_dm; // *sqrt(sigma)
    return dm;
 }
 
@@ -636,7 +639,7 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
          local_func=1;
 
 // WORKING:
-         par[0] = 0.028; // ne
+         par[0] = 10000.00; // as calculated on 2025-04-29 (see notebook), previously wrong was : 0.028; // ne
          par[1] = 4.53e-6;
          par[2] = 62.49;
          par[3] = 0.003235;
