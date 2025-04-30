@@ -507,14 +507,11 @@ Double_t tau_vs_mjd( Double_t* x, Double_t* y )
    Double_t t = x[0];
 
 
-   Double_t peak_ne = y[0]; 
-   Double_t a_pc = y[1]; // n*sigma_dm;
-   Double_t sigma_dm = y[2];
-//   Double_t n = y[1];
-   Double_t t_peak = y[3]; // 62.49;
-//   Double_t sigma_dm = 4.53e-6;
-   Double_t alpha = 1.00;
-   Double_t tau0 = y[4]; // y[3];
+   Double_t theta_l = y[0];  // theta^2 * L 
+   Double_t sigma_blob = y[1];
+   Double_t t_peak = y[2]; // 62.49;
+   Double_t tau0 = y[3]; // y[3];
+   Double_t alpha = y[4];
 
 
    Double_t d_pc = 2000.00; // pc = 2kpc
@@ -531,8 +528,10 @@ Double_t tau_vs_mjd( Double_t* x, Double_t* y )
 
    Double_t yy = v0*(t-t_peak);
 
-   Double_t delta_ne = peak_ne*exp(-(yy*yy)/(2.00*sigma_dm*sigma_dm)); // *sqrt(sigma)
-   Double_t tau = tau0 + 52542.00*(delta_ne*delta_ne)*(d_pc/a_pc)*d_pc*(1.00/(f*f*f*f));
+//   Double_t delta_ne = peak_ne*exp(-(yy*yy)/(2.00*sigma_dm*sigma_dm)); // *sqrt(sigma)
+//   Double_t tau = tau0 + 52542.00*(delta_ne*delta_ne)*(d_pc/a_pc)*d_pc*(1.00/(f*f*f*f));
+
+   Double_t tau = tau0 + 1.20879*(theta_l)*exp(-(yy*yy)/(sigma_blob*sigma_blob));
    return tau;
 }
 
@@ -696,20 +695,20 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
          local_func=1;
 
 // WORKING:
-         par[0] = 0.028; // ne
-         par[1] = 0.01341;
-         par[2] = 4.53e-6;
-         par[3] = 67.26;
+         par[0] = 1.783; // (0.045*0.045)*1999.00; // ne
+         par[1] = 1e-6;
+         par[2] = 68.83;
+         par[3] = 1.926;
          par[4] = 1.00;
  
-         line->SetParName(0,"peak_ne");
-         line->SetParName(1,"a_pc");
-         line->SetParName(2,"#sigma_{gauss} of #Delta n_{e}");
-         line->SetParName(3,"t_{peak} [days]");
-         line->SetParName(4,"#tau_{0}");
+         line->SetParName(0,"#theta L");
+         line->SetParName(1,"#sigma_{blob} turbulence scale");
+         line->SetParName(2,"t_{peak}");
+         line->SetParName(3,"#tau_{0}");
+         line->SetParName(4,"#alpha");
 
 //         line->SetParLimits(1,0.00,1000.00);
-//         line->FixParameter(3,68.00);
+//         line->FixParameter(4,1.00);
 //         line->SetParLimits(2,0.00,10000.00);
 
       }
@@ -739,7 +738,7 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
          line->SetParName(1,"#t_{start}");
          line->SetParName(2,"#t_{peak}");
          line->SetParName(3,"Peak_flux");
-         line->SetParName(4,"#tau");
+         line->SetParName(4,"#tau");         
       }
 
       if( strcmp( fit_func_name, "pulse_gauss" )==0 ){
@@ -1020,7 +1019,7 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
 
    }
    pGraph->GetXaxis()->SetTitleOffset(1.00);
-   pGraph->GetYaxis()->SetTitleOffset(0.60);
+   pGraph->GetYaxis()->SetTitleOffset(1.00);
    pGraph->GetXaxis()->SetTitleSize(0.05);
    pGraph->GetXaxis()->SetLabelSize(0.05);
    pGraph->GetYaxis()->SetTitleSize(0.05);
@@ -1343,7 +1342,7 @@ void fit_tau_variations_gaussint_NEW( const char* basename="taumean_vs_time.test
                        bool bUseFitResidualsRMS=false, // use residuals of the FIT to calculate Sigma_obs which may be slightly different than 1.00 (after normalisation)
                        double min_y=-1000000,  double max_y=-1000000, int bLog=0,
       const char* szDescX="MJD [days]",
-      const char* szDescY="DM - 56.705825 [pc/cm^3] ", 
+      const char* szDescY="#tau [ms]", 
       const char* szTitle=NULL,
       double fit_min_x=0, double fit_max_x=100,
       int x_col=0, int y_col=1, const char* outpngfile=NULL )

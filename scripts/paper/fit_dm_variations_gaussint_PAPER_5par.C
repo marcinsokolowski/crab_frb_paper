@@ -906,11 +906,11 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
          line_draw->SetLineColor(kBlack);
 
          printf("Fitted paramaters:\n");
-         printf("\tpar[0] = %.8f\n",par[0]);
-         printf("\tpar[1] = %.8f\n",par[1]);
-         printf("\tpar[2] = %.8f\n",par[2]);
-         printf("\tpar[3] = %.8f\n",par[3]);
-         printf("\tpar[4] = %.8f\n",par[4]);
+         printf("\tpar[0] = %.8f +/- %.8f\n",par[0],line->GetParError(0));
+         printf("\tpar[1] = %.8f +/- %.8f\n",par[1],line->GetParError(1));
+         printf("\tpar[2] = %.8f +/- %.8f\n",par[2],line->GetParError(2));
+         printf("\tpar[3] = %.8f +/- %.8f\n",par[3],line->GetParError(3));
+         printf("\tpar[4] = %.8f +/- %.8f\n",par[4],line->GetParError(4));
          printf("TEST VALUE = %.8f vs. %.8f\n",line->Eval(0.5),line_draw->Eval(0.5));
 
          gFittedParametersN = 5;

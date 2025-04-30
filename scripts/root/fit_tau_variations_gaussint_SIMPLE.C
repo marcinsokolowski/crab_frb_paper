@@ -1015,6 +1015,24 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
       }
       fclose(out_f);     
 
+      // T (parameter 1) = Sigma_blob / velocity , test varius values of
+      // Sigma_blob for given velocities <= 1000 km/s 
+      printf("Fitted T = %.6f -> see corresponding sigma_blob values for different velocities:\n",par[1]);
+      double pc_in_km = 3.0857e13; // km
+      double v0 = 10.00;
+      while (v0 <= 1000){
+         double sigma_blob_km = (v0*86400)*par[1];
+         double sigma_blob_pc = sigma_blob_km/pc_in_km;
+
+         printf("v0 = %.4f km/s -> sigma_blob = %e [pc] = %e [km]\n",v0,sigma_blob_pc,sigma_blob_km);
+         
+         if( v0 < 300 ){
+            v0 += 10;
+         }else{
+            v0 += 50;
+         }
+      }      
+
    }
    pGraph->GetXaxis()->SetTitleOffset(1.00);
    pGraph->GetYaxis()->SetTitleOffset(1.00);
@@ -1330,9 +1348,12 @@ double normalise_y_minmax( Double_t* x_values, Double_t* y_values, int cnt, doub
    return rms;
 }
 
+bool day_in_horns( double day )
+{
+   return ((day>=43 && day<=58.00) || (day>=65.00 && day<=83.00));
+}
 
-
-void fit_tau_variations_gaussint_SIMPLE( const char* basename="taumean_vs_time.test", 
+void fit_tau_variations_gaussint_SIMPLE( const char* basename="taumean_vs_time.test", bool bExcludeHorns=false,
                        const char* fit_func_name="tau_vs_mjd", // dm_vs_time
                        double noise_start=0, double noise_end=0.4, 
                        double sigma_simulated=0.1120, // simulated sigma of noise in Jy , sigma_Stokes_I - for the entire duration of the observation !!!
@@ -1388,24 +1409,56 @@ void fit_tau_variations_gaussint_SIMPLE( const char* basename="taumean_vs_time.t
    
 
 
+   Double_t* x_value1_orig = new Double_t[MAX_ROWS];
+   Double_t* y_value1_orig = new Double_t[MAX_ROWS];
+   Double_t* x_value1_orig_err = new Double_t[MAX_ROWS];
+   Double_t* y_value1_orig_err = new Double_t[MAX_ROWS];
+
    Double_t* x_value1 = new Double_t[MAX_ROWS];
    Double_t* y_value1 = new Double_t[MAX_ROWS];
    Double_t* x_value1_err = new Double_t[MAX_ROWS];
    Double_t* y_value1_err = new Double_t[MAX_ROWS];
+
    Double_t maxX=-100000,maxY=-100000;   
    Double_t minX=100000,minY=100000;
 
    Int_t ncols;
-   Int_t lq1=0,lq2=0,lq3=0,lq5=0,lq9=0,lq25=0;
+   int lq1_orig = ReadResultsFile( basename, x_value1_orig, y_value1_orig, -1, -1, 0, 2 ); 
+   int lq1_orig_err = ReadResultsFile( basename, x_value1_orig_err, y_value1_orig_err, -1, -1, 1, 3 );
 
-
-
-   lq1 = ReadResultsFile( basename, x_value1, y_value1, -1, -1, 0, 2 ); 
-   int lq1_err = ReadResultsFile( basename, x_value1_err, y_value1_err, -1, -1, 1, 3 );
-
-   for(int i=0;i<lq1;i++){
-      x_value1[i] = (x_value1[i] - gStartX)/86400;      
+   for(int i=0;i<lq1_orig;i++){
+      x_value1_orig[i] = (x_value1_orig[i] - gStartX)/86400;      
    }
+
+   // if required remove data in horns :
+   int lq1 = 0, lq1_err = 0;
+   if( bExcludeHorns ){
+      for(int i=0;i<lq1_orig;i++){
+         double day = x_value1_orig[i];
+
+         if( day_in_horns(day) ){
+            printf("INFO : day = %.4f ignored (data excluded)\n",day);
+         }else{
+            x_value1[lq1] = x_value1_orig[i];
+            y_value1[lq1] = y_value1_orig[i];
+            x_value1_err[lq1_err] = x_value1_orig_err[i];
+            y_value1_err[lq1_err] = y_value1_orig_err[i];
+
+            lq1++;
+            lq1_err++;
+         }
+      }
+   }else{
+      for(int i=0;i<lq1_orig;i++){
+         x_value1[i] = x_value1_orig[i];
+         y_value1[i] = y_value1_orig[i];
+         x_value1_err[i] = x_value1_orig_err[i];
+         y_value1_err[i] = y_value1_orig_err[i];
+         lq1++;
+         lq1_err++;
+      }
+   }
+
    
    TGraphErrors* pGraph1 = DrawGraph( x_value1, y_value1, lq1, 1, NULL, fit_func_name, min_y, max_y, szTitle,
                                       basename, bLog, szDescX, szDescY, fit_min_x, fit_max_x, y_value1_err );
