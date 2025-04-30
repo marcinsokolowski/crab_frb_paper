@@ -469,12 +469,12 @@ Double_t dm_vs_mjd( Double_t* x, Double_t* y )
    // t - time
    Double_t t = x[0];
 
-   Double_t N = y[0];
+   Double_t dDM = y[0];
    Double_t T = y[1];
    Double_t t_peak = y[2];
    Double_t dm0 = y[3];
 
-   Double_t delta_dm = N*exp(-((t-t_peak)*(t-t_peak))/(2.00*(T*T))); // was : peak_ne*exp(-(yy*yy)/(2.00*sigma*sigma))
+   Double_t delta_dm = dDM*exp(-((t-t_peak)*(t-t_peak))/(2.00*(T*T))); // was : peak_ne*exp(-(yy*yy)/(2.00*sigma*sigma))
    Double_t dm = dm0 +  delta_dm; // *sqrt(sigma)
    return dm;
 }
@@ -626,7 +626,7 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
          par[2] = 62.66;
          par[3] = 0.005; // alpha
  
-         line->SetParName(0,"N");
+         line->SetParName(0,"#Delta DM");
          line->SetParName(1,"#Tau_{#sigma}");
          line->SetParName(2,"t_peak [days]");
          line->SetParName(3,"DM_{offset} [pc/cm^{3}]");
@@ -949,11 +949,14 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
       printf("Fitted T = %.6f -> see corresponding sigma_blob values for different velocities:\n",par[1]);
       double pc_in_km = 3.0857e13; // km
       double v0 = 10.00;
+      double pi = TMath::Pi();
       while (v0 <= 1000){
          double sigma_blob_km = (v0*86400)*par[1];
          double sigma_blob_pc = sigma_blob_km/pc_in_km;
 
-         printf("v0 = %.4f km/s -> sigma_blob = %e [pc] = %e [km]\n",v0,sigma_blob_pc,sigma_blob_km);
+         // Normalisation = SQRT(2PI)*n_peak*sigma_blob 
+         double n_peak = par[0]/(sqrt(2*pi)*sigma_blob_pc);
+         printf("v0 = %.4f km/s -> sigma_blob = %e [pc] = %e [km] , n_peak = %e [e-/cm^3]\n",v0,sigma_blob_pc,sigma_blob_km,n_peak);
          
          if( v0 < 300 ){
             v0 += 10;
@@ -961,6 +964,7 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
             v0 += 50;
          }
       }
+
    }
    pGraph->GetXaxis()->SetTitleOffset(1.00);
    pGraph->GetYaxis()->SetTitleOffset(1.00);
