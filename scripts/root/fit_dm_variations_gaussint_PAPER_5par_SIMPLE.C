@@ -944,6 +944,13 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
       }
       fclose(out_f);     
 
+      Double_t par_err[5];
+      par_err[0] = line->GetParError(0);
+      par_err[1] = line->GetParError(1);
+      par_err[2] = line->GetParError(2);
+      par_err[3] = line->GetParError(3);
+      par_err[4] = line->GetParError(4);
+
       // T (parameter 1) = Sigma_blob / velocity , test varius values of
       // Sigma_blob for given velocities <= 1000 km/s 
       printf("Fitted T = %.6f -> see corresponding sigma_blob values for different velocities:\n",par[1]);
@@ -953,10 +960,14 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
       while (v0 <= 1000){
          double sigma_blob_km = (v0*86400)*par[1];
          double sigma_blob_pc = sigma_blob_km/pc_in_km;
+         double sigma_blob_pc_err = (v0*86400)*par_err[1]/pc_in_km;
+         double fwhm_pc = 2.355*sigma_blob_pc;
+         double fwhm_pc_err = 2.355*sigma_blob_pc_err;
 
          // Normalisation = SQRT(2PI)*n_peak*sigma_blob 
          double n_peak = par[0]/(sqrt(2*pi)*sigma_blob_pc);
-         printf("v0 = %.4f km/s -> sigma_blob = %e [pc] = %e [km] , n_peak = %e [e-/cm^3]\n",v0,sigma_blob_pc,sigma_blob_km,n_peak);
+         double n_peak_err = n_peak*sqrt( (par_err[0]/par[0])*(par_err[0]/par[0]) + (sigma_blob_pc_err/sigma_blob_pc)*(sigma_blob_pc_err/sigma_blob_pc) );
+         printf("v0 = %.4f km/s -> sigma_blob = %e +/- %e [pc] = %e [km] (fwhm = %e +/- %e [pc]) , n_peak = %e +/- %e [e-/cm^3]\n",v0,sigma_blob_pc,sigma_blob_pc_err,sigma_blob_km,fwhm_pc,fwhm_pc_err,n_peak,n_peak_err);
          
          if( v0 < 300 ){
             v0 += 10;
