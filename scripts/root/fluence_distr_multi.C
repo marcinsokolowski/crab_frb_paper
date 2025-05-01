@@ -514,9 +514,9 @@ void fluence_distr_multi( const char* file_list, double TotalTimeInHours=0.99876
 //   histo_mp->Sumw2();
 
      if( i > 0 ){
-        histo->Draw("L,same");
+        histo->Draw("same"); // HIST without errors
      }else{
-        histo->Draw("AL");
+        histo->Draw(); // HIST without errors
      }
      char szLegend[64];
      strcpy(szLegend,list[i].fname);

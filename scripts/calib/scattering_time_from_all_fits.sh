@@ -71,12 +71,14 @@ do
      cd $dir     
      
      if [[ $refit_all -gt 0 ]]; then
-        echo "~/github/crab_frb_paper/scripts/calib/refit_tau.sh"
-        ~/github/crab_frb_paper/scripts/calib/refit_tau.sh
+        echo "~/github/crab_frb_paper/scripts/calib/refit_tau.sh 0"
+        ~/github/crab_frb_paper/scripts/calib/refit_tau.sh 0
      fi
      
      dataset=`echo $dir |  awk '{i=index($1,"/eda2/2");print substr($1,i+6,23);}'`
 #     cat *.refit | grep -v nan | awk -v snr_threshold=${snr_threshold} -v chi2_max=${chi2_max} '{if($1>0 && $11>=snr_threshold && $12>chi2_max ){print $9;}}' > tau.txt
+     echo "mv tau.txt tau.txt.old"
+     mv tau.txt tau.txt.old
      cat *.refit | grep -v nan | awk '{if($1>0){print $9;}}' > tau.txt
      
      unixtime=-1
