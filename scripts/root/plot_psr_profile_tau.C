@@ -1111,7 +1111,7 @@ double normalise_y_minmax( Double_t* x_values, Double_t* y_values, int cnt, doub
 
 
 
-void plot_psr_profile( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", int bNormaliseInputData=2, bool bShowOriginalDataWithFit=false,
+void plot_psr_profile_tau( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", int bNormaliseInputData=2, bool bShowOriginalDataWithFit=false,
                        const char* fit_func_name="pulse_gauss", // pulse, pulse_gauss, pulse_gauss_only
                        double noise_start=0, double noise_end=0.4, 
                        double sigma_simulated=0.1120, // simulated sigma of noise in Jy , sigma_Stokes_I - for the entire duration of the observation !!!
