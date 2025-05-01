@@ -432,6 +432,23 @@ void FluenceRateOfOccurancePowerLaw_PAPER_SELFCONSIST( const char* fname, double
       printf("GAUSS MEAN  = %.8f\n",par[1]);
       printf("GAUSS SIGMA = %.8f\n",par[2]);
       printf("Fit results written to file sigma.txt\n");
+
+      // find fluence at which the rate is 1 GP / hour :
+      Double_t prev_rate = -1;
+      Double_t flu = fit_min_x; // Jy s
+      // bin_no,low-border,up+border 
+      while( flu <= fit_max_x ){
+         double rate = histo->GetFunction("power_law_distrib")->Eval( flu );
+         printf("DEBUG : %.6f Jy s -> rate = %.6f / hour\n",flu,rate);
+         if( prev_rate >= 1e-5 && rate <= 1e-5 ){
+            printf("RATE 1 GP / hour is at fluence %.6f [Jy s] in range [%.6f,%.6f] divided into %d bins\n",flu,low,up,bin_no);
+            break;
+         }
+         prev_rate = rate;
+
+         flu += 0.01;
+      }
+
    }else{
       FILE* out = fopen("sigma.txt","a+");
       // filename SIGMA MEAN NORMALIZATION AVG RMS

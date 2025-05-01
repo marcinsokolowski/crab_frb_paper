@@ -152,7 +152,10 @@ def main() :
    print("Histogram binning : range 0.09,50 divided into %d bins" % (options.nbins))
 
    # MPs :
-   mp_counts,mp_bin_edges = np.histogram(mp_arr,options.nbins,range=(0.09,100))
+   low = 0.09
+   up  = 100.00
+   bin_no = options.nbins
+   mp_counts,mp_bin_edges = np.histogram(mp_arr,options.nbins,range=(low,up))
    mp_bin_centres = (mp_bin_edges[:-1] + mp_bin_edges[1:])/2.
    mp_err=np.sqrt(mp_counts)
    print("DEBUG : %d vs. %d vs. %d vs. %d" % (len(mp_arr),len(mp_bin_centres),len(mp_counts),len(mp_err)))   
@@ -164,7 +167,7 @@ def main() :
    R_mp, p_mp = mp_fit_results.distribution_compare('power_law', 'lognormal')
 
    # IPs :
-   ip_counts,ip_bin_edges = np.histogram(ip_arr,options.nbins,range=(0.09,100))
+   ip_counts,ip_bin_edges = np.histogram(ip_arr,options.nbins,range=(low,up))
    ip_bin_centres = (ip_bin_edges[:-1] + ip_bin_edges[1:])/2.
    ip_err=np.sqrt(ip_counts)
    print("DEBUG : %d vs. %d vs. %d vs. %d" % (len(ip_arr),len(ip_bin_centres),len(ip_counts),len(ip_err)))
@@ -210,7 +213,7 @@ def main() :
 #   mp_fit_results.power_law.plot_pdf( mp_arr, ax=ax1 )
 
    # add lines at different rates:
-   intervals=[1,10,60,600,3600,36000] # per second
+   intervals=[1,10,60,600,3600,36000,360000] # per second
    for interval in intervals :
       y=options.pulsar_period_sec/interval
       plt.axhline(y=y, color='grey', linestyle='--')
@@ -226,6 +229,8 @@ def main() :
          s = "1 / hr"
       elif interval == 36000 :
          s = "1 / 10 hr"
+      elif interval == 360000 :
+         s = "1 / 100 hr"
       else :
          s=("1 / %d sec" % interval)
          
@@ -254,6 +259,21 @@ def main() :
    # 2  p1          -3.58540e+00   5.98519e-02  -6.14033e-02   5.84185e-02
    # FITTED POWER LAW = 0.00000039 * (f/10.00000000)^(-3.58540049)
    plt.plot( ip_bin_centres[1:], my_power_law(ip_bin_centres[1:], 3.87086e-07 ,-3.5854), color="blue" )
+
+   # check when the rate is 1 GP / hour , i.e. occurange ~10^-5 
+   prev_rate = -1
+   flu = 0.01 # Jy s
+   # bin_no,low-border,up+border 
+   while flu <= 100.00 :
+      rate = my_power_law( flu, 6.08241e-06 , -3.13137 )
+      print("DEBUG : %.6f Jy s -> rate = %.6f / hour " % (flu,rate))
+      if prev_rate >= 1e-5 and rate <= 1e-5 :
+         print("RATE 1 GP / hour is at fluence %.6f [Jy s] in range [%.6f,%.6f] divided into %d bins" % (flu,low,up,bin_no))
+         break
+
+      prev_rate = rate
+
+      flu += 0.01;
 
 
 

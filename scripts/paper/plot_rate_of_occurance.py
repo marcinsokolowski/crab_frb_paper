@@ -149,6 +149,8 @@ def main() :
    print("READ %d IPs from file %s" % (len(ip_arr),ip_filename))
 #   tau1_arr = tau1_arr - 5.00
 
+   print("Histogram binning : range 0.09,50 divided into %d bins" % (options.nbins))
+
    # MPs :
    mp_counts,mp_bin_edges = np.histogram(mp_arr,options.nbins,range=(0.09,50))
    mp_bin_centres = (mp_bin_edges[:-1] + mp_bin_edges[1:])/2.
