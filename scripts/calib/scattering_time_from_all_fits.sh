@@ -21,9 +21,15 @@ if [[ -n "$4" && "$4" != "-" ]]; then
 fi
 
 maxsnr_template="/media/msok/5508b34c-040a-4dce-a8ff-2c4510a5d1a3/eda2/202?_??_??_pulsars_msok/J0534+2200_flagants_ch40_ch256/256/filterbank_msok_64ch/merged_channels_??????????/presto_sps_thresh5_numdms10_dmstep0.01/merged/pulses_snr*.??_calibrated/"
-if [[ -n "$1" && "$1" != "-" ]]; then
+if [[ -n "$5" && "$5" != "-" ]]; then
    maxsnr_template="$1"
 fi
+
+refit_all=1
+if [[ -n "$6" && "$6" != "-" ]]; then
+   refit_all=$6
+fi
+
 
 curr_path=`pwd`
 
@@ -34,6 +40,12 @@ do
      rm -f taufit.txt
 
      cd $dir     
+     
+     if [[ $refit_all -gt 0 ]]; then
+        echo "~/github/crab_frb_paper/scripts/calib/refit_tau.sh"
+        ~/github/crab_frb_paper/scripts/calib/refit_tau.sh
+     fi
+     
      dataset=`echo $dir |  awk '{i=index($1,"/eda2/2");print substr($1,i+6,23);}'`
      cat *.refit | grep -v nan | awk -v snr_threshold=${snr_threshold} -v chi2_max=${chi2_max} '{if($1>0 && $11>=snr_threshold && $12>chi2_max ){print $9;}}' > tau.txt
      
@@ -57,6 +69,12 @@ do
      rm -f taufit.txt
 
      cd $dir     
+     
+     if [[ $refit_all -gt 0 ]]; then
+        echo "~/github/crab_frb_paper/scripts/calib/refit_tau.sh"
+        ~/github/crab_frb_paper/scripts/calib/refit_tau.sh
+     fi
+     
      dataset=`echo $dir |  awk '{i=index($1,"/eda2/2");print substr($1,i+6,23);}'`
 #     cat *.refit | grep -v nan | awk -v snr_threshold=${snr_threshold} -v chi2_max=${chi2_max} '{if($1>0 && $11>=snr_threshold && $12>chi2_max ){print $9;}}' > tau.txt
      cat *.refit | grep -v nan | awk '{if($1>0){print $9;}}' > tau.txt

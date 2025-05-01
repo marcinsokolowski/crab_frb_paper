@@ -562,7 +562,7 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
          double fit_min_x=-100000, double fit_max_x=-100000, 
          Double_t* y_values_errors=NULL,
          Double_t* init_params=NULL,
-         double bIgnorePeak=0.2 )
+         double bIgnorePeak=0.2, const char* szOPT="AP" )
 {
     int MarkerType = 20;
     int ColorNum = kRed;
@@ -645,7 +645,7 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
     pGraph->SetTitle( szStarName );
 // WORKS 
 //    pGraph->GetXaxis()->SetLimits(0,1);
-    pGraph->Draw("AP");
+    pGraph->Draw( szOPT );
 
    if( fit_min_x<=-100000 ){
       fit_min_x = minX;
@@ -1015,6 +1015,13 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
       }
       fclose(out_f);     
 
+      Double_t par_err[5];
+      par_err[0] = line->GetParError(0);
+      par_err[1] = line->GetParError(1);
+      par_err[2] = line->GetParError(2);
+      par_err[3] = line->GetParError(3);
+      par_err[4] = line->GetParError(4);
+
       // T (parameter 1) = Sigma_blob / velocity , test varius values of
       // Sigma_blob for given velocities <= 1000 km/s 
       printf("Fitted T = %.6f -> see corresponding sigma_blob values for different velocities:\n",par[1]);
@@ -1023,8 +1030,9 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
       while (v0 <= 1000){
          double sigma_blob_km = (v0*86400)*par[1];
          double sigma_blob_pc = sigma_blob_km/pc_in_km;
+         double sigma_blob_pc_err = (v0*86400)*(par_err[1]/pc_in_km);
 
-         printf("v0 = %.4f km/s -> sigma_blob = %e [pc] = %e [km]\n",v0,sigma_blob_pc,sigma_blob_km);
+         printf("v0 = %.4f km/s -> sigma_blob = %e +/- %e [pc]\n",v0,sigma_blob_pc,sigma_blob_pc_err);
          
          if( v0 < 300 ){
             v0 += 10;
@@ -1032,6 +1040,17 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
             v0 += 50;
          }
       }      
+
+      double theta2_l = par[0];
+      double theta2_l_err = par_err[0];   
+      double l_pc = 1.00; // pc 
+      while( l_pc < 2000.00 ){
+          double theta_arcsec = sqrt( theta2_l/l_pc );
+          
+          printf("L = %.2f [pc] -> theta_arcsec = %.8f [arcsec]\n",l_pc,theta_arcsec);
+
+          l_pc += 1.00;
+      }
 
    }
    pGraph->GetXaxis()->SetTitleOffset(1.00);
@@ -1353,7 +1372,7 @@ bool day_in_horns( double day )
    return ((day>=43 && day<=58.00) || (day>=65.00 && day<=83.00));
 }
 
-void fit_tau_variations_gaussint_SIMPLE( const char* basename="taumean_vs_time.test", bool bExcludeHorns=false,
+void fit_tau_variations_gaussint_SIMPLE_TEST( const char* basename="taumean_vs_time.test", bool bExcludeHorns=false,
                        const char* fit_func_name="tau_vs_mjd", // dm_vs_time
                        double noise_start=0, double noise_end=0.4, 
                        double sigma_simulated=0.1120, // simulated sigma of noise in Jy , sigma_Stokes_I - for the entire duration of the observation !!!
@@ -1460,8 +1479,11 @@ void fit_tau_variations_gaussint_SIMPLE( const char* basename="taumean_vs_time.t
    }
 
    
-   TGraphErrors* pGraph1 = DrawGraph( x_value1, y_value1, lq1, 1, NULL, fit_func_name, min_y, max_y, szTitle,
+   TGraphErrors* pGraphOrig = DrawGraph( x_value1_orig, y_value1_orig, lq1_orig, 1, NULL, NULL, min_y, max_y, szTitle,
                                       basename, bLog, szDescX, szDescY, fit_min_x, fit_max_x, y_value1_err );
+
+   TGraphErrors* pGraph1 = DrawGraph( x_value1, y_value1, lq1, 1, NULL, fit_func_name, min_y, max_y, szTitle,
+                                      basename, bLog, szDescX, szDescY, fit_min_x, fit_max_x, y_value1_err, NULL, 0.2, "P,same" );
 
    c1->Update();
 

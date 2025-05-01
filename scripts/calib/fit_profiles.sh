@@ -60,12 +60,12 @@ fi
 if [[ $do_fitting -gt 0 ]]; then
    cd pulses_snr${snr_threshold}_calibrated/
 
-   cp ~/github/crab_frb_paper/scripts/root/plot_psr_profile.C .
+   cp ~/github/crab_frb_paper/scripts/root/plot_psr_profile_tau.C .
 
    mkdir -p images
    for file in `ls pulse*.txt`
    do
-      root ${root_options} "plot_psr_profile.C(\"${file}\",2,1)"   
+      root ${root_options} "plot_psr_profile_tau.C(\"${file}\",2,1)"   
    done
 
    cp ~/github/crab_frb_paper/scripts/root/histotau.C .

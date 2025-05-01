@@ -1211,14 +1211,36 @@ void plot_psr_profile_tau( const char* basename="sigmaG1_vs_lapSigmaG1_for_root"
    double rms_new = calc_rms( x_value1, y_value1, 20, -1e20, 1e20 );
    printf("RMS after rescaling = %.6f in range %.6f - %.6f\n",rms_new,noise_start,noise_end);
 
+   double mean_start=0.00;
+   int mean_count=20;
    for(int i=0;i<lq1;i++){
      y_value1_err[i] = rms_new;
+
+     if(mean_count<20){
+        mean_start += y_value1[i];
+        mean_count++;
+     }
+
+     if( y_value1[i] > maxY ){
+        maxY = y_value1[i];
+     }
    }
 
+   mean_start = mean_start / mean_count;
+   double peak_snr = (maxY - mean_start)/rms_new;
+ 
+   printf("DEBUG : peak_snr = %.4f\n",peak_snr);
+
+   
 
    
    int n_bins = lq1;
    printf("DEBUG : number of bins = %d\n",n_bins);     
+
+   
+   if( peak_snr <= 5 ){
+       fit_func_name = NULL;
+   }
 
    // plot original data:
    TGraphErrors* pGraph1 = DrawGraph( x_value1, y_value1, lq1, 1, NULL, fit_func_name, 0.00, max_y, szTitle,
@@ -1235,7 +1257,9 @@ void plot_psr_profile_tau( const char* basename="sigmaG1_vs_lapSigmaG1_for_root"
    sprintf(szFittedFile,"%s.refit",basename);
    FILE* outf = fopen(szFittedFile,"w");
    outf = fopen(szFittedFile,"w");
-   fprintf(outf,"%.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.1f %.2f\n",gFittedParameters[0],gFittedParametersErrors[0],gFittedParameters[1],gFittedParametersErrors[1],gFittedParameters[2],gFittedParametersErrors[2],gFittedParameters[3],gFittedParametersErrors[3],gFittedParameters[4],gFittedParametersErrors[4],snr,gFinalChi2);
+   if( fit_func_name ){
+      fprintf(outf,"%.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.1f %.2f\n",gFittedParameters[0],gFittedParametersErrors[0],gFittedParameters[1],gFittedParametersErrors[1],gFittedParameters[2],gFittedParametersErrors[2],gFittedParameters[3],gFittedParametersErrors[3],gFittedParameters[4],gFittedParametersErrors[4],snr,gFinalChi2);
+   }
    fclose(outf);
 
 
