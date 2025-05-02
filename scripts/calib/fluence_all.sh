@@ -40,9 +40,8 @@ do
    echo "cat ../../../../../../analysis*/MEAN_SEFD.txt | tail -1"      
    MEAN_SEFD=`cat ../../../../../../analysis*/MEAN_SEFD.txt | tail -1`
 
-   echo "~/github/crab_frb_paper/scripts/calib/fluence.sh ${MEAN_SEFD} 5 - - ${replot_only}"
-   sleep 1
-   ~/github/crab_frb_paper/scripts/calib/fluence.sh ${MEAN_SEFD} 5 - - ${replot_only}
+   echo "~/github/crab_frb_paper/scripts/calib/fluence.sh ${MEAN_SEFD} 5 - \"${root_options}\" ${replot_only}"
+   ~/github/crab_frb_paper/scripts/calib/fluence.sh ${MEAN_SEFD} 5 - "${root_options}" ${replot_only}
 
    cd ${curr_path}
 done
