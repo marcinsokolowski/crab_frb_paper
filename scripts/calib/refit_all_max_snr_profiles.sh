@@ -38,8 +38,8 @@ do
      cd $dir     
      
      if [[ $refit_all -gt 0 ]]; then
-        echo "~/github/crab_frb_paper/scripts/calib/refit_tau.sh 0"
-        ~/github/crab_frb_paper/scripts/calib/refit_tau.sh 0
+        echo "~/github/crab_frb_paper/scripts/calib/refit_tau.sh 0 \"pulse??????_snr*.?_time*sec.txt\""
+        ~/github/crab_frb_paper/scripts/calib/refit_tau.sh 0 "pulse??????_snr*.?_time*sec.txt"
      fi
      
      dataset=`echo $dir |  awk '{i=index($1,"/eda2/2");print substr($1,i+6,23);}'`
@@ -58,8 +58,9 @@ do
      rm -f taufit.txt     
      root ${root_options} "histotau.C(\"tau.txt\",0,1,0,0.08,100,0,\"Scattering Time [sec]\", \"Number of pulses fitted\", 0, \"${dataset}\", NULL, \"_histo\", $unixtime, \"${dataset}\" )"
      cat taufit.txt        
-     cd -
+     cd -     
 done
+
 
 cd $curr_path
 

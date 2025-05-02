@@ -71,8 +71,8 @@ do
      cd $dir     
      
      if [[ $refit_all -gt 0 ]]; then
-        echo "~/github/crab_frb_paper/scripts/calib/refit_tau.sh 0"
-        ~/github/crab_frb_paper/scripts/calib/refit_tau.sh 0
+        echo "~/github/crab_frb_paper/scripts/calib/refit_tau.sh 0 \"pulse??????_snr*.?_time*sec.txt\""
+        ~/github/crab_frb_paper/scripts/calib/refit_tau.sh 0 "pulse??????_snr*.?_time*sec.txt"
      fi
      
      dataset=`echo $dir |  awk '{i=index($1,"/eda2/2");print substr($1,i+6,23);}'`
