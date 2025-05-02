@@ -1206,17 +1206,18 @@ void plot_psr_profile_tau( const char* basename="sigmaG1_vs_lapSigmaG1_for_root"
 
 
 
+   int n_first_points = 10;
    lq1 = ReadResultsFile( basename, x_value1, y_value1, -1, -1, x_col, y_col ); 
    printf("Control RMS after re-scaling:\n");
-   double rms_new = calc_rms( x_value1, y_value1, 20, -1e20, 1e20 );
+   double rms_new = calc_rms( x_value1, y_value1, n_first_points, -1e20, 1e20 );
    printf("RMS after rescaling = %.6f in range %.6f - %.6f\n",rms_new,noise_start,noise_end);
 
    double mean_start=0.00;
-   int mean_count=20;
+   int mean_count=0;
    for(int i=0;i<lq1;i++){
      y_value1_err[i] = rms_new;
 
-     if(mean_count<20){
+     if(mean_count<n_first_points ){
         mean_start += y_value1[i];
         mean_count++;
      }

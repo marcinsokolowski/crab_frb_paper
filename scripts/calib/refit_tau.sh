@@ -14,7 +14,7 @@ echo "cp ~/github/crab_frb_paper/scripts/root/plot_psr_profile_tau.C ."
 cp ~/github/crab_frb_paper/scripts/root/plot_psr_profile_tau.C .
 
 mkdir -p images
-for file in `ls pulse*.txt`
+for file in `ls pulse??????_snr??.?_time*sec.txt` # only snr>=10
 do
    root ${root_options} "plot_psr_profile_tau.C(\"${file}\",2,1)"   
 done
