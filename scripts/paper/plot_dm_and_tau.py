@@ -5,6 +5,8 @@ import sys
 from astropy.time import Time
 import pylab
 
+from mpl_axes_aligner import align
+
 pylab.rc('font', family='serif', size=20)
 
 def read_data_file( filename, errors=True ) :
@@ -115,11 +117,13 @@ def main() :
    color = 'tab:blue'
    ax2.set_ylabel(r'Scattering Time ($\tau$) [ms]', color=color, fontsize=20)  # we already handled the x-label with ax1
 #   ax2.plot(t, data2, color=color)
-   ax2.errorbar( tau1_arr_mjd, tau1_arr, yerr=tau1_err, fmt='+', color=color )
+   ax2.errorbar( tau1_arr_mjd, tau1_arr, yerr=tau1_err, fmt='v', color=color )
    ax2.tick_params(axis='y', labelcolor=color)
 #   ax2.yaxis.get_label().set_fontsize(40)
    ax2.yaxis.set_label_coords(+1.06, .5) # (+1.09, .5)
-   
+
+   # align axis 
+   align.yaxes(ax1, 0.00, ax2, 2.00)    
    
 
    fig.tight_layout()  # otherwise the right y-label is slightly clipped
