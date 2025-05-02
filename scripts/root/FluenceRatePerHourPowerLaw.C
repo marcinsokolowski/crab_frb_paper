@@ -420,8 +420,9 @@ void FluenceRatePerHourPowerLaw( const char* fname, double TotalTimeInHours=0.99
 //       fprintf(out,"# FILE FIT_SIGMA FIT_MEAN FIT_NORM MEAN RMS\n");
 //    }
 
-      fprintf(out,"# FIT_NORM(par[0]) FIT_POWER_LAW_INDEX(par[1]) par_err[0] par_eff[1] FREQ[MHz] CHANNEL UNIXTIME MAX_DISTR_FLUENCE MAX_DISTR\n");
-      fprintf(out,"%.20f %.20f %.20f %.20f %.4f %d %.8f %.8f %.8f\n",fit_norm,fit_exp,fit_norm_err,fit_exp_err,((double)gChannel)*(480.00/4096.00),gChannel,gUnixTime,max_distr_fluence,max_distr);
+      double fluence_of_oneperhour_pulse = gFlux0 / TMath::Power( par[0] , (1.00/par[1]) );
+      fprintf(out,"# FIT_NORM(par[0]) FIT_POWER_LAW_INDEX(par[1]) par_err[0] par_eff[1] FREQ[MHz] CHANNEL UNIXTIME MAX_DISTR_FLUENCE MAX_DISTR N_GPs(#) FluenceOnePerHourRate\n");
+      fprintf(out,"%.20f %.20f %.20f %.20f %.4f %d %.8f %.8f %.8f %d %.6f\n",fit_norm,fit_exp,fit_norm_err,fit_exp_err,((double)gChannel)*(480.00/4096.00),gChannel,gUnixTime,max_distr_fluence,max_distr,count,fluence_of_oneperhour_pulse);
       fclose(out);      
 
 
