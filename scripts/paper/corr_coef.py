@@ -91,7 +91,7 @@ def main() :
    ax1.plot( x_arr, y_arr, color=color, marker='+', linestyle='None' )
    
    corr_pearsons, pvalue = pearsonr( x_arr, y_arr )    
-   print('Pearsons correlation: %.3f, pvalue = %.8f' % (corr_pearsons,pvalue))
+   print('Pearsons correlation: %.3f, pvalue = %e' % (corr_pearsons,pvalue))
    
    corr_spearmans, _ = spearmanr( x_arr, y_arr )
    print('Spearmans correlation: %.3f' % corr_spearmans)
