@@ -346,6 +346,8 @@ void FluenceRatePerHourPowerLaw( const char* fname, double TotalTimeInHours=0.99
    Double_t* y_values = new Double_t[histo->GetNbinsX()];
    int graph_count=0;
 
+   double max_distr_fluence = -1, max_distr = -1e20;
+
    FILE* outf = fopen(gOutHistoFile,"w");
    for(int ch=0;ch<histo->GetNbinsX();ch++){
       double val_histo = histo->GetBinContent(ch);
@@ -357,6 +359,11 @@ void FluenceRatePerHourPowerLaw( const char* fname, double TotalTimeInHours=0.99
          x_values[graph_count] = histo->GetBinCenter(ch);
          y_values[graph_count] = val_histo; // dbm2mW(val_histo);
          graph_count++;
+
+         if( val_histo > max_distr ){
+            max_distr = val_histo;
+            max_distr_fluence = histo->GetBinCenter(ch);
+         }
       }
    }
    fclose(outf);   
@@ -412,7 +419,9 @@ void FluenceRatePerHourPowerLaw( const char* fname, double TotalTimeInHours=0.99
 //    if( bPrintHeader > 0 ){
 //       fprintf(out,"# FILE FIT_SIGMA FIT_MEAN FIT_NORM MEAN RMS\n");
 //    }
-      fprintf(out,"%.20f %.20f %.20f %.20f %.4f %d %.8f\n",fit_norm,fit_exp,fit_norm_err,fit_exp_err,((double)gChannel)*(480.00/4096.00),gChannel,gUnixTime);
+
+      fprintf(out,"# FIT_NORM(par[0]) FIT_POWER_LAW_INDEX(par[1]) par_err[0] par_eff[1] FREQ[MHz] CHANNEL UNIXTIME MAX_DISTR_FLUENCE MAX_DISTR\n");
+      fprintf(out,"%.20f %.20f %.20f %.20f %.4f %d %.8f %.8f %.8f\n",fit_norm,fit_exp,fit_norm_err,fit_exp_err,((double)gChannel)*(480.00/4096.00),gChannel,gUnixTime,max_distr_fluence,max_distr);
       fclose(out);      
 
 

@@ -33,6 +33,7 @@ if [[ -n "$5" && "$5" != "-" ]]; then
    replot_only=$5
 fi
 
+dtm=`date +%Y%m%d%H%M`
 
 outdir=pulses_snr${snr_threshold}_calibrated/
 
@@ -66,9 +67,14 @@ if [[ 1 -gt 0 ]]; then
    awk '{if($1!="#"){print $4;}}' calibrated_pulses.txt > calibrated_snr.txt
 
    TotalTimeHours=`cat ../../../../../../../analysis_final/TotalGoodTimeInSec.txt | awk '{print $1/3600.00}'`
-   
+   unixtime=`cat ../../../../../UNIXTIME.txt`
+
+   mkdir -p backup/${dtm}
+      
    cp ~/github/crab_frb_paper/scripts/root/FluenceRatePerHourPowerLaw.C .
-   root ${root_options} "FluenceRatePerHourPowerLaw.C(\"calibrated_fluence.txt\",${TotalTimeHours},0,800,10000)"
+   
+   mv calibrated_fluence.txt.fit_results_fit_range_800.00-10000.00* backup/${dtm}/
+   root ${root_options} "FluenceRatePerHourPowerLaw.C(\"calibrated_fluence.txt\",${TotalTimeHours},0,800,10000,${unixtime})"
 #   root ${root_options} "FluenceRatePerHourPowerLaw.C(\"calibrated_fluence.txt\",${TotalTimeHours},0,600,10000)"
 #   root ${root_options} "FluenceRatePerHourPowerLaw.C(\"calibrated_fluence.txt\",${TotalTimeHours},0,1000,10000)"
    
