@@ -90,8 +90,8 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, Double_t* x_val
 		y_values[i] = ( y_values[i] / maxY );
 	}
 
-	if( gVerb || 1 ){
-           printf("q=%d %f %f +/- %f\n",q, x_values[i], y_values[i], y_values_err[i] );
+	if( gVerb ){
+           printf("q=%d %f %f\n",q, x_values[i], y_values[i] );
         }	
 
         pGraph->SetPoint( i, x_values[i], y_values[i] );
@@ -106,8 +106,9 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, Double_t* x_val
         if(y_values[i]<minY)
             minY = y_values[i];
 
-//        pGraph->SetPointError( i, (0.5/24.00) , sqrt(y_values[i]) ); // 1/2 hour observation error.
-        pGraph->SetPointError( i, 0.00 , y_values_err[i] );
+        if( x_values_err && y_values_err ){
+           pGraph->SetPointError( i, x_values_err[i], y_values_err[i] ); // 1/2 hour observation error.
+        }
     }
 	 printf("Found min_x=%.2f , max_x=%.2f\n",minX,maxX);
 	 printf("Found min_y=%.2f , max_y=%.2f\n",minY,maxY);
@@ -128,27 +129,15 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, Double_t* x_val
 	double norm = 1;
 	double mean = 1;
 	double sigma = 1;
-/*
-	TH1F*  histo = new TH1F("adu_histo","adu_histo",50,minY,maxY);
-   for(int i=0;i<numVal;i++){
-      histo->Fill( y_values[i] );
-   }
-   histo->Fit("gaus","0");
-   norm = histo->GetFunction("gaus")->GetParameter(0);
-   mean = histo->GetFunction("gaus")->GetParameter(1);
-   sigma = histo->GetFunction("gaus")->GetParameter(2);
-	r = (sigma/mean);
-                                                                                
-   printf("Gauss_norm = %.8f\n",norm);
-   printf("Gauss_sigma = %.8f\n",sigma);
-   printf("Gauss_mean = %.8f\n",mean);
-   printf("sigma/mean = %8f\n",(sigma/mean));
-*/
-
 
     pGraph->SetMarkerStyle(MarkerType);
     pGraph->SetMarkerColor(ColorNum);
-    pGraph->SetMarkerSize(2);
+    pGraph->SetMarkerSize(1.5);
+    pGraph->GetXaxis()->SetTitleSize(0.05);
+    pGraph->GetYaxis()->SetTitleSize(0.05);
+    pGraph->GetXaxis()->SetTitleOffset(1);
+    pGraph->GetYaxis()->SetTitleOffset(0.6);
+
 	 if( min_y>-10000 && max_y>-10000 ){
        pGraph->SetMinimum( min_y );
        pGraph->SetMaximum( max_y );
@@ -333,7 +322,7 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, Double_t* x_val
                                                                                 
    char szDesc[255];
 //   sprintf(szDesc,"sigma/mean = %.8f\n",r);
-	sprintf(szDesc,"Start time = %s (LOCAL)",szStartLocalTime);
+	sprintf(szDesc,"Start time = %s (AWST)",szStartLocalTime);
    printf("Ploting |%s| at (%.2f,%.2f)\n",szDesc,(minX+maxX)/2 , maxY-5);
    lat.DrawLatex( (minX+maxX)/2 , maxY-5 , szDesc);
 
@@ -452,12 +441,11 @@ int ReadResultsFile( const char* fname, Double_t* x_values, Double_t* y_values,
            continue;
 	  }
 
-     if( gStartTime <= 0.001 && all==0 ){
+     if( all == 0 && gStartTime<=0.0001 ){
          gStartTime = x_val;
-         printf("START TIME SET TO : %.8f\n",gStartTime);
      }
 
-	  x_values[all] = (x_val - gStartTime);
+	  x_values[all] = x_val - gStartTime;
 	  y_values[all] = y_val;
 	  if( gVerb ){
    	     printf("values : %f %f\n",x_val,y_val);
@@ -471,15 +459,17 @@ int ReadResultsFile( const char* fname, Double_t* x_values, Double_t* y_values,
    return all;
 }  
 
-void plot_plnorm_vs_time_error( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", double min_y=0, double max_y=150,
-                              const char* szDescY="Fitted power norm index vs. time",
-                              int x_col=0, int y_col=2, int y_col_err=3,
-                                        int min_local_time=-1e6, int max_local_time=1e6,
-					const char* fit_func_name=NULL,
-					int bLog=0,
-		const char* szDescX="Local Time", const char* szTitle=NULL,
+void plot_fluenceinfo_vs_time_error_PAPER( const char*
+					basename="sigmaG1_vs_lapSigmaG1_for_root",
+                                        const char* szDescY="One hour fluence",double min_y=1000, double max_y=5000, 
+					int min_local_time=-1e6, int
+					max_local_time=1e6, const char*
+					fit_func_name=NULL, 
+					int bLog=1,
+		const char* szDescX="Date", const char* szTitle=NULL,
 		int b_percent=0,
 		double fit_min_x=-100000, double fit_max_x=-100000,
+		int x_col=0, int y_col=2, 
       double min_uxtime=-10000, double max_uxtime=-10000, const char* outdir="images/" )
 {
 	gPercent = b_percent;
@@ -496,7 +486,7 @@ void plot_plnorm_vs_time_error( const char* basename="sigmaG1_vs_lapSigmaG1_for_
    // gROOT->Reset();
    // const char* basename = "s_vs_sigma_g_sqr";
 
-   TCanvas* c1 = new TCanvas("c1","xxxx",10,10,1800,1000);
+   TCanvas* c1 = new TCanvas("c1","xxxx",10,10,1800,600);
 	c1->SetGridx();
    c1->SetGridy();
 	c1->SetFillColor(0);
@@ -522,8 +512,8 @@ void plot_plnorm_vs_time_error( const char* basename="sigmaG1_vs_lapSigmaG1_for_
 
    Double_t* x_value1 = new Double_t[MAX_ROWS];
    Double_t* y_value1 = new Double_t[MAX_ROWS];
-   Double_t* x_value_err1 = new Double_t[MAX_ROWS];
-   Double_t* y_value_err1 = new Double_t[MAX_ROWS];
+   Double_t* x_value1_err = new Double_t[MAX_ROWS];
+   Double_t* y_value1_err = new Double_t[MAX_ROWS];
    Double_t maxX=-100000,maxY=-100000;	
    Double_t minX=100000,minY=100000;
 	Double_t first_value;
@@ -532,7 +522,7 @@ void plot_plnorm_vs_time_error( const char* basename="sigmaG1_vs_lapSigmaG1_for_
    Int_t lq1=0,lq2=0,lq3=0,lq5=0,lq9=0,lq25=0;
 
    lq1 = ReadResultsFile( basename, x_value1, y_value1, -1, -1, x_col, y_col ); 
-   Int_t lq1_err = ReadResultsFile( basename, x_value_err1, y_value_err1, -1, -1, x_col+1, y_col_err ); 
+   int lq1_err = ReadResultsFile( basename, x_value1_err, y_value1_err, -1, -1, x_col+1, y_col+1 ); 
 
 	time_t ut_start_time = (time_t)gStartTime;
    if( !(gmtime_tm = gmtime( &ut_start_time )) ){
@@ -549,7 +539,7 @@ void plot_plnorm_vs_time_error( const char* basename="sigmaG1_vs_lapSigmaG1_for_
 
    
    // drawing background graphs here :
-   TGraph* pGraph1 = DrawGraph( x_value1, y_value1, NULL, y_value_err1, lq1, 1, NULL, 
+   TGraph* pGraph1 = DrawGraph( x_value1, y_value1, x_value1_err, y_value1_err, lq1, 1, NULL, 
 				  fit_func_name, min_y, max_y, szTitle,
 				basename, bLog, szDescX, szDescY, fit_min_x,
 				fit_max_x );

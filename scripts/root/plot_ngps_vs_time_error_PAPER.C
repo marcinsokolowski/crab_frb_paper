@@ -457,8 +457,8 @@ int ReadResultsFile( const char* fname, Double_t* x_values, Double_t* y_values,
 }  
 
 void plot_ngps_vs_time_error_PAPER( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", int min_local_time=-1e6, int max_local_time=1e6,
-					const char* fit_func_name=NULL, double min_y=90, 
-					double max_y=4000, int bLog=1,
+					const char* fit_func_name=NULL, double min_y=50, 
+					double max_y=5000, int bLog=1,
 		const char* szDescX="Date",const char* szDescY="Number of GPs per hour", const char* szTitle=NULL,
 		int b_percent=0,
 		double fit_min_x=-100000, double fit_max_x=-100000,

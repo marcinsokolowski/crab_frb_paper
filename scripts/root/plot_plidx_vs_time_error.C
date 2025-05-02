@@ -473,7 +473,7 @@ int ReadResultsFile( const char* fname, Double_t* x_values, Double_t* y_values,
 
 void plot_plidx_vs_time_error( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", double min_y=-6, double max_y=0,
                               const char* szDescY="SNR : fitted power law index vs. time",
-                              int x_col=0, int y_col=2, int y_col_err=4,
+                              int x_col=0, int y_col=2, int y_col_err=3,
                                         int min_local_time=-1e6, int max_local_time=1e6,
 					const char* fit_func_name=NULL,
 					int bLog=0,
