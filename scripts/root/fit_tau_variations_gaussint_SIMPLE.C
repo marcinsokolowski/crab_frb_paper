@@ -1372,13 +1372,13 @@ bool day_in_horns( double day )
    return ((day>=43 && day<=58.00) || (day>=65.00 && day<=83.00));
 }
 
-void fit_tau_variations_gaussint_SIMPLE_TEST( const char* basename="taumean_vs_time.test", bool bExcludeHorns=false,
+void fit_tau_variations_gaussint_SIMPLE( const char* basename="taumean_vs_time.test", bool bExcludeHorns=false,
                        const char* fit_func_name="tau_vs_mjd", // dm_vs_time
                        double noise_start=0, double noise_end=0.4, 
                        double sigma_simulated=0.1120, // simulated sigma of noise in Jy , sigma_Stokes_I - for the entire duration of the observation !!!
                        bool bIsSigmaSimulPerPhaseBin=false, // if this is true no need to multiply sigma_simulated by sqrt(n_bins)
                        bool bUseFitResidualsRMS=false, // use residuals of the FIT to calculate Sigma_obs which may be slightly different than 1.00 (after normalisation)
-                       double min_y=-1000000,  double max_y=-1000000, int bLog=0,
+                       double min_y=1,  double max_y=6, int bLog=0,
       const char* szDescX="MJD [days]",
       const char* szDescY="#tau [ms]", 
       const char* szTitle=NULL,
