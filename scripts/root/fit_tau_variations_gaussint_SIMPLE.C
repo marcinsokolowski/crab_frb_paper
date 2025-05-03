@@ -1046,8 +1046,10 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
       double l_pc = 1.00; // pc 
       while( l_pc < 2000.00 ){
           double theta_arcsec = sqrt( theta2_l/l_pc );
+          double theta_radians = theta_arcsec*(1.00/3600.00)*(TMath::Pi()/180.00);
+          double R_size_pc = l_pc*theta_radians;
           
-          printf("L = %.2f [pc] -> theta_arcsec = %.8f [arcsec]\n",l_pc,theta_arcsec);
+          printf("L = %.2f [pc] -> theta_arcsec = %.8f [arcsec] -> R = %e\n",l_pc,theta_arcsec,R_size_pc);
 
           l_pc += 1.00;
       }
