@@ -44,7 +44,7 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
          const char* szStarName="", const char* fname="default",
          int bLog=0, const char* szDescX=NULL, const char* szDescY=NULL,
          double fit_min_x=-100000, double fit_max_x=-100000, Double_t* x_values_err=NULL,  Double_t* y_values_err=NULL,
-         int ColorNum = kRed, const char* szOPT="AP", bool bShowError=true  )
+         int ColorNum = kBlack, const char* szOPT="AP", bool bShowError=true  )
 {
     int MarkerType = 20;
 
@@ -162,6 +162,10 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
          printf("Fitting straight line\n");
          line = new TF1("fit_func",Line,fit_min_x,fit_max_x,2);
          line_draw = new TF1("fit_func2",Line,minX,maxX,2);
+
+         line->SetParName(0,"Slope (d#tau/d#DeltaDM)");
+         line->SetParName(1,"Intercept (#Tau_{0})");
+
          local_func=1;
       }
    }
@@ -243,11 +247,11 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
             // szDesc1 += i;
       } 
 
-        lat.DrawLatex(minX+(maxX-minX)*0.2,minY+(maxY-minY)*0.7,szDesc1.Data());
+//        lat.DrawLatex(minX+(maxX-minX)*0.2,minY+(maxY-minY)*0.7,szDesc1.Data());
 
       szDesc2 = "b = ";
       szDesc2 += par[1];
-        lat.DrawLatex(minX+(maxX-minX)*0.2,minY+(maxY-minY)*0.6,szDesc2.Data());
+//        lat.DrawLatex(minX+(maxX-minX)*0.2,minY+(maxY-minY)*0.6,szDesc2.Data());
 
 //      }
    }
