@@ -40,6 +40,7 @@ double gNoiseStart=0.00;
 double gNoiseEnd=1e20;
 bool   gUseFitResidualsRMS=false;
 char   gInputFileName[256];
+double gDistanceEarthToScreen=2000.00;
 
 #define MAX_ROWS 10000000
 
@@ -507,7 +508,7 @@ Double_t tau_vs_mjd( Double_t* x, Double_t* y )
    Double_t t = x[0];
 
 
-   Double_t d_pc = 2000.00; // pc = 2kpc
+   Double_t d_pc = gDistanceEarthToScreen; // pc = 2kpc
    Double_t theta_l = y[0]*d_pc;  // theta^2 * L 
    Double_t sigma_time = y[1];
    Double_t t_peak = y[2]; // 62.49;
@@ -586,6 +587,7 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
 
         if( y_values_errors ){
            pGraph->SetPointError( i, 0.00, y_values_errors[i] );
+           printf("%d : error = %.8f\n",i,y_values_errors[i] );
         }
 
         if(x_values[i]>maxX)
@@ -1374,7 +1376,8 @@ bool day_in_horns( double day )
    return ((day>=43 && day<=58.00) || (day>=65.00 && day<=83.00));
 }
 
-void fit_tau_variations_gaussint_SIMPLE_Dknown( const char* basename="taumean_vs_time.test", bool bExcludeHorns=false,
+void fit_tau_variations_gaussint_SIMPLE_Dknown( const char* basename="taumean_vs_time.test", double distance_to_screen_pc=2000.00,
+                       bool bExcludeHorns=false,
                        const char* fit_func_name="tau_vs_mjd", // dm_vs_time
                        double noise_start=0, double noise_end=0.4, 
                        double sigma_simulated=0.1120, // simulated sigma of noise in Jy , sigma_Stokes_I - for the entire duration of the observation !!!
@@ -1387,6 +1390,8 @@ void fit_tau_variations_gaussint_SIMPLE_Dknown( const char* basename="taumean_vs
       double fit_min_x=0, double fit_max_x=100,
       int x_col=0, int y_col=1, const char* outpngfile=NULL )
 {
+   gDistanceEarthToScreen = distance_to_screen_pc;   
+ 
    int index;
    double snr,time;
    if( sscanf(basename,"pulse%d_snr%lf_time%lfsec.txt",&index,&snr,&time) == 3){
@@ -1482,7 +1487,7 @@ void fit_tau_variations_gaussint_SIMPLE_Dknown( const char* basename="taumean_vs
 
    
    TGraphErrors* pGraphOrig = DrawGraph( x_value1_orig, y_value1_orig, lq1_orig, 1, NULL, NULL, min_y, max_y, szTitle,
-                                      basename, bLog, szDescX, szDescY, fit_min_x, fit_max_x, y_value1_err );
+                                      basename, bLog, szDescX, szDescY, fit_min_x, fit_max_x, y_value1_orig_err );
 
    TGraphErrors* pGraph1 = DrawGraph( x_value1, y_value1, lq1, 1, NULL, fit_func_name, min_y, max_y, szTitle,
                                       basename, bLog, szDescX, szDescY, fit_min_x, fit_max_x, y_value1_err, NULL, 0.2, "P,same" );
