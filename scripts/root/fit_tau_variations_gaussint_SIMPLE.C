@@ -1048,8 +1048,11 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
           double theta_arcsec = sqrt( theta2_l/l_pc );
           double theta_radians = theta_arcsec*(1.00/3600.00)*(TMath::Pi()/180.00);
           double R_size_pc = l_pc*theta_radians;
+          double fwhm_pc = 2.355*R_size_pc;
+//          double fwhm_pc_err = 2.355*sigma_blob_pc_err;
+
           
-          printf("L = %.2f [pc] -> theta_arcsec = %.8f [arcsec] -> R = %e\n",l_pc,theta_arcsec,R_size_pc);
+          printf("L = %.2f [pc] -> theta_arcsec = %.8f [arcsec] -> R = %e [pc] , FWHM = %e [pc]\n",l_pc,theta_arcsec,R_size_pc,fwhm_pc);
 
           l_pc += 1.00;
       }

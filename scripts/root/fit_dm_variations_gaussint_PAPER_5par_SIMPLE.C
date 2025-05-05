@@ -957,7 +957,7 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
       double pc_in_km = 3.0857e13; // km
       double v0 = 10.00;
       double pi = TMath::Pi();
-      while (v0 <= 1000){
+      while (v0 <= 1500){
          double sigma_blob_km = (v0*86400)*par[1];
          double sigma_blob_pc = sigma_blob_km/pc_in_km;
          double sigma_blob_pc_err = (v0*86400)*par_err[1]/pc_in_km;
