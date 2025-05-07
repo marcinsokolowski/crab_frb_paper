@@ -336,6 +336,7 @@ void fluence_vs_flux_model_norm_noise_tau_dep_FLUENCE_DETECTOR( double n_tau=4.0
 
       tau += tau_step;
    } 
+return;
 */
 
    tau = start_tau;
@@ -416,7 +417,7 @@ void fluence_vs_flux_model_norm_noise_tau_dep_FLUENCE_DETECTOR( double n_tau=4.0
       double F_min = pulse_no_norm->Integral( -0.02, +0.02, 1e-10 )*1000.00;
 
 //      F_min = 5.00*simul_mean_fluence_rms;
-      printf("DEBUG : F_min = %.8f [Jy ms] vs. F_min_rms = %.8f [Jy ms]\n",F_min,10.00*simul_mean_fluence_rms); 
+      printf("DEBUG : F_min = %.8f [Jy ms] vs. F_min_rms = %.8f [Jy ms]\n",F_min,5.00*simul_mean_fluence_rms); 
       
       double N_gp = count_gps( fluence_distrib, F_min*0.75, fluence_bin );
 
