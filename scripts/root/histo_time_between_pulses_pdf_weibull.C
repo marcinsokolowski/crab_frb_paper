@@ -12,7 +12,7 @@
 #include <TMath.h>
 #include <TComplex.h>
 #include <TFile.h>
-
+#include <TMinuit.h>
 
 int gVerb=0;
 
@@ -388,7 +388,8 @@ void histo_time_between_pulses_pdf_weibull( const char* fname,
    Double_t fit_lambda=0.00,fit_exp=0.00;
    Double_t fit_lambda_err=0.00,fit_exp_err=0.00;
    if( dofit ){
-      TF1* pFitFunc = new TF1("weibull_distrib",weibull_distrib,fit_min_x,fit_max_x,2);
+      int n_par = 2;
+      TF1* pFitFunc = new TF1("weibull_distrib",weibull_distrib,fit_min_x,fit_max_x,n_par);
 //      par[0] = 0.00003;
 //      par[0] = 0.001; //100.00
 
@@ -402,7 +403,19 @@ void histo_time_between_pulses_pdf_weibull( const char* fname,
       pFitFunc->SetParameters(par);
       pFitFunc->SetParName(0,"#lambda");
       pFitFunc->SetParName(1,"k");
-      histo->Fit("weibull_distrib","E,V","",fit_min_x,fit_max_x);
+//      pFitFunc->FixParameter(1,1.00);
+
+      TFitResultPtr pFitRes = histo->Fit("weibull_distrib","E,V,R,S","",fit_min_x,fit_max_x);
+
+//      TFitResultPtr pFitRes = histo->Fit(pFitFunc,"E,V,R,S","",fit_min_x,fit_max_x);
+      TMatrixDSym cov = pFitRes->GetCovarianceMatrix(); 
+      cov.Print();
+      TMatrixD matrix0(n_par,n_par);
+      gMinuit->mnemat(matrix0.GetMatrixArray(),n_par);
+      matrix0.Print();
+
+ 
+
 //      histo->GetFunction("power_law_distrib")->SetParameters(par);
 //      histo->Fit("power_law_distrib","E,V","",fit_min_x,fit_max_x);
       histo->GetFunction("weibull_distrib")->GetParameters(par);
