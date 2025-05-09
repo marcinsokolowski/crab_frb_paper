@@ -400,18 +400,19 @@ void histo_time_between_pulses_pdf_weibull( const char* fname,
       par[1] = 1.00;
  
       pFitFunc->SetParameters(par);
-      pFitFunc->SetParName(0,"Fitted #lambda");
-      histo->Fit("exponential_distrib","E,V","",fit_min_x,fit_max_x);
+      pFitFunc->SetParName(0,"#lambda");
+      pFitFunc->SetParName(1,"k");
+      histo->Fit("weibull_distrib","E,V","",fit_min_x,fit_max_x);
 //      histo->GetFunction("power_law_distrib")->SetParameters(par);
 //      histo->Fit("power_law_distrib","E,V","",fit_min_x,fit_max_x);
-      histo->GetFunction("exponential_distrib")->GetParameters(par);
+      histo->GetFunction("weibull_distrib")->GetParameters(par);
 //      parerrors=histo->GetFunction("power_law_distrib")->GetParErrors();
-      fit_lambda_err = histo->GetFunction("exponential_distrib")->GetParError(0);
+      fit_lambda_err = histo->GetFunction("weibull_distrib")->GetParError(0);
 
       Double_t x_test[1],y_test[1];
       x_test[0] = 10.00;
       y_test[0] = 0.01;
-      printf("TEST : f(10) = %e vs. %e\n",pFitFunc->Eval(10.00),exponential_distrib(x_test,y_test));
+      printf("TEST : f(10) = %e vs. %e\n",pFitFunc->Eval(10.00),weibull_distrib(x_test,y_test));
    
       TLatex lat;
       lat.SetTextAlign(23);
