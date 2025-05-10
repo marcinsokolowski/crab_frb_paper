@@ -56,7 +56,7 @@ def read_data_file( filename, errors=True ) :
             min_x = x
 
    if errors :
-      return (np.array(x_arr),np.array(x_err),np.array(y_arr),np.array(y_err),min_x,max_x)
+      return (np.array(x_arr),np.array(x_err_arr),np.array(y_arr),np.array(y_err_arr),min_x,max_x)
    else :
       return (np.array(x_arr),np.array(y_arr),min_x,max_x)
 
