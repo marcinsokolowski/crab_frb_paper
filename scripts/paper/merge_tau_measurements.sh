@@ -33,7 +33,7 @@ do
      pwd
      echo "echo $uxtime > ux.txt"
      echo $uxtime > ux.txt
-     merged=$(($merged+1))
+     merged=1
   else
      if [[ $diff -lt 86400 ]]; then
         echo "IF ???"
@@ -60,6 +60,10 @@ do
      echo
      echo
      if [[ $merged -ge $merge_n ]]; then
+        # keep file with tau-s from merged days in file tau_ux${unixtime}.txt
+        echo "cp curr.txt tau_ux${unixtime}.txt"
+        cp curr.txt tau_ux${unixtime}.txt
+        
         echo "rm -f curr.txt ux.txt"
         rm -f curr.txt ux.txt
         merged=0
@@ -75,7 +79,7 @@ do
         
         merged=1
      fi
-#     exit
+     exit
   fi
   prev_ux=${uxtime}
 done
