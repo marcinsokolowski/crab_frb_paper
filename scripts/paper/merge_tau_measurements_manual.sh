@@ -1,5 +1,7 @@
 #!/bin/bash
 
+cd ~/Desktop/SKA/papers/2024/EDA2_FRBs/PAPER/TAU_MERGED
+
 tau_list=all_tau_files.txt
 merged=0
 dataset="unknown"
@@ -64,4 +66,12 @@ do
    
 #   sleep 5
 done < ${tau_list}
+
+
+cp ~/github/crab_frb_paper/scripts/root/plot_scattau_vs_time.C .
+awk '{if($1!="#"){print $7" 43200 "$3*1000.0" "$2*1000.0;}}' taufit.txt > fit_tau_vs_time.txt
+awk '{if($1!="#"){print $7" 43200 "$5*1000.0" "$6*1000.0;}}' taufit.txt > mean_tau_vs_time.txt
+
+root -l "plot_scattau_vs_time.C(\"taumean_vs_time.txt\",\"fit_tau_vs_time.txt\")"
+root -l "plot_scattau_vs_time.C(\"taumean_vs_time.txt\",\"mean_tau_vs_time.txt\")"
 

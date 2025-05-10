@@ -27,6 +27,8 @@ do
 
   finish=0
   if [[ $merged -le 0 ]]; then
+     echo "DEBUG : starting new average (merged = $merged)"
+     
      echo "cat ${tau_file} > curr.txt"
      cat ${tau_file} > curr.txt
 
@@ -35,8 +37,9 @@ do
      echo $uxtime > ux.txt
      merged=1
   else
+     echo "DEBUG : merged = $merged -> checking if continue current merge or stop now"
      if [[ $diff -lt 86400 ]]; then
-        echo "IF ???"
+        echo "DEBUG : time difference = $diff [sec] (<86400) -> continuing merging"
         echo "cat ${tau_file} >> curr.txt"
         cat ${tau_file} >> curr.txt   
         
@@ -46,6 +49,8 @@ do
         pwd
         merged=$(($merged+1))
      else 
+        echo "DEBUG : time difference = $diff [sec] (>=86400) -> stopping merge now"
+     
         # too long break -> fit now and start new average :
         finish=1
      fi     
@@ -57,19 +62,26 @@ do
      echo "Number of merged = $merge_n reached ($merged) -> fitting Gaussian now (unixtime = $unixtime)"     
      root -l "histotau.C(\"curr.txt\",0,1,0,0.08,100,0,\"Scattering Time [sec]\", \"Number of pulses fitted\", 0, \"${dataset}\", NULL, \"_histo\", $unixtime, \"${dataset}\" )"
      # histogram/fit 
+     
+     echo "DEBUG : keeping merged tau-s in file tau_ux${unixtime}.txt"
+     echo "cp curr.txt tau_ux${unixtime}.txt"
+     cp curr.txt tau_ux${unixtime}.txt
+     
      echo
      echo
      if [[ $merged -ge $merge_n ]]; then
         # keep file with tau-s from merged days in file tau_ux${unixtime}.txt
+        echo "Number of merged = $merge_n reached ($merged) -> removing previous merge files : curr.txt and ux.txt"
+        
         echo "cp curr.txt tau_ux${unixtime}.txt"
         cp curr.txt tau_ux${unixtime}.txt
         
         echo "rm -f curr.txt ux.txt"
         rm -f curr.txt ux.txt
         merged=0
-        
-        sleep 5
      else
+        echo "Too long time difference - starting new merge"
+     
         # new dataset was after too long break and starts new average:
         echo "cat ${tau_file} > curr.txt"
         cat ${tau_file} > curr.txt
@@ -79,7 +91,8 @@ do
         
         merged=1
      fi
-     exit
+     
+     sleep 5     
   fi
   prev_ux=${uxtime}
 done
