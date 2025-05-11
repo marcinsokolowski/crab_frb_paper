@@ -4,6 +4,17 @@ arfile=pulse_31425593048_sum.rf
 if [[ -n "$1" && "$1" != "-" ]]; then
    arfile=$1     
 fi
+b=${arfile%%.rf}
+
+dodedisp=1
+if [[ -n "$2" && "$2" != "-" ]]; then
+   dodedisp=$2
+fi
+
+func_name="leading_edge"
+if [[ -n "$3" && "$3" != "-" ]]; then
+   func_name="$3"
+fi
 
 echo "cp ~/github/crab_frb_paper/scripts/root/fit_leading_edge.C ."
 cp ~/github/crab_frb_paper/scripts/root/fit_leading_edge.C .
@@ -19,19 +30,32 @@ do
    dmfile=${arfile%%rf}dm${dm}
    txtfile=${dmfile}.txt
    psrfile=${txtfile%%txt}psr
+
+   if [[ $dodedisp -gt 0 ]]; then   
+      echo "pam ${arfile} -d ${dm} -e "dm${dm}""
+      pam ${arfile} -d ${dm} -e "dm${dm}"
    
-   echo "pam ${arfile} -d ${dm} -e "dm${dm}""
-   pam ${arfile} -d ${dm} -e "dm${dm}"
+      pdv -FTtp ${dmfile} | awk '{if(NF==4){print $0;}}' > ${txtfile}
    
-   pdv -FTtp ${dmfile} | awk '{if(NF==4){print $0;}}' > ${txtfile}
+      awk '{print $3*(0.0333924123/1024.00)" "$4;}' ${txtfile} > ${psrfile}
+   else
+      echo "Dedisp skipped"
+   fi
    
-   awk '{print $3*(0.0333924123/1024.00)" "$4;}' ${txtfile} > ${psrfile}
-   
-   root -l "fit_leading_edge.C(\"${psrfile}\",${dm})" 
+   root -l "fit_leading_edge.C(\"${psrfile}\",${dm},\"${func_name}\")" 
 
 #   rm -f ${dmfile}   
    echo "rm -f ${dmfile}"   
-   sleep 1
+#   sleep 1
 done
 
 # cat pulse*dm??.psr*.fit | awk '{print NR" "$7/($5-$3);}'  > slope_vs_index.txt
+cat ${b}.dm*.psr.fit > slope_vs_dm.txt
+root -l "plotslope_err.C(\"slope_vs_dm.txt\",\"poly2\")"
+
+cat pulse*dm*.psr*.fit | awk '{print $1" 0 "$7/($5-$3)" 0 ";}' |sort -n  > slope_vs_index_pulse.txt
+cat pulse*dm*.psr*.fit | awk '{print $1" 0 "$6-$4" 0";}' |sort -n > risetime_vs_index.txt
+
+root -l "plotslope_err.C(\"slope_vs_index_pulse.txt\",\"poly2\")"
+root -l "plotrisetime_err.C(\"risetime_vs_index.txt\",\"poly2\",56.7,56.74)"
+
