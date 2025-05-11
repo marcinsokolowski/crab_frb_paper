@@ -1283,10 +1283,11 @@ void fit_leading_edge( const char* basename, double dm, const char* fit_func_nam
 
    c1->Update();
 
+   double dm_err=0.00;
    char szFittedFile[128];
    sprintf(szFittedFile,"%s.fit",basename);
    FILE* outf = fopen(szFittedFile,"w");
-   fprintf(outf,"%.8f %.8f %.8f %.8f %.8f\n",dm,gFittedParameters[0],gFittedParametersErrors[0],gFittedParameters[1],gFittedParametersErrors[1]);
+   fprintf(outf,"%.8f %.8f %.8f %.8f %.8f %.8f\n",dm,dm_err,gFittedParameters[0],gFittedParametersErrors[0],gFittedParameters[1],gFittedParametersErrors[1]);
    fclose(outf);
 
 //   normalise_x( x_value1_original, lq1 );
