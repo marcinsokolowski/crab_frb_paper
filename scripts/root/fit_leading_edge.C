@@ -1154,7 +1154,7 @@ double normalise_y_minmax( Double_t* x_values, Double_t* y_values, int cnt, doub
 
 
 
-void fit_leading_edge( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", const char* fit_func_name="leading_edge",
+void fit_leading_edge( const char* basename, double dm, const char* fit_func_name="leading_edge",
                          double range_start=-1e20, double range_end=+1e20,
                          double cal_constant=1.00,
                    int bNormaliseInputData=0, bool bShowOriginalDataWithFit=false,
@@ -1286,7 +1286,7 @@ void fit_leading_edge( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", co
    char szFittedFile[128];
    sprintf(szFittedFile,"%s.fit",basename);
    FILE* outf = fopen(szFittedFile,"w");
-   fprintf(outf,"%.8f %.8f %.8f %.8f\n",gFittedParameters[0],gFittedParametersErrors[0],gFittedParameters[1],gFittedParametersErrors[1]);
+   fprintf(outf,"%.8f %.8f %.8f %.8f %.8f\n",dm,gFittedParameters[0],gFittedParametersErrors[0],gFittedParameters[1],gFittedParametersErrors[1]);
    fclose(outf);
 
 //   normalise_x( x_value1_original, lq1 );
