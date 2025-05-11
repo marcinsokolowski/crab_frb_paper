@@ -578,7 +578,7 @@ printf("DEBUG : phase_max = %.8f\n",phase_max);
       }
       fclose(out_f);     
 
-      double integral_value = line_draw->Integral( minX, maxX, 1e-18 );      
+/*      double integral_value = line_draw->Integral( minX, maxX, 1e-18 );      
       double integral = integral_value - par[0]*(maxX-minX);
       double fluence = integral*gCalConstant*1000.00; // calibration constant and 1000 to make Jy ms 
       double fluence_error = 0.00;
@@ -588,9 +588,9 @@ printf("DEBUG : phase_max = %.8f\n",phase_max);
       double chi2_ndf = chi2/ndf;
       double par0_err = line->GetParError(0);
       printf("Chi2 = %.8f , ndf = %.1f , chi2_ndf = %.8f , isnan(par[0] error) = %d\n",chi2,ndf,chi2_ndf,isnan(par0_err));
-      gFinalChi2 = chi2_ndf;
+      gFinalChi2 = chi2_ndf;*/
 
-      TF1* line_int = new TF1("fit_func2",Pulse_with_gauss_onset,minX,maxX,5);
+/*      TF1* line_int = new TF1("fit_func2",Pulse_with_gauss_onset,minX,maxX,5);
       double par0 = par[0];
       par[0] = 0.00;
       line_int->SetParameters(par);
@@ -611,7 +611,7 @@ printf("DEBUG : phase_max = %.8f\n",phase_max);
       double integral_manual_offset_corrected = integral_manual - offset_correction;
       double fluence_manual = integral_manual_offset_corrected*gCalConstant*1000.00;
       printf("Manual integration in DrawGraph (sum) = %.8f in range [%.8f -  %.8f] -> Integral = %.8f -> Corrected for offset = %.8f (subtracted %.8f)\n",sum,minX,maxX,integral_manual,integral_manual_offset_corrected,offset_correction);   
-
+*/
       double t_peak = x_values[phase_max_i];
       int pre_rise_i = phase_max_i - 10;
       if( pre_rise_i < 0 ){
@@ -663,13 +663,13 @@ printf("DEBUG : phase_max = %.8f\n",phase_max);
 
 
 
-   if( bSaveFit ){
+/*   if( bSaveFit ){
       if( fluence > 0 && chi2_ndf<1.5 && !isnan(par0_err) ){
          FILE* outf2 = fopen("fitted_fluence.txt","a+");
          fprintf(outf2,"%s %.8f %.8f %.8f %.8f\n",gInputFileName,fluence,fluence_error,fluence2,fluence_manual);
          fclose(outf2); 
       }
-   }
+   }*/
 
    pGraph->GetXaxis()->SetTitleOffset(1.00);
    pGraph->GetYaxis()->SetTitleOffset(0.60);
@@ -712,7 +712,7 @@ printf("DEBUG : phase_max = %.8f\n",phase_max);
       double max_flux = -1000;
       double phase=0.00;
       double delta_phase=(1.00/n_bins); // 0.001;
-      fluence = 0.00;
+//      fluence = 0.00;
       double sum_profile = 0.00; // fit 
       int n_bins_fit=0;
       while( phase < 1.00 ){ // was 2.0
@@ -721,7 +721,7 @@ printf("DEBUG : phase_max = %.8f\n",phase_max);
          if( flux > max_flux ){
             max_flux = flux;            
          }
-         fluence += flux*delta_phase;
+//         fluence += flux*delta_phase;
          sum_profile += flux;
 
          phase += delta_phase;
@@ -742,11 +742,11 @@ printf("DEBUG : phase_max = %.8f\n",phase_max);
       }
       double sum_profile_data_before_rescale =  sum_profile_data*gOriginalRMS;
 
-      printf("Max flux = %.6f [units]\n",max_flux);
-      printf("Mean flux = %.6f [units] (or %.6f) = %.8f / %.8f\n",(fluence/phase),(sum_profile/n_bins),fluence,phase);
-      printf("Fluence  = %.6f [units*phase]\n",fluence);
-      printf("Sum profile = %.8f\n",sum_profile);
-      printf("Sum profile data = %e (before re-scaling = %e)\n",sum_profile_data,sum_profile_data_before_rescale);
+//      printf("Max flux = %.6f [units]\n",max_flux);
+//      printf("Mean flux = %.6f [units] (or %.6f) = %.8f / %.8f\n",(fluence/phase),(sum_profile/n_bins),fluence,phase);
+//      printf("Fluence  = %.6f [units*phase]\n",fluence);
+//      printf("Sum profile = %.8f\n",sum_profile);
+//      printf("Sum profile data = %e (before re-scaling = %e)\n",sum_profile_data,sum_profile_data_before_rescale);
 
       double w10_start=-1;
       double w10_end=-1;

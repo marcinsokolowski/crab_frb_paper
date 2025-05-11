@@ -60,6 +60,6 @@ else
    cat pulse*dm*.psr*.fit | awk '{print $1" 0 "$8/($6-$4)" 0 ";}' |sort -n  > slope_vs_index_pulse.txt
    cat pulse*dm*.psr*.fit | awk '{print $1" 0 "$6-$4" 0";}' |sort -n > risetime_vs_index.txt
 
-   root -l "plotslope_err.C(\"slope_vs_index_pulse.txt\",\"poly2\")"
+   root -l "plotslope_err.C(\"slope_vs_index_pulse.txt\",\"poly2\",56.7,56.74)"
    root -l "plotrisetime_err.C(\"risetime_vs_index.txt\",\"poly2\",56.7,56.74)"
 fi
