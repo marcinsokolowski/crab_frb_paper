@@ -19,8 +19,12 @@ fi
 echo "cp ~/github/crab_frb_paper/scripts/root/fit_leading_edge.C ."
 cp ~/github/crab_frb_paper/scripts/root/fit_leading_edge.C .
 
-echo "cp ~/github/crab_frb_paper/scripts/root/plotslope.C ."
-cp ~/github/crab_frb_paper/scripts/root/plotslope.C .
+echo "cp ~/github/crab_frb_paper/scripts/root/plotslope_err.C ."
+cp ~/github/crab_frb_paper/scripts/root/plotslope_err.C .
+
+echo "cp ~/github/crab_frb_paper/scripts/root/plotrisetime_err.C ."
+cp ~/github/crab_frb_paper/scripts/root/plotrisetime_err.C .
+
 
 mkdir -p images/
 
@@ -50,12 +54,13 @@ do
 done
 
 # cat pulse*dm??.psr*.fit | awk '{print NR" "$7/($5-$3);}'  > slope_vs_index.txt
-cat ${b}.dm*.psr.fit > slope_vs_dm.txt
-root -l "plotslope_err.C(\"slope_vs_dm.txt\",\"poly2\")"
+if [[ $func_name == "leading_edge" ]]; then
+   cat ${b}.dm*.psr.fit > slope_vs_dm.txt
+   root -l "plotslope_err.C(\"slope_vs_dm.txt\",\"poly2\")"
+else 
+   cat pulse*dm*.psr*.fit | awk '{print $1" 0 "$7/($5-$3)" 0 ";}' |sort -n  > slope_vs_index_pulse.txt
+   cat pulse*dm*.psr*.fit | awk '{print $1" 0 "$6-$4" 0";}' |sort -n > risetime_vs_index.txt
 
-cat pulse*dm*.psr*.fit | awk '{print $1" 0 "$7/($5-$3)" 0 ";}' |sort -n  > slope_vs_index_pulse.txt
-cat pulse*dm*.psr*.fit | awk '{print $1" 0 "$6-$4" 0";}' |sort -n > risetime_vs_index.txt
-
-root -l "plotslope_err.C(\"slope_vs_index_pulse.txt\",\"poly2\")"
-root -l "plotrisetime_err.C(\"risetime_vs_index.txt\",\"poly2\",56.7,56.74)"
-
+   root -l "plotslope_err.C(\"slope_vs_index_pulse.txt\",\"poly2\")"
+   root -l "plotrisetime_err.C(\"risetime_vs_index.txt\",\"poly2\",56.7,56.74)"
+fi
