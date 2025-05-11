@@ -55,11 +55,11 @@ done
 # cat pulse*dm??.psr*.fit | awk '{print NR" "$7/($5-$3);}'  > slope_vs_index.txt
 if [[ $func_name == "leading_edge" ]]; then
    cat ${b}.dm*.psr.fit > slope_vs_dm.txt
-   root -l "plotslope_err.C(\"slope_vs_dm.txt\",\"poly2\")"
+   root -l "plotslope_err.C(\"slope_vs_dm.txt\",\"poly2\",56.7,56.74,\"leading_edge\")"
 else 
    cat pulse*dm*.psr*.fit | awk '{print $1" 0 "$8/($6-$4)" 0 ";}' |sort -n  > slope_vs_index_pulse.txt
    cat pulse*dm*.psr*.fit | awk '{print $1" 0 "$6-$4" 0";}' |sort -n > risetime_vs_index.txt
 
-   root -l "plotslope_err.C(\"slope_vs_index_pulse.txt\",\"poly2\",56.7,56.74)"
+   root -l "plotslope_err.C(\"slope_vs_index_pulse.txt\",\"poly2\",56.7,56.74,\"pulse\")"
    root -l "plotrisetime_err.C(\"risetime_vs_index.txt\",\"poly2\",56.7,56.74)"
 fi
