@@ -238,8 +238,8 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, Double_t* x_val
          }
          printf("MAX SLOPE at DM = %.6f (slope = %.8f)\n",x_max_slope,max_slope);
 
-         FILE* outf = fopen("SLOPE.txt","w");
-         fprintf(outf,"%.8f %.8f %.8f %.8f %.8f\n",par[0],par[1],par[2],x_max_slope,max_slope);
+         FILE* outf = fopen("DM_RISE_TIME.txt","w");
+         fprintf(outf,"%.8f %.8f\n",par[1],line->GetParError(1));
          fclose(outf);
       }
 
