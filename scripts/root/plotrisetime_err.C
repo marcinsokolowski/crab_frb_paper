@@ -482,4 +482,6 @@ void plotrisetime_err( const char* basename="sigmaG1_vs_lapSigmaG1_for_root",
       szPngName1 += ".png";
    }
    c1->Print(szPngName1.Data());
+
+   printf("PWD : %s\n",gSystem->pwd());
 }

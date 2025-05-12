@@ -334,12 +334,12 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
          }
 
 printf("DEBUG : phase_max = %.8f\n",phase_max);
-         double ts = phase_max - 0.02; // 2*(x_values[1]-x_values[0]);
+         double ts = phase_max - 0.001; // 2*(x_values[1]-x_values[0]);
          double tp = phase_max;
          double alpha = max_value / (tp - ts);
 
          par[0] = 0;
-         par[1] = 0.023;
+         par[1] = ts;
          par[2] = tp;
          par[3] = max_value;
          par[4] = 0.2; // very long decay ...         
@@ -352,11 +352,21 @@ printf("DEBUG : phase_max = %.8f\n",phase_max);
             par[3] = 15.692*1e12;
          }*/
 
+         printf("Initial parameters:\n");
+         printf("   Offset    = %.8f\n",par[0]);
+         printf("   t_start   = %.8f\n",par[1]);
+         printf("   t_peak    = %.8f\n",par[2]);
+         printf("   Peak_flux = %.8f\n",par[3]);
+         printf("   Tau       = %.8f\n",par[4]);
+
          line->SetParName(0,"Offset");
          line->SetParName(1,"#t_{start}");
          line->SetParName(2,"#t_{peak}");
          line->SetParName(3,"Peak_flux");
          line->SetParName(4,"#tau");
+
+         line->SetParLimits(1,0.00,1.00);
+         line->SetParLimits(2,0.00,1.00);
       }
 
       if( strcmp( fit_func_name, "leading_edge" )==0 ){
