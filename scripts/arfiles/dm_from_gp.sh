@@ -16,6 +16,12 @@ if [[ -n "$3" && "$3" != "-" ]]; then
    func_name="$3"
 fi
 
+root_options="-l"
+if [[ -n "$4" && "$4" != "-" ]]; then
+   root_options="$4"
+fi
+
+
 echo "cp ~/github/crab_frb_paper/scripts/root/fit_leading_edge.C ."
 cp ~/github/crab_frb_paper/scripts/root/fit_leading_edge.C .
 
@@ -45,7 +51,7 @@ do
    fi
    
    awk '{print $3*(0.0333924123/1024.00)" "$4;}' ${txtfile} > ${psrfile}
-   root -l -b -q "fit_leading_edge.C(\"${psrfile}\",${dm},\"${func_name}\")" 
+   root ${root_options} "fit_leading_edge.C(\"${psrfile}\",${dm},\"${func_name}\")" 
 
 #   rm -f ${dmfile}   
    echo "rm -f ${dmfile}"   
