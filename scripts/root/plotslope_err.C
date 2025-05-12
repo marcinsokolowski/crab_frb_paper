@@ -319,6 +319,9 @@ int ReadResultsFile( const char* fname, Double_t* x_values, Double_t* y_values,
    long lval1,lval2,lval3,lval4;
    double max_val=-100000;
 
+   double sum = 0.00, sum2 = 0.00;
+   int rms_count=0;
+
    all=0;
    int ncols=-1;
    while (1) {
@@ -390,21 +393,53 @@ int ReadResultsFile( const char* fname, Double_t* x_values, Double_t* y_values,
            printf("values : %f %f\n",x_val,y_val);
           }
 
+     if( rms_count < 5 ){
+        sum += y_val;
+        sum2 += y_val*y_val; 
+        rms_count++;
+     }
+
      all++;
    }
    fclose(fcd);
 
+   double mean5 = sum/rms_count;
+   double rms5 = sqrt( sum2/rms_count - mean5*mean5 );
 
-   printf("max_val = %.4f\n",max_val);
-   double prev=y_values[0];
-   for(int i=0;i<all;i++){
-      if( y_values[i]<=(max_val-3) && prev>=(max_val-3) ){ 
-         if( gVerb>0 ){
-            printf("%s : 3dB Point (%.4f - 3dB) is %.4f dB at %.4f [MHz]\n",fname,max_val,y_values[i],x_values[i]);
-         }
+   printf("CLEAN : mean5 = %.8f , rms5 = %.8f\n",mean5,rms5);
+
+   Double_t* clean_x = new Double_t[all];
+   Double_t* clean_y = new Double_t[all];
+   // exclude outliers :
+
+   // first is always added - at least for now
+   clean_x[0] = x_values[0];
+   clean_y[0] = y_values[0];
+   int clean_count=1;
+
+   Double_t prev_value = y_values[0];
+   for(int i=1;i<all;i++){
+      double diff = y_values[i] - prev_value;
+      if( fabs(diff) < 40*rms5 ){
+         clean_x[clean_count] = x_values[i];
+         clean_y[clean_count] = y_values[i];
+         clean_count++;
+
+         prev_value = y_values[i];
+      }else{
+         printf("CLEAN : skipped outlier %.8f %.8f , diff = %.8f = %.2f sigma\n",x_values[i],y_values[i],diff,diff/rms5);
       }
-      prev = y_values[i];
    }
+
+   all = clean_count;
+   for(int i=0;i<clean_count;i++){
+      x_values[i] = clean_x[i];
+      y_values[i] = clean_y[i];
+   }
+
+   delete [] clean_x;
+   delete [] clean_y;
+
 
 //   exit(0);   
    return all;
