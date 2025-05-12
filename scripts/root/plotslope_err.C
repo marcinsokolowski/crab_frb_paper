@@ -319,9 +319,6 @@ int ReadResultsFile( const char* fname, Double_t* x_values, Double_t* y_values,
    long lval1,lval2,lval3,lval4;
    double max_val=-100000;
 
-   double sum = 0.00, sum2 = 0.00;
-   int rms_count=0;
-
    all=0;
    int ncols=-1;
    while (1) {
@@ -393,57 +390,143 @@ int ReadResultsFile( const char* fname, Double_t* x_values, Double_t* y_values,
            printf("values : %f %f\n",x_val,y_val);
           }
 
-     if( rms_count < 5 ){
-        sum += y_val;
-        sum2 += y_val*y_val; 
-        rms_count++;
-     }
-
      all++;
    }
    fclose(fcd);
 
-   double mean5 = sum/rms_count;
-   double rms5 = sqrt( sum2/rms_count - mean5*mean5 );
+   return all;
+}  
 
-   printf("CLEAN : mean5 = %.8f , rms5 = %.8f\n",mean5,rms5);
-
-   Double_t* clean_x = new Double_t[all];
-   Double_t* clean_y = new Double_t[all];
-   // exclude outliers :
-
-   // first is always added - at least for now
-   clean_x[0] = x_values[0];
-   clean_y[0] = y_values[0];
-   int clean_count=1;
-
-   Double_t prev_value = y_values[0];
-   for(int i=1;i<all;i++){
-      double diff = y_values[i] - prev_value;
-      if( fabs(diff) < 40*rms5 ){
-         clean_x[clean_count] = x_values[i];
-         clean_y[clean_count] = y_values[i];
-         clean_count++;
-
-         prev_value = y_values[i];
+Double_t interpolate(Double_t* ftab, Double_t* ytab, int cnt, Double_t f, int bUseEnds=0 )
+{
+   for(int i=1;i<cnt;i++){
+      double freq = ftab[i];
+      double val  = ytab[i];
+        
+      if( fabs(freq - f )<=0.01 ){
+         return val;
       }else{
-         printf("CLEAN : skipped outlier %.8f %.8f , diff = %.8f = %.2f sigma\n",x_values[i],y_values[i],diff,diff/rms5);
+         if( ftab[i-1]<=f && f<=ftab[i] ){
+            double u1 = ftab[i-1];
+            double t1 = ytab[i-1];
+            double u2 = ftab[i];
+            double t2 = ytab[i];
+
+            double interpol_val = t1 + (f-u1)*(t2-t1)/(u2-u1);
+//            printf("Out_val = %.2f\n",(interpol_val));
+            return (interpol_val);
+         }
       }
    }
 
-   all = clean_count;
-   for(int i=0;i<clean_count;i++){
-      x_values[i] = clean_x[i];
-      y_values[i] = clean_y[i];
+   if( bUseEnds ){
+      if( f < ftab[0] ){
+         return ytab[0];
+      }
+      if( f > ftab[cnt-1] ){
+         return ytab[cnt-1];
+      }
    }
 
-   delete [] clean_x;
-   delete [] clean_y;
+   if( gVerb > 0 ){
+      printf("WARNING : could not find value for freq = %f\n",f);
+   }
+
+   return -1000;
+}
 
 
-//   exit(0);   
-   return all;
-}  
+int clean_outliers( Double_t* x_values, Double_t* y_values, Double_t* x_values_err, Double_t* y_values_err, int& all )
+{
+      int all_orig = all;
+      Double_t sum = 0.00, sum2 = 0.00;
+      int rms_count = 0;
+      for(int i=0;i<5;i++){
+        sum += y_values[i];
+        sum2 += y_values[i]*y_values[i]; 
+        rms_count++;
+      }
+
+      double mean5 = sum/rms_count;
+      double rms5 = sqrt( sum2/rms_count - mean5*mean5 );
+
+      printf("CLEAN : mean5 = %.8f , rms5 = %.8f\n",mean5,rms5);
+
+      Double_t* clean_x = new Double_t[all];
+      Double_t* clean_y = new Double_t[all];
+      Double_t* clean_x_err = new Double_t[all];
+      Double_t* clean_y_err = new Double_t[all];
+      // exclude outliers :
+
+      // first is always added - at least for now
+      clean_x[0] = x_values[0];
+      clean_y[0] = y_values[0];
+      clean_x_err[0] = x_values_err[0];
+      clean_y_err[0] = y_values_err[0];
+      int clean_count=1;
+
+      Double_t threshold = 12*rms5;
+      Double_t prev_value = y_values[0];
+      for(int i=1;i<all;i++){
+         double diff = y_values[i] - prev_value;
+         printf("CLEAN : checking point %d %.8f %.8f -> diff = %.8f (=%.2f sigma) vs. threshold = %.8f\n",i,x_values[i],y_values[i],diff,(diff/rms5),threshold);
+
+         if( fabs(diff) < threshold ){
+            clean_x[clean_count] = x_values[i];
+            clean_y[clean_count] = y_values[i];
+            clean_x_err[clean_count] = x_values_err[i];
+            clean_y_err[clean_count] = y_values_err[i];
+            clean_count++;
+
+            prev_value = y_values[i];
+         }else{
+            // check if between two points:
+            // Double_t interpolate(Double_t* ftab, Double_t* ytab, int cnt, Double_t f, int bUseEnds=0 )
+            if( i < (all-1) ){
+               Double_t ftab[2],ytab[2];
+               ftab[0] = x_values[i-1];
+               ytab[0] = y_values[i-1];
+               ftab[1] = x_values[i+1];
+               ytab[1] = y_values[i+1];
+
+               Double_t expected_val = interpolate( ftab, ytab, 2, x_values[i], 0 );
+               Double_t diff = y_values[i] - expected_val;
+               printf("CLEAN : expected value = %.8f value , vs. %.8f -> diff = %.8f (%.2f sigma)\n",expected_val,y_values[i],diff,(diff/rms5));
+
+               if( fabs(diff) < threshold ){
+                  clean_x[clean_count] = x_values[i];
+                  clean_y[clean_count] = y_values[i];
+                  clean_x_err[clean_count] = x_values_err[i];
+                  clean_y_err[clean_count] = y_values_err[i];
+                  clean_count++;
+
+                  prev_value = y_values[i];
+               }else{
+                  printf("CLEAN : skipped outlier %.8f %.8f , diff = %.8f = %.2f sigma\n",x_values[i],y_values[i],diff,diff/rms5);
+               }
+            }else{
+               printf("CLEAN : skipped outlier %.8f %.8f , diff = %.8f = %.2f sigma\n",x_values[i],y_values[i],diff,diff/rms5);
+            }
+         }
+      }
+
+      all = clean_count;
+      for(int i=0;i<clean_count;i++){
+         x_values[i] = clean_x[i];
+         y_values[i] = clean_y[i];
+         x_values_err[i] = clean_x_err[i];
+         y_values_err[i] = clean_y_err[i];
+      }
+      printf("CLEAN : %d points left after cleaning (out of original %d)\n",clean_count,all_orig);
+
+      delete [] clean_x;
+      delete [] clean_y;
+      delete [] clean_x_err;
+      delete [] clean_y_err;
+
+      return clean_count;
+}
+
 
 void plotslope_err( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", 
                const char* fit_func_name=NULL, double fit_min_x=-100000, double fit_max_x=-100000,
@@ -503,6 +586,8 @@ void plotslope_err( const char* basename="sigmaG1_vs_lapSigmaG1_for_root",
 
    lq1 = ReadResultsFile( basename, x_value1, y_value1, -1, -1, x_col, y_col ); 
    int lq1_err = ReadResultsFile( basename, x_value1_err, y_value1_err, -1, -1, x_col+1, y_col+1 );
+   lq1 = clean_outliers( x_value1, y_value1, x_value1_err, y_value1_err, lq1 );
+   lq1_err = lq1;
    
    // drawing background graphs here :
    TGraphErrors* pGraph1 = DrawGraph( x_value1, y_value1, x_value1_err, y_value1_err, lq1, 1, NULL, 
