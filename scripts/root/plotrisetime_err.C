@@ -194,6 +194,9 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, Double_t* x_val
 
    if( local_func ){
       line->SetParameters(par);
+
+      line->SetParLimits(1,fit_min_x,fit_max_x);
+      line->SetParLimits(0,0.00,10000.00);
    }
    if( fit_func_name && strlen(fit_func_name) ){
       printf("fitting function : %s",fit_func_name);

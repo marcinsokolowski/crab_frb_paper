@@ -198,6 +198,7 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, Double_t* x_val
       line->SetParameters(par);
 
       line->SetParLimits(1,fit_min_x,fit_max_x);
+      line->SetParLimits(0,-10000.00,0.000);
    }
    if( fit_func_name && strlen(fit_func_name) ){
       printf("fitting function : %s",fit_func_name);
@@ -577,8 +578,8 @@ int clean_outliers( Double_t* x_values, Double_t* y_values, Double_t* x_values_e
 void plotslope_err( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", 
                const char* fit_func_name=NULL, double fit_min_x=-100000, double fit_max_x=-100000,
                const char* szLabel="poly2",
-               double min_y=0.20, 
-               double max_y=1.20, int bLog=0,
+               double min_y=0.00, 
+               double max_y=5.00, int bLog=0,
       const char* szDescX="DM",const char* szDescY="Slope", const char* szTitle=NULL,
       int x_col=0, int y_col=2, const char* outpngfile=NULL )
 {
