@@ -21,6 +21,7 @@ if [[ -n "$4" && "$4" != "-" ]]; then
    root_options="$4"
 fi
 
+force=0
 
 echo "cp ~/github/crab_frb_paper/scripts/root/fit_leading_edge.C ."
 cp ~/github/crab_frb_paper/scripts/root/fit_leading_edge.C .
@@ -34,7 +35,7 @@ cp ~/github/crab_frb_paper/scripts/root/plotrisetime_err.C .
 
 mkdir -p images/
 
-for dm in `echo 56.600 56.630 56.640 56.650 56.670 56.700 56.702 56.704 56.706 56.708 56.710 56.712 56.714 56.716 56.718 56.720 56.722 56.724 56.726 56.728 56.730 56.732 56.734 56.736 56.738 56.740 56.742 56.744 56.746 56.748 56.750 56.760 56.770 56.780 56.790 56.800 56.830 56.850 56.880 56.900`
+for dm in `echo 56.600 56.630 56.640 56.650 56.670 56.680 56.690 56.700 56.702 56.704 56.706 56.708 56.710 56.712 56.714 56.716 56.718 56.720 56.722 56.724 56.726 56.728 56.730 56.732 56.734 56.736 56.738 56.740 56.742 56.744 56.746 56.748 56.750 56.760 56.770 56.780 56.790 56.800 56.830 56.850 56.880 56.900`
 do
    
    dmfile=${arfile%%rf}dm${dm}
@@ -42,10 +43,14 @@ do
    psrfile=${txtfile%%txt}psr
 
    if [[ $dodedisp -gt 0 ]]; then   
-      echo "pam ${arfile} -d ${dm} -e "dm${dm}""
-      pam ${arfile} -d ${dm} -e "dm${dm}"
+      if [[ -s ${txtfile} && $force -le 0 ]]; then
+         echo "ALREADY CREATED $txtfile -> no need to de-disperse"
+      else
+         echo "pam ${arfile} -d ${dm} -e "dm${dm}""
+         pam ${arfile} -d ${dm} -e "dm${dm}"
    
-      pdv -FTtp ${dmfile} | awk '{if(NF==4){print $0;}}' > ${txtfile}   
+         pdv -FTtp ${dmfile} | awk '{if(NF==4){print $0;}}' > ${txtfile}   
+      fi
    else
       echo "Dedisp skipped"
    fi

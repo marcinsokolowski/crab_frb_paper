@@ -1,6 +1,6 @@
 #!/bin/bash
 
-template="/media/msok/5508b34c-040a-4dce-a8ff-2c4510a5d1a3/eda2/202?_??_??_pulsars_msok/J0534+2200_flagants_ch40_ch256/256/single_pulse_archive_pulse_*sec_interval*sec"
+template="/media/msok/5508b34c-040a-4dce-a8ff-2c4510a5d1a3/eda2/202?_??_??_pulsars_msok/J0534+2200_flagants_ch40_ch256/256/single_pulse_archive_pulse_*sec_interval*sec/*.ar"
 if [[ -n "$1" && "$1" != "-" ]]; then
    template="$1"
 fi
@@ -28,8 +28,9 @@ fi
 
 curr_path=`pwd`
 
-for path in `ls -d ${template}`
+for arfile_path in `ls ${template}`
 do
+   path=`dirname $arfile_path`
    cd $path
    echo
    echo
@@ -66,7 +67,6 @@ do
        echo "~/github/crab_frb_paper/scripts/arfiles/dm_from_gp.sh $rffile 0 pulse \"${root_options}\""
        ~/github/crab_frb_paper/scripts/arfiles/dm_from_gp.sh $rffile 0 "pulse" "${root_options}"
    fi   
-   
    
    cd $curr_path
    sleep 5
