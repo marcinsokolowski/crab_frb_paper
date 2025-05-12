@@ -12,6 +12,15 @@ do
    
    mkdir -p $new_dir
    
-   echo "cp ${dir}/*.ar ${new_dir}/"
-   cp ${dir}/*.ar ${new_dir}/   
+   echo "rsync -avP ${dir}/*.ar ${new_dir}/"
+   rsync -avP ${dir}/*.ar ${new_dir}/   
+   
+   echo "rsync -avP ${dir}/DM*txt ${new_dir}/"
+   rsync -avP ${dir}/DM*txt ${new_dir}/
+
+   echo "rsync -avP ${dir}/*.C ${new_dir}/"
+   rsync -avP ${dir}/*.C ${new_dir}/
+
+   echo "rsync -avP ${dir}/.root_history ${new_dir}/"
+   rsync -avP ${dir}/.root_history ${new_dir}/
 done
