@@ -20,6 +20,12 @@ if [[ -n "$4" && "$4" != "-" ]]; then
    root_options="$4"
 fi
 
+force=0
+if [[ -n "$5" && "$5" != "-" ]]; then
+   force=$5
+fi
+
+
 curr_path=`pwd`
 
 for path in `ls -d ${template}`
@@ -47,8 +53,8 @@ do
    if [[ -s DM_SLOPE_leading_edge.txt && $force -le 0 ]]; then
        echo "ALREADY PROCESSED leading_edge : $path"
    else
-       echo "~/github/crab_frb_paper/scripts/arfiles/dm_from_gp.sh $rffile 1 leading_edge \"${root_options}\""
-       ~/github/crab_frb_paper/scripts/arfiles/dm_from_gp.sh $rffile 1 "leading_edge" "${root_options}"
+       echo "~/github/crab_frb_paper/scripts/arfiles/dm_from_gp.sh $rffile $dodedisp leading_edge \"${root_options}\""
+       ~/github/crab_frb_paper/scripts/arfiles/dm_from_gp.sh $rffile $dodedisp "leading_edge" "${root_options}"
    fi   
    
    if [[ -s DM_SLOPE_pulse.txt && $force -le 0 ]]; then

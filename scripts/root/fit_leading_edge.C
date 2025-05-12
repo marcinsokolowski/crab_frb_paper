@@ -960,7 +960,7 @@ int ReadResultsFile( const char* fname, Double_t* x_values, Double_t* y_values,
      if( x_val < min_x ){
         min_x = x_val;
      }
-     if( gVerb || 1 ){
+     if( gVerb || 0 ){
         printf("values : %f %f\n",x_val,y_val);
      }
 
@@ -1300,7 +1300,7 @@ void fit_leading_edge( const char* basename, double dm, const char* fit_func_nam
    if( strstr(basename,"leading_edge") ){
       fprintf(outf,"%.8f %.8f %.8f %.8f %.8f %.8f\n",dm,dm_err,gFittedParameters[0],gFittedParametersErrors[0],gFittedParameters[1],gFittedParametersErrors[1]);
    }else{
-      fprintf(outf,"%.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f\n",dm,gFittedParameters[0],gFittedParametersErrors[0],gFittedParameters[1],gFittedParametersErrors[1],gFittedParameters[2],gFittedParametersErrors[2],gFittedParameters[3],gFittedParametersErrors[3],gFittedParameters[4],gFittedParametersErrors[4]);
+      fprintf(outf,"%.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f\n",dm,dm_err,gFittedParameters[0],gFittedParametersErrors[0],gFittedParameters[1],gFittedParametersErrors[1],gFittedParameters[2],gFittedParametersErrors[2],gFittedParameters[3],gFittedParametersErrors[3],gFittedParameters[4],gFittedParametersErrors[4]);
    }
    fclose(outf);
 
