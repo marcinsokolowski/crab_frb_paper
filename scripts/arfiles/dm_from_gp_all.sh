@@ -31,6 +31,9 @@ curr_path=`pwd`
 for path in `ls -d ${template}`
 do
    cd $path
+   echo
+   echo
+   pwd
    
    arfile=`ls *.ar | tail -1`
    backup_file=${arfile}.backup
@@ -65,8 +68,6 @@ do
    fi   
    
    
-
-exit;
-   
    cd $curr_path
+   sleep 5
 done

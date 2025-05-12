@@ -598,7 +598,7 @@ void plotrisetime_err( const char* basename="sigmaG1_vs_lapSigmaG1_for_root",
    // gROOT->Reset();
    // const char* basename = "s_vs_sigma_g_sqr";
 
-   TCanvas* c1 = new TCanvas("c1","xxxx",200,10,700,500);
+   TCanvas* c1 = new TCanvas("c1","xxxx",200,10,1800,1200);
    c1->SetGridx();
    c1->SetGridy();
    c1->SetFillColor(0);
