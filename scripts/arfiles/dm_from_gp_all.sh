@@ -44,8 +44,21 @@ do
       psrconv -o PSRFITS ${arfile}   
    fi
    
-   echo "~/github/crab_frb_paper/scripts/arfiles/dm_from_gp.sh $rffile $dodedisp $func_name \"${root_options}\""
-   ~/github/crab_frb_paper/scripts/arfiles/dm_from_gp.sh $rffile $dodedisp $func_name "${root_options}"
+   if [[ -s DM_SLOPE_leading_edge.txt && $force -le 0 ]]; then
+       echo "ALREADY PROCESSED leading_edge : $path"
+   else
+       echo "~/github/crab_frb_paper/scripts/arfiles/dm_from_gp.sh $rffile 1 leading_edge \"${root_options}\""
+       ~/github/crab_frb_paper/scripts/arfiles/dm_from_gp.sh $rffile 1 "leading_edge" "${root_options}"
+   fi   
+   
+   if [[ -s DM_SLOPE_pulse.txt && $force -le 0 ]]; then
+       echo "ALREADY PROCESSED pulse : $path"
+   else
+       echo "~/github/crab_frb_paper/scripts/arfiles/dm_from_gp.sh $rffile 0 pulse \"${root_options}\""
+       ~/github/crab_frb_paper/scripts/arfiles/dm_from_gp.sh $rffile 0 "pulse" "${root_options}"
+   fi   
+   
+   
 
 exit;
    

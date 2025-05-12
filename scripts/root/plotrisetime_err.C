@@ -22,6 +22,8 @@ int gVerb=0;
 
 #define MAX_ROWS 10000000
 
+#define REPLACE_ELEMS( tab, pos1, pos2 ) { tmp=tab[pos1]; tab[pos1]=tab[pos2]; tab[pos2]=tmp; }
+
 Double_t HorizontalLine( Double_t* x, Double_t* y )
 {
    return y[0];
@@ -446,19 +448,61 @@ Double_t interpolate(Double_t* ftab, Double_t* ytab, int cnt, Double_t f, int bU
 }
 
 
+void my_sort_float( double* ftab, long cnt )
+{
+   double divider = ftab[0];
+   
+   int beg = 1;
+   int end = cnt-1;
+   double tmp;
+
+   if(cnt){ 
+      while(beg<=end){
+         if(ftab[beg]>divider){
+            if(ftab[end]<=divider){
+               REPLACE_ELEMS( ftab, beg, end )
+               beg++;
+               end--;
+            }else{   
+               end--;
+            }
+         }else{   
+            beg++;
+            if(ftab[end]>divider)
+               end--;
+         }
+      }
+      if(end!=0){
+         REPLACE_ELEMS( ftab, end, 0)
+      }
+
+      my_sort_float( ftab, end );
+      my_sort_float( &(ftab[beg]), cnt-beg );
+   }
+
+}
+
+
+
 int clean_outliers( Double_t* x_values, Double_t* y_values, Double_t* x_values_err, Double_t* y_values_err, int& all )
 {
       int all_orig = all;
-      Double_t sum = 0.00, sum2 = 0.00;
-      int rms_count = 0;
-      for(int i=0;i<5;i++){
-        sum += y_values[i];
-        sum2 += y_values[i]*y_values[i]; 
-        rms_count++;
+ 
+      int cnt=10;
+      double tmparr[10];
+      for(int i=0;i<10;i++){
+         tmparr[i] = y_values[i];
       }
+      my_sort_float(tmparr,cnt);
 
-      double mean5 = sum/rms_count;
-      double rms5 = sqrt( sum2/rms_count - mean5*mean5 );
+      double median = tmparr[5];
+      int q75= (int)(cnt*0.75);
+      int q25= (int)(cnt*0.25);
+      double iqr = tmparr[q75]-tmparr[q25];
+      double sigma_iqr = iqr/1.35;
+
+      double mean5 = median;
+      double rms5 = sigma_iqr;
 
       printf("CLEAN : mean5 = %.8f , rms5 = %.8f\n",mean5,rms5);
 
@@ -475,7 +519,7 @@ int clean_outliers( Double_t* x_values, Double_t* y_values, Double_t* x_values_e
       clean_y_err[0] = y_values_err[0];
       int clean_count=1;
 
-      Double_t threshold = 10*rms5;
+      Double_t threshold = 2.5*rms5;
       Double_t prev_value = y_values[0];
       for(int i=1;i<all;i++){
          double diff = y_values[i] - prev_value;
