@@ -1170,7 +1170,7 @@ void fit_leading_edge_slope( const char* basename, double dm, const char* fit_fu
 
    double dm_err=0.00;
    char szFittedFile[128];
-   sprintf(szFittedFile,"%s.fittest",basename);
+   sprintf(szFittedFile,"%s.fit",basename);
    FILE* outf = fopen(szFittedFile,"w");
    if( strstr(basename,"leading_edge") ){
       fprintf(outf,"%.8f %.8f %.8f %.8f %.8f %.8f\n",dm,dm_err,gFittedParameters[0],gFittedParametersErrors[0],gFittedParameters[1],gFittedParametersErrors[1]);
