@@ -81,7 +81,7 @@ Double_t Pulse_with_linear_onset( Double_t* x, Double_t* y )
    Double_t peak_flux = y[3];
    Double_t tau = y[4];
 
-   double flux = offset;
+   double flux = 0.00;
    if( t > t0 ){
       if( t < t_peak ){
          double a = peak_flux / ( t_peak - t0 );
@@ -93,7 +93,7 @@ Double_t Pulse_with_linear_onset( Double_t* x, Double_t* y )
    }
 
 
-   return flux;
+   return flux + offset;
 
    // FRB171020 , 200 Jy ms @ 1.4 GHz 
    //             1500 Jy ms @ 185 MHz and spectral index  = -1
@@ -379,8 +379,11 @@ printf("DEBUG : phase_max = %.8f\n",phase_max);
          line->SetParName(3,"Peak_flux");
          line->SetParName(4,"#tau");
 
-         line->SetParLimits(1,0.00,1.00);
-         line->SetParLimits(2,0.00,1.00);
+         line->SetParLimits(1,0.00,0.04);
+         line->SetParLimits(2,0.00,0.04);
+         line->SetParLimits(3,0.00,1.00);
+         line->SetParLimits(4,0.00,1.00);
+
       }
 
       if( strcmp( fit_func_name, "leading_edge" )==0 ){
@@ -552,7 +555,8 @@ printf("DEBUG : phase_max = %.8f\n",phase_max);
       if( strstr(fit_func_name,"line") || fit_func_name[0]=='l' || fit_func_name[0]=='L'
           || fit_func_name[0]=='h' || fit_func_name[0]=='H' || strstr(fit_func_name,"pulse") || fit_func_name[0]=='p' || strstr(fit_func_name,"pulse_gauss") || strstr(fit_func_name,"pulse_gauss_only")
         ){
-         pGraph->Fit("fit_func","R");
+         // options : https://root.cern.ch/doc/master/classTGraph.html#a61269bcd47a57296f0f1d57ceff8feeb
+         pGraph->Fit("fit_func","R,F,E,M,V");
          printf("DEBUG : fitted fit_func (%s)\n",fit_func_name);
       }
 
@@ -583,6 +587,14 @@ printf("DEBUG : phase_max = %.8f\n",phase_max);
          gFittedParametersErrors[2] = line->GetParError(2);
          gFittedParametersErrors[3] = line->GetParError(3);
          gFittedParametersErrors[4] = line->GetParError(4);
+
+         if( strcmp( fit_func_name, "pulse" )==0 ){
+            double slope = par[3]/(par[2]-par[1]);
+            double risetime = (par[2] - par[1]);
+
+            printf("SLOPE = %.8f\n",slope);
+            printf("RISETIME = %.8f\n",risetime);
+         }
 
       }
 
