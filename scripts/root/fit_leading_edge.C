@@ -344,6 +344,20 @@ printf("DEBUG : phase_max = %.8f\n",phase_max);
          par[3] = max_value;
          par[4] = 0.2; // very long decay ...         
 
+         FILE* parf = fopen("last.fit","r");
+         if( parf ){
+            char szLine[256];
+            fgets(szLine,256,parf);
+            if( sscanf(szLine,"%lf %lf %lf %lf %lf\n",&(par[0]),&(par[1]),&(par[2]),&(par[3]),&(par[4])) == 5 ){
+               printf("Read parameters from file last.fit : %.8f %.8f %.8f %.8f %.8f\n",par[0],par[1],par[2],par[3],par[4]);
+            }else{
+               printf("ERROR : could not read 5 parameters from file last.fit\n");
+            }
+            fclose(parf);
+         }else{
+            printf("WARNING : file last.fit with fitted parameteres does not exist\n");
+         }
+
 /*         if( gNormaliseInputData ){
             par[1] = par[1] / numVal;
             par[2] = par[2] / numVal;
@@ -418,6 +432,20 @@ printf("DEBUG : phase_max = %.8f\n",phase_max);
 
          par[0] = (y_values[i_height2 + 10] - y_values[i_height2 - 10])/(x_values[i_height2 + 10] - x_values[i_height2 - 10]);
          par[1] = y_values[i_height2] - par[0]*x_values[i_height2];
+
+         FILE* parf = fopen("last.fit","r");
+         if( parf ){
+            char szLine[256];
+            fgets(szLine,256,parf);
+            if( sscanf(szLine,"%lf %lf\n",&(par[0]),&(par[1])) ==  2 ){
+               printf("Read parameters from file last.fit : %.8f %.8f\n",par[0],par[1]);
+            }else{
+               printf("ERROR : could not read 5 parameters from file last.fit\n");
+            }
+            fclose(parf);
+         }else{
+            printf("WARNING : file last.fit with fitted parameteres does not exist\n");
+         }
 
 
          line->SetParName(0,"Slope");
@@ -1120,6 +1148,16 @@ void fit_leading_edge( const char* basename, double dm, const char* fit_func_nam
       fprintf(outf,"%.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f\n",dm,dm_err,gFittedParameters[0],gFittedParametersErrors[0],gFittedParameters[1],gFittedParametersErrors[1],gFittedParameters[2],gFittedParametersErrors[2],gFittedParameters[3],gFittedParametersErrors[3],gFittedParameters[4],gFittedParametersErrors[4]);
    }
    fclose(outf);
+
+   outf = fopen("last.fit","w");
+   if( strstr(basename,"leading_edge") ){
+      fprintf(outf,"%.8f %.8f\n",gFittedParameters[0],gFittedParameters[1]);
+   }else{
+      fprintf(outf,"%.8f %.8f %.8f %.8f %.8f\n",gFittedParameters[0],gFittedParameters[1],gFittedParameters[2],gFittedParameters[3],gFittedParameters[4]);
+   }
+   fclose(outf);
+
+
 
 //   normalise_x( x_value1_original, lq1 );
 //   normalise_y_minmax( x_value1_original, y_value1_original, lq1, 0.00, 0.4  );
