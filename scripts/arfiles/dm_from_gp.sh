@@ -31,7 +31,7 @@ if [[ -n "$6" && "$6" != "-" ]]; then
    force="$6"
 fi
 
-
+slope_version=0
 
 echo "cp ~/github/crab_frb_paper/scripts/root/fit_leading_edge*.C ."
 cp ~/github/crab_frb_paper/scripts/root/fit_leading_edge*.C .
@@ -72,7 +72,12 @@ do
 
 #   rm -f last.fit   
    awk '{print $3*(0.0333924123/1024.00)" "$4;}' ${txtfile} > ${psrfile}
-   root ${root_options} "fit_leading_edge_slope.C(\"${psrfile}\",${dm},\"${func_name}\")" 
+   # or fit_leading_edge_slope.C
+   if [[ $slope_version -gt 0 ]]; then
+      root ${root_options} "fit_leading_edge_slope.C(\"${psrfile}\",${dm},\"${func_name}\")"
+   else
+      root ${root_options} "fit_leading_edge.C(\"${psrfile}\",${dm},\"${func_name}\")" 
+   fi
 
 #   rm -f ${dmfile}   
    echo "rm -f ${dmfile}"   
@@ -106,7 +111,14 @@ do
    
 #   rm -f last.fit
    awk '{print $3*(0.0333924123/1024.00)" "$4;}' ${txtfile} > ${psrfile}
-   root ${root_options} "fit_leading_edge_slope.C(\"${psrfile}\",${dm},\"${func_name}\")" 
+   # or fit_leading_edge_slope.C
+   
+   if [[ $slope_version -gt 0 ]]; then
+      # fitting with slope is less stable in measuring RISE TIME :
+      root ${root_options} "fit_leading_edge_slope.C(\"${psrfile}\",${dm},\"${func_name}\")"
+   else
+      root ${root_options} "fit_leading_edge.C(\"${psrfile}\",${dm},\"${func_name}\")" 
+   fi
 
 #   rm -f ${dmfile}   
    echo "rm -f ${dmfile}"   
@@ -120,8 +132,16 @@ if [[ $func_name == "leading_edge" ]]; then
    cat ${b}.dm*.psr.fit > slope_vs_dm_leading_edge.txt
    root ${root_options} "plotslope_err.C(\"slope_vs_dm_leading_edge.txt\",\"poly2\",56.62,56.8,\"leading_edge\")"
 else 
-   cat pulse*dm*.psr*.fit | awk '{err_down=sqrt($6*$6+$8*$8);err_up=$10;up=$9;down=($7-$5);slope=up/down;err=slope*sqrt((err_up/up)*(err_up/up)+(err_down/down)*(err_down/down));print $1" 0 "slope" "err;}' |sort -n  > slope_vs_index_pulse.txt
-   cat pulse*dm*.psr*.fit | awk '{err=sqrt($6*$6+$8*$8);print $1" 0 "$7-$5" "err;}' |sort -n > risetime_vs_index.txt
+# normal _ts version :
+
+   if [[ $slope_version -gt 0 ]]; then
+      # WARNING : slope version is less stable in measuring RISE TIME !!!
+      cat pulse*dm*.psr*.fit | awk '{print $1" 0 "$5" "$6;}' > slope_vs_index_pulse.txt 
+      cat pulse*dm*.psr*.fit | awk '{p=$9;dp=$10;s=$5;ds=$6;err=(p/s)*sqrt((dp/p)*(dp/p)+(ds/s)*(ds/s));print $1" 0 "dt" "err;}' |sort -n > risetime_vs_index.txt
+   else
+      cat pulse*dm*.psr*.fit | awk '{err_down=sqrt($6*$6+$8*$8);err_up=$10;up=$9;down=($7-$5);slope=up/down;err=slope*sqrt((err_up/up)*(err_up/up)+(err_down/down)*(err_down/down));print $1" 0 "slope" "err;}' |sort -n  > slope_vs_index_pulse.txt
+      cat pulse*dm*.psr*.fit | awk '{err=sqrt($6*$6+$8*$8);print $1" 0 "$7-$5" "err;}' |sort -n > risetime_vs_index.txt      
+   fi
 
    root ${root_options} "plotslope_err.C(\"slope_vs_index_pulse.txt\",\"poly2\",56.62,56.8,\"pulse\")"
    root ${root_options} "plotrisetime_err.C(\"risetime_vs_index.txt\",\"poly2\",56.59,56.8)"
