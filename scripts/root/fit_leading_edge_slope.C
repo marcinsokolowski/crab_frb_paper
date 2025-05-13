@@ -76,24 +76,35 @@ Double_t Pulse_with_linear_onset( Double_t* x, Double_t* y )
    Double_t t = x[0];
 
    Double_t offset = y[0];
-   Double_t t0 = y[1];           // start of the pulse
+   Double_t slope  = y[1];
    Double_t t_peak = y[2];
    Double_t peak_flux = y[3];
    Double_t tau = y[4];
 
-   double flux = offset;
+//   Double_t p0 = peak_flux - slope*t_peak;
+//   Double_t t0 = -p0/slope;
+   double t0 = t_peak - peak_flux/slope;
+
+   if( t0 >= t_peak ){
+       printf("ERROR : t0 >= t_peak (%.8f >= %.8f), slope = %.8f , peak_flux = %.8f\n",t0,t_peak,slope,peak_flux);
+       return 10000.00;
+   }
+
+// printf("DEBUG : slope = %.8f, p0 = %.8f , t0 = %.8f vs. t_peak = %.8f\n",slope,p0,t0,t_peak);
+
+   double flux = 0.00;
    if( t > t0 ){
       if( t < t_peak ){
-         double a = peak_flux / ( t_peak - t0 );
-         flux = a*(t - t0 );
-      }else{
+//         double a = peak_flux / ( t_peak - t0 );
+         flux = slope*( t - t0 );
+      }else{ 
          // exponential decay
-         flux = peak_flux*exp( - (t-t_peak) / tau );
+         flux = peak_flux*exp( - (t-t_peak) / tau ) + offset;
       }
    }
 
 
-   return flux;
+   return flux + offset;
 
    // FRB171020 , 200 Jy ms @ 1.4 GHz 
    //             1500 Jy ms @ 185 MHz and spectral index  = -1
@@ -338,13 +349,14 @@ printf("DEBUG : phase_max = %.8f\n",phase_max);
          double tp = phase_max;
          double alpha = max_value / (tp - ts);
 
+         double slope = max_value/(tp-ts);
          par[0] = 0;
-         par[1] = ts;
+         par[1] = slope; // slope;
          par[2] = tp;
          par[3] = max_value;
          par[4] = 0.2; // very long decay ...         
 
-         FILE* parf = fopen("last.fit","r");
+         FILE* parf = fopen("last_test.fit","r");
          if( parf ){
             char szLine[256];
             fgets(szLine,256,parf);
@@ -368,19 +380,21 @@ printf("DEBUG : phase_max = %.8f\n",phase_max);
 
          printf("Initial parameters:\n");
          printf("   Offset    = %.8f\n",par[0]);
-         printf("   t_start   = %.8f\n",par[1]);
+         printf("   Slope   = %.8f\n",par[1]);
          printf("   t_peak    = %.8f\n",par[2]);
          printf("   Peak_flux = %.8f\n",par[3]);
          printf("   Tau       = %.8f\n",par[4]);
 
          line->SetParName(0,"Offset");
-         line->SetParName(1,"#t_{start}");
+         line->SetParName(1,"Slope");
          line->SetParName(2,"#t_{peak}");
          line->SetParName(3,"Peak_flux");
          line->SetParName(4,"#tau");
 
          line->SetParLimits(1,0.00,1.00);
-         line->SetParLimits(2,0.00,1.00);
+         line->SetParLimits(2,0.00,0.04);
+         line->SetParLimits(3,0.000000001,100.00);
+         line->SetParLimits(4,0.0001,0.10);
       }
 
       if( strcmp( fit_func_name, "leading_edge" )==0 ){
@@ -433,7 +447,7 @@ printf("DEBUG : phase_max = %.8f\n",phase_max);
          par[0] = (y_values[i_height2 + 10] - y_values[i_height2 - 10])/(x_values[i_height2 + 10] - x_values[i_height2 - 10]);
          par[1] = y_values[i_height2] - par[0]*x_values[i_height2];
 
-         FILE* parf = fopen("last.fit","r");
+         FILE* parf = fopen("last_test.fit","r");
          if( parf ){
             char szLine[256];
             fgets(szLine,256,parf);
@@ -552,8 +566,10 @@ printf("DEBUG : phase_max = %.8f\n",phase_max);
       if( strstr(fit_func_name,"line") || fit_func_name[0]=='l' || fit_func_name[0]=='L'
           || fit_func_name[0]=='h' || fit_func_name[0]=='H' || strstr(fit_func_name,"pulse") || fit_func_name[0]=='p' || strstr(fit_func_name,"pulse_gauss") || strstr(fit_func_name,"pulse_gauss_only")
         ){
-         pGraph->Fit("fit_func","R");
-         printf("DEBUG : fitted fit_func (%s)\n",fit_func_name);
+         // options : https://root.cern.ch/doc/master/classTGraph.html#a61269bcd47a57296f0f1d57ceff8feeb
+//         pGraph->Fit("fit_func","R,F,E,M");
+         pGraph->Fit("fit_func","R,F,E,M,V");
+         printf("DEBUG : fitted fit_func (%s) - NEW ???\n",fit_func_name);
       }
 
       if( local_func ){
@@ -583,6 +599,17 @@ printf("DEBUG : phase_max = %.8f\n",phase_max);
          gFittedParametersErrors[2] = line->GetParError(2);
          gFittedParametersErrors[3] = line->GetParError(3);
          gFittedParametersErrors[4] = line->GetParError(4);
+
+         if( strcmp( fit_func_name, "pulse" )==0 ){
+            double slope = par[1];
+            double p0 = par[3] - par[1]*par[2];
+            double t_s = -p0/par[1];
+            double risetime = par[2] - t_s;
+
+            printf("T_START = %.8f vs. T_PEAK = %.8f\n",t_s,par[2]);
+            printf("SLOPE = %.8f\n",slope);
+            printf("RISETIME = %.8f\n",risetime);
+         }
 
       }
 
@@ -1012,7 +1039,7 @@ double normalise_y_minmax( Double_t* x_values, Double_t* y_values, int cnt, doub
 
 
 
-void fit_leading_edge( const char* basename, double dm, const char* fit_func_name="leading_edge",
+void fit_leading_edge_slope( const char* basename, double dm, const char* fit_func_name="leading_edge",
                          double range_start=-1e20, double range_end=+1e20,
                          double cal_constant=1.00,
                    int bNormaliseInputData=0, bool bShowOriginalDataWithFit=false,
@@ -1143,7 +1170,7 @@ void fit_leading_edge( const char* basename, double dm, const char* fit_func_nam
 
    double dm_err=0.00;
    char szFittedFile[128];
-   sprintf(szFittedFile,"%s.fit",basename);
+   sprintf(szFittedFile,"%s.fittest",basename);
    FILE* outf = fopen(szFittedFile,"w");
    if( strstr(basename,"leading_edge") ){
       fprintf(outf,"%.8f %.8f %.8f %.8f %.8f %.8f\n",dm,dm_err,gFittedParameters[0],gFittedParametersErrors[0],gFittedParameters[1],gFittedParametersErrors[1]);
@@ -1152,7 +1179,7 @@ void fit_leading_edge( const char* basename, double dm, const char* fit_func_nam
    }
    fclose(outf);
 
-   outf = fopen("last.fit","w");
+   outf = fopen("last_test.fit","w");
    if( strstr(basename,"leading_edge") ){
       fprintf(outf,"%.8f %.8f\n",gFittedParameters[0],gFittedParameters[1]);
    }else{
