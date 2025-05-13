@@ -32,42 +32,49 @@ for arfile_path in `ls ${template}`
 do
    path=`dirname $arfile_path`
    cd $path
-   echo
-   echo
-   pwd
    
-   arfile=`ls *.ar | tail -1`
-   backup_file=${arfile}.backup
-   rffile=${arfile%%ar}rf # PSR FITS 
+   if [[ -s good.txt ]]; then
+      echo "The data in this path already considered processed correctly"
+      pwd
+   else          
+      echo
+      echo
+      pwd
+   
+      arfile=`ls *.ar | tail -1`
+      backup_file=${arfile}.backup
+      rffile=${arfile%%ar}rf # PSR FITS 
 
-   if [[ -s $backup_file ]]; then   
-      echo "Backup file $backup_file already exists -> no need to recreate"
-   else
-      echo "cp $arfile $backup_file"
-      cp $arfile $backup_file
+      if [[ -s $backup_file ]]; then   
+         echo "Backup file $backup_file already exists -> no need to recreate"
+      else
+         echo "cp $arfile $backup_file"
+         cp $arfile $backup_file
+      fi
+   
+      if [[ -s $rffile ]]; then
+         echo "PSRFITS file $rffile already exists -> no need to recreate"
+      else
+         echo "psrconv -o PSRFITS ${arfile}"
+         psrconv -o PSRFITS ${arfile}   
+      fi
+   
+      if [[ -s DM_SLOPE_leading_edge.txt && $force -le 0 ]]; then
+          echo "ALREADY PROCESSED leading_edge : $path"
+      else
+          echo "~/github/crab_frb_paper/scripts/arfiles/dm_from_gp.sh $rffile $dodedisp leading_edge \"${root_options}\" - ${force}"
+          ~/github/crab_frb_paper/scripts/arfiles/dm_from_gp.sh $rffile $dodedisp "leading_edge" "${root_options}" - ${force}
+      fi   
+   
+      if [[ -s DM_SLOPE_pulse.txt && $force -le 0 ]]; then
+          echo "ALREADY PROCESSED pulse : $path"
+      else
+          echo "~/github/crab_frb_paper/scripts/arfiles/dm_from_gp.sh $rffile 0 pulse \"${root_options}\" - ${force}"
+          ~/github/crab_frb_paper/scripts/arfiles/dm_from_gp.sh $rffile 0 "pulse" "${root_options} - ${force}"
+      fi   
+   
+      cd $curr_path
    fi
    
-   if [[ -s $rffile ]]; then
-      echo "PSRFITS file $rffile already exists -> no need to recreate"
-   else
-      echo "psrconv -o PSRFITS ${arfile}"
-      psrconv -o PSRFITS ${arfile}   
-   fi
-   
-   if [[ -s DM_SLOPE_leading_edge.txt && $force -le 0 ]]; then
-       echo "ALREADY PROCESSED leading_edge : $path"
-   else
-       echo "~/github/crab_frb_paper/scripts/arfiles/dm_from_gp.sh $rffile $dodedisp leading_edge \"${root_options}\" - ${force}"
-       ~/github/crab_frb_paper/scripts/arfiles/dm_from_gp.sh $rffile $dodedisp "leading_edge" "${root_options}" - ${force}
-   fi   
-   
-   if [[ -s DM_SLOPE_pulse.txt && $force -le 0 ]]; then
-       echo "ALREADY PROCESSED pulse : $path"
-   else
-       echo "~/github/crab_frb_paper/scripts/arfiles/dm_from_gp.sh $rffile 0 pulse \"${root_options}\" - ${force}"
-       ~/github/crab_frb_paper/scripts/arfiles/dm_from_gp.sh $rffile 0 "pulse" "${root_options} - ${force}"
-   fi   
-   
-   cd $curr_path
    sleep 5
 done
