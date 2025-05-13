@@ -57,15 +57,15 @@ do
    if [[ -s DM_SLOPE_leading_edge.txt && $force -le 0 ]]; then
        echo "ALREADY PROCESSED leading_edge : $path"
    else
-       echo "~/github/crab_frb_paper/scripts/arfiles/dm_from_gp.sh $rffile $dodedisp leading_edge \"${root_options}\""
-       ~/github/crab_frb_paper/scripts/arfiles/dm_from_gp.sh $rffile $dodedisp "leading_edge" "${root_options}"
+       echo "~/github/crab_frb_paper/scripts/arfiles/dm_from_gp.sh $rffile $dodedisp leading_edge \"${root_options}\" - ${force}"
+       ~/github/crab_frb_paper/scripts/arfiles/dm_from_gp.sh $rffile $dodedisp "leading_edge" "${root_options}" - ${force}
    fi   
    
    if [[ -s DM_SLOPE_pulse.txt && $force -le 0 ]]; then
        echo "ALREADY PROCESSED pulse : $path"
    else
-       echo "~/github/crab_frb_paper/scripts/arfiles/dm_from_gp.sh $rffile 0 pulse \"${root_options}\""
-       ~/github/crab_frb_paper/scripts/arfiles/dm_from_gp.sh $rffile 0 "pulse" "${root_options}"
+       echo "~/github/crab_frb_paper/scripts/arfiles/dm_from_gp.sh $rffile 0 pulse \"${root_options}\" - ${force}"
+       ~/github/crab_frb_paper/scripts/arfiles/dm_from_gp.sh $rffile 0 "pulse" "${root_options} - ${force}"
    fi   
    
    cd $curr_path

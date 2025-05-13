@@ -21,7 +21,7 @@ if [[ -n "$4" && "$4" != "-" ]]; then
    root_options="$4"
 fi
 
-pdv_options="-C" # add -C to change phase of the peak (move it around - not sure how ...)
+pdv_options="" # add -C to change phase of the peak (move it around - not sure how ...)
 if [[ -n "$5" && "$5" != "-" ]]; then
    pdv_options="$5"
 fi
@@ -54,18 +54,18 @@ do
    psrfile=${txtfile%%txt}psr
 
    if [[ $dodedisp -gt 0 ]]; then   
-      if [[ -s ${txtfile} && $force -le 0 ]]; then
-         echo "ALREADY CREATED $txtfile -> no need to de-disperse"
-      else
+      if [[ ! -s ${txtfile} || $force -gt 0 ]]; then
          echo "pam ${arfile} -d ${dm} -e "dm${dm}""
          pam ${arfile} -d ${dm} -e "dm${dm}"
+      else
+         echo "ALREADY CREATED $txtfile -> no need to de-disperse"
       fi
    else
       echo "Dedisp skipped"
    fi
    
    # -C changes position of the peak -> not great for fitting  
-   if [[ ! -s ${txtfile} ]]; then
+   if [[ ! -s ${txtfile} || $force -ge 2 ]]; then
       echo "pdv -FTtp ${pdv_options} ${dmfile} | awk '{if(NF==4){print $0;}}' > ${txtfile}"
       pdv -FTtp ${pdv_options} ${dmfile} | awk '{if(NF==4){print $0;}}' > ${txtfile}    
    fi
@@ -74,9 +74,9 @@ do
    awk '{print $3*(0.0333924123/1024.00)" "$4;}' ${txtfile} > ${psrfile}
    # or fit_leading_edge_slope.C
    if [[ $slope_version -gt 0 ]]; then
-      root ${root_options} "fit_leading_edge_slope.C(\"${psrfile}\",${dm},\"${func_name}\")"
+      root ${root_options} "fit_leading_edge_slope.C+(\"${psrfile}\",${dm},\"${func_name}\")"
    else
-      root ${root_options} "fit_leading_edge.C(\"${psrfile}\",${dm},\"${func_name}\")" 
+      root ${root_options} "fit_leading_edge.C+(\"${psrfile}\",${dm},\"${func_name}\")" 
    fi
 
 #   rm -f ${dmfile}   
@@ -93,18 +93,18 @@ do
    psrfile=${txtfile%%txt}psr
 
    if [[ $dodedisp -gt 0 ]]; then   
-      if [[ -s ${txtfile} && $force -le 0 ]]; then
-         echo "ALREADY CREATED $txtfile -> no need to de-disperse"
-      else
+      if [[ ! -s ${txtfile} || $force -le 0 ]]; then
          echo "pam ${arfile} -d ${dm} -e "dm${dm}""
          pam ${arfile} -d ${dm} -e "dm${dm}"
+      else
+         echo "ALREADY CREATED $txtfile -> no need to de-disperse"
       fi
    else
       echo "Dedisp skipped"
    fi
    
    # -C changes position of the peak -> not great for fitting  
-   if [[ ! -s ${txtfile} ]]; then
+   if [[ ! -s ${txtfile} || $force -ge 2 ]]; then
       echo "pdv -FTtp ${pdv_options} ${dmfile} | awk '{if(NF==4){print $0;}}' > ${txtfile}"
       pdv -FTtp ${pdv_options} ${dmfile} | awk '{if(NF==4){print $0;}}' > ${txtfile}    
    fi
@@ -115,9 +115,9 @@ do
    
    if [[ $slope_version -gt 0 ]]; then
       # fitting with slope is less stable in measuring RISE TIME :
-      root ${root_options} "fit_leading_edge_slope.C(\"${psrfile}\",${dm},\"${func_name}\")"
+      root ${root_options} "fit_leading_edge_slope.C+(\"${psrfile}\",${dm},\"${func_name}\")"
    else
-      root ${root_options} "fit_leading_edge.C(\"${psrfile}\",${dm},\"${func_name}\")" 
+      root ${root_options} "fit_leading_edge.C+(\"${psrfile}\",${dm},\"${func_name}\")" 
    fi
 
 #   rm -f ${dmfile}   
