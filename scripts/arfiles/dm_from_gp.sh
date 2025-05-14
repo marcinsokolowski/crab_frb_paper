@@ -32,6 +32,7 @@ if [[ -n "$6" && "$6" != "-" ]]; then
 fi
 
 slope_version=0
+unwrap=0
 
 echo "cp ~/github/crab_frb_paper/scripts/root/fit_leading_edge*.C ."
 cp ~/github/crab_frb_paper/scripts/root/fit_leading_edge*.C .
@@ -72,6 +73,17 @@ do
 
 #   rm -f last.fit   
    awk '{print $3*(0.0333924123/1024.00)" "$4;}' ${txtfile} > ${psrfile}
+
+   # UNWRAP if required :
+   if [[ $unwrap -gt 0 ]]; then
+      echo "~/github/crab_frb_paper/scripts/unwrap_profile.sh ${psrfile} tmp.psr 500"
+      ~/github/crab_frb_paper/scripts/unwrap_profile.sh ${psrfile} tmp.psr 500
+      
+      echo "cp tmp.psr ${psrfile}"
+      cp tmp.psr ${psrfile}
+   fi
+
+   
    # or fit_leading_edge_slope.C
    if [[ $slope_version -gt 0 ]]; then
       root ${root_options} "fit_leading_edge_slope.C+(\"${psrfile}\",${dm},\"${func_name}\")"
@@ -111,6 +123,16 @@ do
    
 #   rm -f last.fit
    awk '{print $3*(0.0333924123/1024.00)" "$4;}' ${txtfile} > ${psrfile}
+   
+   # UNWRAP if required :
+   if [[ $unwrap -gt 0 ]]; then
+      echo "~/github/crab_frb_paper/scripts/unwrap_profile.sh ${psrfile} tmp.psr 500"
+      ~/github/crab_frb_paper/scripts/unwrap_profile.sh ${psrfile} tmp.psr 500
+
+      echo "cp tmp.psr ${psrfile}"
+      cp tmp.psr ${psrfile}
+   fi
+   
    # or fit_leading_edge_slope.C
    
    if [[ $slope_version -gt 0 ]]; then
@@ -142,7 +164,10 @@ else
       cat pulse*dm*.psr*.fit | awk '{err_down=sqrt($6*$6+$8*$8);err_up=$10;up=$9;down=($7-$5);slope=up/down;err=slope*sqrt((err_up/up)*(err_up/up)+(err_down/down)*(err_down/down));print $1" 0 "slope" "err;}' |sort -n  > slope_vs_index_pulse.txt
       cat pulse*dm*.psr*.fit | awk '{err=sqrt($6*$6+$8*$8);print $1" 0 "$7-$5" "err;}' |sort -n > risetime_vs_index.txt      
    fi
-
-   root ${root_options} "plotslope_err.C(\"slope_vs_index_pulse.txt\",\"poly2\",56.62,56.8,\"pulse\")"
-   root ${root_options} "plotrisetime_err.C(\"risetime_vs_index.txt\",\"poly2\",56.59,56.8)"
+ 
+   # was 56.62,56.8,
+   root ${root_options} "plotslope_err.C(\"slope_vs_index_pulse.txt\",\"poly2\",56.66,56.75,\"pulse\")"
+   
+   # was 56.59,56.8
+   root ${root_options} "plotrisetime_err.C(\"risetime_vs_index.txt\",\"poly2\",56.66,56.75)"
 fi
