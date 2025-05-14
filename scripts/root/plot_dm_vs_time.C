@@ -142,6 +142,7 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
 
     pGraph->SetMarkerStyle(MarkerType);
     pGraph->SetMarkerColor(ColorNum);
+    pGraph->SetLineColor(ColorNum);
     pGraph->SetMarkerSize(2);
     if( min_y>-10000 && max_y>-10000 ){
        pGraph->SetMinimum( min_y );
@@ -444,7 +445,7 @@ void plot_dm_vs_time( const char* basename="sigmaG1_vs_lapSigmaG1_for_root",
                            const char* basename3=NULL,
                            int min_local_time=-1e6, int max_local_time=1e6,
                const char* fit_func_name=NULL, double min_y=56.65, 
-               double max_y=56.75, int bLog=0,
+               double max_y=56.9, int bLog=0,
       const char* szDescX="Local Time",const char* szDescY="DM [pc/cm^3]", const char* szTitle=NULL,
       int b_percent=0,
       double fit_min_x=-100000, double fit_max_x=-100000,
@@ -541,7 +542,7 @@ void plot_dm_vs_time( const char* basename="sigmaG1_vs_lapSigmaG1_for_root",
       int lq2 = ReadResultsFile( basename2, x_value2, y_value2, -1, -1, 0, 2 ); 
       int lq2_err = ReadResultsFile( basename2, x_value2_err, y_value2_err, -1, -1, 1, 3 ); 
 
-      TGraphErrors* pGraph2 = DrawGraph( x_value2, y_value2, lq2, 1, NULL, fit_func_name, min_y, max_y, szTitle, basename, bLog, szDescX, szDescY, fit_min_x, fit_max_x, y_value2_err, "P,same", 34 , kRed );
+      TGraphErrors* pGraph2 = DrawGraph( x_value2, y_value2, lq2, 1, NULL, fit_func_name, min_y, max_y, szTitle, basename, bLog, szDescX, szDescY, fit_min_x, fit_max_x, y_value2_err, "P,L,same", 34 , kRed );
 
 //      legend->AddEntry(pGraph2,"Coherent (.ar files)","P");     
       legend->AddEntry(pGraph2, basename2, "P");

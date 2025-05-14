@@ -31,8 +31,13 @@ if [[ -n "$6" && "$6" != "-" ]]; then
    force="$6"
 fi
 
-slope_version=0
 unwrap=0
+if [[ -n "$7" && "$7" != "-" ]]; then
+   unwrap=$7
+fi
+
+
+slope_version=0
 
 echo "cp ~/github/crab_frb_paper/scripts/root/fit_leading_edge*.C ."
 cp ~/github/crab_frb_paper/scripts/root/fit_leading_edge*.C .
@@ -66,13 +71,14 @@ do
    fi
    
    # -C changes position of the peak -> not great for fitting  
-   if [[ ! -s ${txtfile} || $force -ge 2 ]]; then
+   if [[ ! -s ${psrfile} || $force -ge 2 ]]; then
       echo "pdv -FTtp ${pdv_options} ${dmfile} | awk '{if(NF==4){print $0;}}' > ${txtfile}"
       pdv -FTtp ${pdv_options} ${dmfile} | awk '{if(NF==4){print $0;}}' > ${txtfile}    
+      
+      awk '{print $3*(0.0333924123/1024.00)" "$4;}' ${txtfile} > ${psrfile}
    fi
 
 #   rm -f last.fit   
-   awk '{print $3*(0.0333924123/1024.00)" "$4;}' ${txtfile} > ${psrfile}
 
    # UNWRAP if required :
    if [[ $unwrap -gt 0 ]]; then
@@ -116,13 +122,14 @@ do
    fi
    
    # -C changes position of the peak -> not great for fitting  
-   if [[ ! -s ${txtfile} || $force -ge 2 ]]; then
+   if [[ ! -s ${psrfile} || $force -ge 2 ]]; then
       echo "pdv -FTtp ${pdv_options} ${dmfile} | awk '{if(NF==4){print $0;}}' > ${txtfile}"
       pdv -FTtp ${pdv_options} ${dmfile} | awk '{if(NF==4){print $0;}}' > ${txtfile}    
+      
+      awk '{print $3*(0.0333924123/1024.00)" "$4;}' ${txtfile} > ${psrfile}
    fi
    
 #   rm -f last.fit
-   awk '{print $3*(0.0333924123/1024.00)" "$4;}' ${txtfile} > ${psrfile}
    
    # UNWRAP if required :
    if [[ $unwrap -gt 0 ]]; then
