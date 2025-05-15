@@ -617,6 +617,12 @@ printf("DEBUG : phase_max = %.8f\n",phase_max);
             rise->GetParameters(parl);
             fprintf(outf,"%.8f 0.00 %.8f %.8f %.8f %.8f\n",gDM,parl[0],rise->GetParError(0),parl[1],rise->GetParError(1));
             fclose(outf);
+
+            sprintf(szFittedFile,"%s.peak",gInputFileName); 
+            outf = fopen(szFittedFile,"a+");
+            rise->GetParameters(parl);
+            fprintf(outf,"%.8f 0.00 %.8f %.8f %.8f %.8f\n",gDM,fp,gFittedParametersErrors[3]);
+            fclose(outf);
          }
 
       }
