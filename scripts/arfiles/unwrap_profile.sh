@@ -22,7 +22,7 @@ delta_phase=`awk -v prev=0 '{if(NR==2){print $1-prev;}prev=$1;}' $file`
 
 echo "DEBUG : max_phase = $max_phase, delta_phase = $delta_phase"
 
-cat ${file} | awk -v n=500 -v delta_phase=0.0000326098 '{bin=(NR-1);amp=$2;if(NR<=n){bin=1024+bin;}printf("%.8f %.8f\n",(bin-n)*delta_phase,amp);}' |sort -n > ${unwraped_file}
+cat ${file} | awk -v n=${n} -v delta_phase=0.0000326098 '{bin=(NR-1);amp=$2;if(NR<=n){bin=1024+bin;}printf("%.8f %.8f\n",(bin-n)*delta_phase,amp);}' |sort -n > ${unwraped_file}
 
 
 

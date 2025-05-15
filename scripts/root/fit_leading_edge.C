@@ -387,7 +387,8 @@ printf("DEBUG : phase_max = %.8f\n",phase_max);
       }
 
       if( strcmp( fit_func_name, "leading_edge" )==0 ){
-         printf("Fitting leading edge\n");
+         int n_slope_points = 4;
+         printf("Fitting leading edge using %d points\n",n_slope_points);
 
          for(int i=0;i<numVal;i++){
             if( y_values[i] > max_value ){
@@ -425,15 +426,15 @@ printf("DEBUG : phase_max = %.8f\n",phase_max);
 
 //         double fit_start = x_height2-5*res;
 //         double fit_end = x_height1+5*res;
-         double fit_start = x_height2-10*res;
-         double fit_end = x_height2+10*res;
+         double fit_start = x_height2-n_slope_points*res;
+         double fit_end = x_height2+n_slope_points*res;
          printf("DEBUG : phase_max = %.8f , phase rnage = %.8f - %.8f, fiting in range %.8f - %.8f , res = %.8f\n",phase_max,x_height2,x_height1,fit_start,fit_end,res);
 
          line = new TF1("fit_func",Line,fit_start,fit_end,2);
          line_draw = new TF1("fit_func2",Line,fit_start,fit_end,2);
          local_func=1;
 
-         par[0] = (y_values[i_height2 + 10] - y_values[i_height2 - 10])/(x_values[i_height2 + 10] - x_values[i_height2 - 10]);
+         par[0] = (y_values[i_height2 + n_slope_points] - y_values[i_height2 - n_slope_points])/(x_values[i_height2 + n_slope_points] - x_values[i_height2 - n_slope_points]);
          par[1] = y_values[i_height2] - par[0]*x_values[i_height2];
 
          FILE* parf = fopen("last.fit","r");
@@ -1117,7 +1118,7 @@ void fit_leading_edge( const char* basename, double dm, const char* fit_func_nam
 //   normalise_x( x_value1, lq1 );
 
    // normalise by Y-MEAN/RMS
-   if( bNormaliseInputData == 1 ){
+/*   if( bNormaliseInputData == 1 ){
       rms = normalise_y_meanrms( x_value1, y_value1, lq1, 0.00, 0.4  );
    }else{
       if( bNormaliseInputData == 2 ){
@@ -1125,14 +1126,14 @@ void fit_leading_edge( const char* basename, double dm, const char* fit_func_nam
       }else{
          printf("UNKNOWN VALUE of bNormaliseInputData = %d\n",bNormaliseInputData);
       }
-   }
+   }*/
    
    printf("Control RMS after re-scaling:\n");
    double rms_new = calc_rms( x_value1, y_value1, lq1, noise_start, noise_end );
-   printf("RMS after rescaling = %.6f in range %.6f - %.6f\n",rms_new,noise_start,noise_end);
+   printf("RMS after rescaling = %.6f (vs. old %.6f) in range %.6f - %.6f\n",rms_new,rms_original,noise_start,noise_end);
 
    for(int i=0;i<lq1;i++){
-     y_value1_err[i] = rms_new;
+     y_value1_err[i] = rms_original;
    }
 
 

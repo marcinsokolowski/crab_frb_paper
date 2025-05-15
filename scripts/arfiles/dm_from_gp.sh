@@ -32,8 +32,18 @@ if [[ -n "$6" && "$6" != "-" ]]; then
 fi
 
 unwrap=0
+n_unwrap=500
 if [[ -n "$7" && "$7" != "-" ]]; then
    unwrap=$7
+   
+   if [[ $unwrap -gt 1 ]]; then
+      n_unwrap=$unwrap
+   fi
+fi
+
+use_prev_fit=1
+if [[ -n "$8" && "$8" != "-" ]]; then
+   use_prev_fit=$8
 fi
 
 
@@ -78,12 +88,17 @@ do
       awk '{print $3*(0.0333924123/1024.00)" "$4;}' ${txtfile} > ${psrfile}
    fi
 
-#   rm -f last.fit   
+   if [[ $use_prev_fit -gt 0 ]]; then
+      echo "Using last.fit"
+   else
+      echo "Not using last fit : rm -f last.fit"
+      rm -f last.fit   
+   fi
 
    # UNWRAP if required :
    if [[ $unwrap -gt 0 ]]; then
-      echo "~/github/crab_frb_paper/scripts/unwrap_profile.sh ${psrfile} tmp.psr 500"
-      ~/github/crab_frb_paper/scripts/unwrap_profile.sh ${psrfile} tmp.psr 500
+      echo "~/github/crab_frb_paper/scripts/unwrap_profile.sh ${psrfile} tmp.psr ${n_unwrap}"
+      ~/github/crab_frb_paper/scripts/unwrap_profile.sh ${psrfile} tmp.psr ${n_unwrap}
       
       echo "cp tmp.psr ${psrfile}"
       cp tmp.psr ${psrfile}
@@ -129,12 +144,17 @@ do
       awk '{print $3*(0.0333924123/1024.00)" "$4;}' ${txtfile} > ${psrfile}
    fi
    
-#   rm -f last.fit
+   if [[ $use_prev_fit -gt 0 ]]; then
+      echo "Using last.fit"
+   else
+      echo "Not using last fit : rm -f last.fit"
+      rm -f last.fit   
+   fi
    
    # UNWRAP if required :
    if [[ $unwrap -gt 0 ]]; then
-      echo "~/github/crab_frb_paper/scripts/unwrap_profile.sh ${psrfile} tmp.psr 500"
-      ~/github/crab_frb_paper/scripts/unwrap_profile.sh ${psrfile} tmp.psr 500
+      echo "~/github/crab_frb_paper/scripts/unwrap_profile.sh ${psrfile} tmp.psr ${n_unwrap}"
+      ~/github/crab_frb_paper/scripts/unwrap_profile.sh ${psrfile} tmp.psr ${n_unwrap}
 
       echo "cp tmp.psr ${psrfile}"
       cp tmp.psr ${psrfile}
@@ -173,8 +193,8 @@ else
    fi
  
    # was 56.62,56.8,
-   root ${root_options} "plotslope_err.C(\"slope_vs_index_pulse.txt\",\"poly2\",56.66,56.75,\"pulse\")"
+   root ${root_options} "plotslope_err.C(\"slope_vs_index_pulse.txt\",\"poly2\",56.64,56.8,\"pulse\")"
    
    # was 56.59,56.8
-   root ${root_options} "plotrisetime_err.C(\"risetime_vs_index.txt\",\"poly2\",56.66,56.75)"
+   root ${root_options} "plotrisetime_err.C(\"risetime_vs_index.txt\",\"poly2\",56.64,56.8)"
 fi
