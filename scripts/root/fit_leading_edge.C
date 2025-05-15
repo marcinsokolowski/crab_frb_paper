@@ -25,6 +25,7 @@
 #include <TComplex.h>
 #include <TFile.h>
 
+double gDM=-1;
 double gFinalChi2 = -1.00;
 double gCalConstant = 33.03678886; // Jy 
 int gLog=0;
@@ -595,6 +596,27 @@ printf("DEBUG : phase_max = %.8f\n",phase_max);
 
             printf("SLOPE = %.8f\n",slope);
             printf("RISETIME = %.8f\n",risetime);
+
+
+            double ts = par[1];
+            double tp = par[2];
+            double l = (tp-ts);
+            double fp = par[3];
+            double t1 = ts + 0.1*l; // 0.2
+            double t2 = ts + 0.5*l; // 0.6
+
+            TF1* rise = new TF1("Line",Line,t1,t2,2);
+            Double_t parl[2];
+            parl[0] = fp/(tp-ts);
+            parl[1] = -parl[0]*ts;
+            pGraph->Fit("Line","R,F,E,M,V");
+//            rise->SetLineColor(kGreen);
+            char szFittedFile[128];
+            sprintf(szFittedFile,"%s.rise",gInputFileName); 
+            FILE* outf = fopen(szFittedFile,"a+");
+            rise->GetParameters(parl);
+            fprintf(outf,"%.8f 0.00 %.8f %.8f %.8f %.8f\n",gDM,parl[0],rise->GetParError(0),parl[1],rise->GetParError(1));
+            fclose(outf);
          }
 
       }
@@ -1040,6 +1062,7 @@ void fit_leading_edge( const char* basename, double dm, const char* fit_func_nam
       double fit_min_x=-100000, double fit_max_x=-100000,
       int x_col=0, int y_col=1, const char* outpngfile=NULL )
 {
+   gDM = dm;
    gMinX_Allowed = range_start;
    gMaxX_Allowed = range_end;
 
