@@ -48,7 +48,7 @@ cd ../${outdir}/
 # ~/github/crab_frb_paper/scripts/arfiles/dm_from_gp.sh `ls *.rf|tail -1` 0 "leading_edge" "-l -b -q" - 0 0
 
 if [[ $do_replot -gt 0 ]]; then
-   ~/github/crab_frb_paper/scripts/arfiles/dm_from_gp_replot.sh `ls *.rf|tail -1` 0 "pulse" ${root_options} - - - - NEW_FIT
+   ~/github/crab_frb_paper/scripts/arfiles/dm_from_gp_replot.sh `ls *.rf|tail -1` 0 "pulse" "${root_options}" - - - - NEW_FIT
 else 
    ~/github/crab_frb_paper/scripts/arfiles/dm_from_gp.sh `ls *.rf|tail -1` 0 "pulse" "${root_options}" - 0 0
 fi   

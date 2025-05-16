@@ -52,6 +52,14 @@ if [[ -n "$9" && "$9" != "-" ]]; then
    outdir="$9"
 fi
 
+
+echo "#######################################"
+echo "PARAMETERS:"
+echo "#######################################"
+echo "outdir = $outdir"
+echo "#######################################"
+
+
 slope_version=0
 
 echo "cp ~/github/crab_frb_paper/scripts/root/fit_leading_edge*.C ."
