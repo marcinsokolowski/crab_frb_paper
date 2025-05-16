@@ -52,6 +52,11 @@ if [[ -n "$9" && "$9" != "-" ]]; then
    outdir="$9"
 fi
 
+root_options2="${root_options}"
+if [[ -n "${10}" && "${10}" != "-" ]]; then
+   root_options2="${10}"
+fi
+
 
 echo "#######################################"
 echo "PARAMETERS:"
@@ -153,12 +158,12 @@ else
    cp UNIXTIME.txt ${outdir}/   
  
    # was 56.62,56.8,
-   root ${root_options} "plotslope_err.C(\"slope_vs_index_pulse.txt\",\"poly2\",56.66,56.75,\"pulse\",\"${outdir}\")"
+   root ${root_options2} "plotslope_err.C(\"slope_vs_index_pulse.txt\",\"poly2\",56.66,56.75,\"pulse\",\"${outdir}\")"
 
-   root ${root_options} "plotrise_err.C(\"rise_vs_dm.txt\",\"poly2\",56.66,56.75,\"pulse\",\"${outdir}\")"
+   root ${root_options2} "plotrise_err.C(\"rise_vs_dm.txt\",\"poly2\",56.66,56.75,\"pulse\",\"${outdir}\")"
    
-   root ${root_options} "plotpeak_err.C(\"peak_vs_dm.txt\",\"poly2\",56.66,56.75,\"pulse\",\"${outdir}\")"
+   root ${root_options2} "plotpeak_err.C(\"peak_vs_dm.txt\",\"poly2\",56.66,56.8,\"pulse\",\"${outdir}\")"
    
    # was 56.59,56.8
-   root ${root_options} "plotrisetime_err.C(\"risetime_vs_index.txt\",\"poly2\",56.66,56.75,\"${outdir}\")"
+   root ${root_options2} "plotrisetime_err.C(\"risetime_vs_index.txt\",\"poly2\",56.66,56.75,\"${outdir}\")"
 fi
