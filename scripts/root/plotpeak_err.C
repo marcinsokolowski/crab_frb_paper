@@ -20,6 +20,8 @@
 int gLog=0;
 int gVerb=0;
 char gLabel[128];
+char gOutDir[128];
+
 
 #define MAX_ROWS 10000000
 
@@ -246,7 +248,7 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, Double_t* x_val
          printf("MAX SLOPE at DM = %.6f (slope = %.8f)\n",x_max_slope,max_slope);
 
          char szOutName[128];
-         sprintf(szOutName,"DM_SLOPE_%s.txt",gLabel);
+         sprintf(szOutName,"%s/DM_SLOPE_%s.txt",gOutDir,gLabel);
          FILE* outf = fopen(szOutName,"w");
          fprintf(outf,"%.8f %.8f\n",par[1],line->GetParError(1));
          fclose(outf);
@@ -578,11 +580,13 @@ int clean_outliers( Double_t* x_values, Double_t* y_values, Double_t* x_values_e
 void plotpeak_err( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", 
                const char* fit_func_name=NULL, double fit_min_x=-100000, double fit_max_x=-100000,
                const char* szLabel="poly2",
+               const char* szOutDir="./",
                double min_y=0.00, 
                double max_y=0.01, int bLog=0,
       const char* szDescX="DM",const char* szDescY="Slope", const char* szTitle=NULL,
       int x_col=0, int y_col=2, const char* outpngfile=NULL )
 {
+   strcpy(gOutDir,szOutDir);
    if( szLabel ){
       strcpy(gLabel,szLabel);
    }
