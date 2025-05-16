@@ -54,7 +54,7 @@ do
 #      fi   
    
    echo "~/github/crab_frb_paper/scripts/arfiles/dm_from_gp_replot.sh $rffile 0 pulse \"${root_options}\" - ${force} 0 1 ${outdir}"
-   ~/github/crab_frb_paper/scripts/arfiles/dm_from_gp_replot.sh $rffile 0 "pulse" "${root_options} - ${force} 0 1 ${outdir}"
+   ~/github/crab_frb_paper/scripts/arfiles/dm_from_gp_replot.sh $rffile 0 "pulse" "${root_options}" - ${force} 0 1 ${outdir}
    
    cd $curr_path
    

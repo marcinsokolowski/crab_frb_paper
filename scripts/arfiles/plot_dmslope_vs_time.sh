@@ -34,6 +34,7 @@ do
          awk -v ux=$ux '{if(ux>0){print ux" 0 "$1" "$2;}}' ${datafile} >> ${outdir}/DM_SLOPE_pulse_vs_ux.txt
          awk -v ux=$ux '{if(ux>0){print ux" 0 "$1" "$2;}}' ${dir}/DM_RISE_TIME.txt >> ${outdir}/DM_RISE_TIME_vs_ux.txt
          awk -v ux=$ux '{if(ux>0){print ux" 0 "$1" "$2;}}' ${dir}/DM_SLOPE_leading_edge.txt >> ${outdir}/DM_LEADING_EDGE_vs_ux.txt
+         awk -v ux=$ux '{if(ux>0){print ux" 0 "$1" "$2;}}' ${dir}/DM_PEAK_pulse.txt >> ${outdir}/DM_PEAK_pulse_vs_ux.txt
       else
          echo "Skipped - flagged as bad data (set use_all > 10 to include even bad data)"
       fi
@@ -49,5 +50,6 @@ cp ~/github/crab_frb_paper/scripts/root/plot_dm_vs_time.C .
 root -l "plot_dm_vs_time.C(\"DM_SLOPE_pulse_vs_ux.txt\")"
 root -l "plot_dm_vs_time.C(\"DM_RISE_TIME_vs_ux.txt\")"
 root -l "plot_dm_vs_time.C(\"DM_LEADING_EDGE_vs_ux.txt\")"
+root -l "plot_dm_vs_time.C(\"DM_PEAK_pulse_vs_ux.txt\")"
 
 

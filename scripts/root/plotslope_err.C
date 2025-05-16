@@ -581,7 +581,7 @@ void plotslope_err( const char* basename="sigmaG1_vs_lapSigmaG1_for_root",
                const char* szLabel="poly2",
                const char* szOutDir="./",
                double min_y=0.00, 
-               double max_y=0.50, int bLog=0,
+               double max_y=3.00, int bLog=0,
       const char* szDescX="DM",const char* szDescY="Slope", const char* szTitle=NULL,
       int x_col=0, int y_col=2, const char* outpngfile=NULL )
 {

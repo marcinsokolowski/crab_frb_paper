@@ -613,15 +613,15 @@ printf("DEBUG : phase_max = %.8f\n",phase_max);
 //            rise->SetLineColor(kGreen);
             char szFittedFile[128];
             sprintf(szFittedFile,"%s.rise",gInputFileName); 
-            FILE* outf = fopen(szFittedFile,"a+");
+            FILE* outf = fopen(szFittedFile,"w");
             rise->GetParameters(parl);
             fprintf(outf,"%.8f 0.00 %.8f %.8f %.8f %.8f\n",gDM,parl[0],rise->GetParError(0),parl[1],rise->GetParError(1));
             fclose(outf);
 
             sprintf(szFittedFile,"%s.peak",gInputFileName); 
-            outf = fopen(szFittedFile,"a+");
+            outf = fopen(szFittedFile,"w");
             rise->GetParameters(parl);
-            fprintf(outf,"%.8f 0.00 %.8f %.8f %.8f %.8f\n",gDM,fp,gFittedParametersErrors[3]);
+            fprintf(outf,"%.8f 0.00 %.8f %.8f %.8f %.8f\n",gDM,(fp-par[0]),gFittedParametersErrors[3]);
             fclose(outf);
          }
 

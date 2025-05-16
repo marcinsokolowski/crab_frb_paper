@@ -140,6 +140,9 @@ else
    fi
    
    mkdir -p ${outdir}
+   
+   echo "cp UNIXTIME.txt ${outdir}/"
+   cp UNIXTIME.txt ${outdir}/   
  
    # was 56.62,56.8,
    root ${root_options} "plotslope_err.C(\"slope_vs_index_pulse.txt\",\"poly2\",56.66,56.75,\"pulse\",\"${outdir}\")"

@@ -15,6 +15,11 @@ if [[ -n "$3" && "$3" != "-" ]]; then
    n="$3"
 fi
 
+do_replot=0
+if [[ -n "$4" && "$4" != "-" ]]; then
+   do_replot=$4
+fi
+
 
 subdir=`basename ${template}`
 
@@ -40,9 +45,14 @@ cp UNIXTIME.txt ../${outdir}/
 
 cd ../${outdir}/
 
-~/github/crab_frb_paper/scripts/arfiles/dm_from_gp.sh `ls *.rf|tail -1` 0 "leading_edge" "-l -b -q" - 0 0
+# ~/github/crab_frb_paper/scripts/arfiles/dm_from_gp.sh `ls *.rf|tail -1` 0 "leading_edge" "-l -b -q" - 0 0
 
-~/github/crab_frb_paper/scripts/arfiles/dm_from_gp.sh `ls *.rf|tail -1` 0 "pulse" "${root_options}" - 0 0
+if [[ $do_replot -gt 0 ]]; then
+   ~/github/crab_frb_paper/scripts/arfiles/dm_from_gp_replot.sh `ls *.rf|tail -1` 0 "pulse" ${root_options} - - - - NEW_FIT
+else 
+   ~/github/crab_frb_paper/scripts/arfiles/dm_from_gp.sh `ls *.rf|tail -1` 0 "pulse" "${root_options}" - 0 0
+fi   
+
 
 cd ..
 echo "DM_SLOPE_pulse*txt"

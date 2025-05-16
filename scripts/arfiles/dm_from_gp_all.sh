@@ -70,7 +70,7 @@ do
           echo "ALREADY PROCESSED pulse : $path"
       else
           echo "~/github/crab_frb_paper/scripts/arfiles/dm_from_gp.sh $rffile 0 pulse \"${root_options}\" - ${force}"
-          ~/github/crab_frb_paper/scripts/arfiles/dm_from_gp.sh $rffile 0 "pulse" "${root_options} - ${force}"
+          ~/github/crab_frb_paper/scripts/arfiles/dm_from_gp.sh $rffile 0 "pulse" "${root_options}" - ${force}
       fi   
    
       cd $curr_path

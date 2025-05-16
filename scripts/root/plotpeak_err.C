@@ -248,7 +248,7 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, Double_t* x_val
          printf("MAX SLOPE at DM = %.6f (slope = %.8f)\n",x_max_slope,max_slope);
 
          char szOutName[128];
-         sprintf(szOutName,"%s/DM_SLOPE_%s.txt",gOutDir,gLabel);
+         sprintf(szOutName,"%s/DM_PEAK_%s.txt",gOutDir,gLabel);
          FILE* outf = fopen(szOutName,"w");
          fprintf(outf,"%.8f %.8f\n",par[1],line->GetParError(1));
          fclose(outf);
