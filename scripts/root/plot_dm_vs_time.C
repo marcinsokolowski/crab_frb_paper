@@ -443,6 +443,7 @@ int ReadResultsFile( const char* fname, Double_t* x_values, Double_t* y_values,
 void plot_dm_vs_time( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", 
                            const char* basename2=NULL,
                            const char* basename3=NULL,
+                           const char* basename4=NULL,
                            int min_local_time=-1e6, int max_local_time=1e6,
                const char* fit_func_name=NULL, double min_y=56.65, 
                double max_y=56.9, int bLog=0,
@@ -562,6 +563,22 @@ void plot_dm_vs_time( const char* basename="sigmaG1_vs_lapSigmaG1_for_root",
 //      legend->AddEntry(pGraph3,"Coherent (.ar files)","P");     
       legend->AddEntry(pGraph3, basename3, "P");
    }
+
+   if( basename4 ){
+      Double_t* x_value4 = new Double_t[MAX_ROWS];
+      Double_t* y_value4 = new Double_t[MAX_ROWS];
+      Double_t* x_value4_err = new Double_t[MAX_ROWS];
+      Double_t* y_value4_err = new Double_t[MAX_ROWS];
+
+      int lq4 = ReadResultsFile( basename4, x_value4, y_value4, -1, -1, 0, 2 ); 
+      int lq4_err = ReadResultsFile( basename4, x_value4_err, y_value4_err, -1, -1, 1, 3 ); 
+
+      TGraphErrors* pGraph4 = DrawGraph( x_value4, y_value4, lq4, 1, NULL, fit_func_name, min_y, max_y, szTitle, basename, bLog, szDescX, szDescY, fit_min_x, fit_max_x, y_value4_err, "P,same", 22 , kGreen );
+
+//      legend->AddEntry(pGraph4,"Coherent (.ar files)","P");     
+      legend->AddEntry(pGraph4, basename4, "P");
+   }
+
 
    legend->Draw();   
    c1->Update();
