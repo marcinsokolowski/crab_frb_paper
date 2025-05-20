@@ -34,3 +34,9 @@ if __name__ == "__main__":
    screen_parameters( 5e-5, tau_lyne_and_thorne, "Crab Nebula" )
  
 
+   tau_msok = 0.005 
+   # screen midway between pulsar and earth :
+   screen_parameters( 0.5, tau_msok, "midway" )
+
+   # screen midway between pulsar and earth :
+   screen_parameters( 5e-5, tau_msok, "Crab Nebula" )
