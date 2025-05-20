@@ -19,3 +19,21 @@ viss_kmpersec = (theta_rad*l/dt)*pc
 
 
 print("V_iss = %.4f km/s" % (viss_kmpersec))
+
+
+# solve velocity equation :
+v_crab = 120 # km/s 
+v_earth = 30 # km/s
+v_screen = 15 # km/s - just a test/guess value
+
+x = (viss_kmpersec - (v_earth-v_screen)) / (v_crab - v_screen)
+
+print("x = %.4f" % (x))
+
+# x = Dos/Dps -> (1+x)Dps = D = l 
+Dps = l/(1+x)
+Dos = Dps*x
+
+print("Distance pulsar-screen Dps = %.4f pc" % (Dps))
+print("Distance observer-screen Dos = %.4f pc" % (Dos))
+
