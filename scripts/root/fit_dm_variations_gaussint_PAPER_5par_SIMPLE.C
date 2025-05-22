@@ -976,6 +976,15 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
          }
       }
 
+      // calculate integral under the curve - Offset :
+      par[3] = 0.00;
+      line->SetParameters(par);
+      double dt = (100-20);
+      Double_t integral = line->Integral(20,100);
+      Double_t mean_delta_dm = integral/dt;
+      printf("Integral = %.8f , mean_delta_dm = %.8f pc/cm^3\n",integral,mean_delta_dm);
+      
+
    }
    pGraph->GetXaxis()->SetTitleOffset(1.00);
    pGraph->GetYaxis()->SetTitleOffset(1.00);

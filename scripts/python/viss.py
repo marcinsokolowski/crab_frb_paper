@@ -11,7 +11,7 @@ theta_arcsec2=0.0009331
 theta_arcsec=math.sqrt(theta_arcsec2)
 theta_rad=theta_arcsec/206265.00
 print("theta = %.8f [arcsec] = %e [rad]" % (theta_arcsec,theta_rad))
-dt=75*86400 # /2.00 # has to be ~ Half-Peak (see ACF analysis)
+dt=80*86400 # /2.00 # has to be ~ Half-Peak (see ACF analysis)
 pc=3.0857*1e13 # km
 
 
