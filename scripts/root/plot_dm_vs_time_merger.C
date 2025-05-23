@@ -430,7 +430,7 @@ int ReadResultsFile( const char* fname, Double_t* x_values, Double_t* y_values,
      x_values[all] = (x_val - gStartTime);
      y_values[all] = y_val;
      if( gVerb || 1 ){
-           printf("values : %f %f\n",x_val,y_val);
+           printf("values : %f %f -> %.2f %.2f\n",x_val,y_val,x_values[all],y_values[all]);
           }
 
      all++;
@@ -444,6 +444,7 @@ int ReadResultsFile( const char* fname, Double_t* x_values, Double_t* y_values,
 int merge( Double_t* x_values, Double_t* y_values, Double_t* x_values_err, Double_t* y_values_err, int& all )
 {
    if( gMergeSeconds > 0 ){
+      printf("DEBUG : merging data points closer than %.2f seconds\n",gMergeSeconds);
       Double_t* merged_x = new Double_t[all];
       Double_t* merged_y = new Double_t[all];
       Double_t* merged_x_err = new Double_t[all];
@@ -484,6 +485,9 @@ int merge( Double_t* x_values, Double_t* y_values, Double_t* x_values_err, Doubl
             merged++;
          }
       }
+  
+      printf("%d points -> %d after merging\n",all,merged);
+      FILE* outf = fopen("merged.txt","w");
 
       all = merged;
       for(int i=0;i<merged;i++){
@@ -491,7 +495,10 @@ int merge( Double_t* x_values, Double_t* y_values, Double_t* x_values_err, Doubl
          y_values[i] = merged_y[i];
          x_values_err[i] = merged_x_err[i];
          y_values_err[i] = merged_y_err[i];
-      }
+
+         fprintf(outf,"%.8f %.8f %.8f %.8f\n",x_values[i]+gStartTime,x_values_err[i],y_values[i],y_values_err[i]);
+      }      
+      fclose(outf);
 
       delete [] merged_x;
       delete [] merged_y;
@@ -625,6 +632,7 @@ void plot_dm_vs_time_merger( const char* basename="sigmaG1_vs_lapSigmaG1_for_roo
       int lq3_err = ReadResultsFile( basename3, x_value3_err, y_value3_err, -1, -1, 1, 3 ); 
 //      lq3_err = merge( x_value3, y_value3, x_value3_err, y_value3_err,lq3 );
 
+      lq3_err = merge( x_value3, y_value3, x_value3_err, y_value3_err, lq3 );
       TGraphErrors* pGraph3 = DrawGraph( x_value3, y_value3, lq3, 1, NULL, fit_func_name, min_y, max_y, szTitle, basename, bLog, szDescX, szDescY, fit_min_x, fit_max_x, y_value3_err, "P,same", 22 , kBlue );
 
 //      legend->AddEntry(pGraph3,"Coherent (.ar files)","P");     
