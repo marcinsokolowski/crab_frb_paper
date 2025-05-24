@@ -533,7 +533,7 @@ void plot_dm_vs_time_merger_PAPER( const char* basename="sigmaG1_vs_lapSigmaG1_f
                            int min_local_time=-1e6, int max_local_time=1e6,
                const char* fit_func_name=NULL, double min_y=56.65, 
                double max_y=56.9, int bLog=0,
-      const char* szDescX="Local Time",const char* szDescY="DM [pc/cm^3]", const char* szTitle=NULL,
+      const char* szDescX="Local Time",const char* szDescY="DM [pc cm^{-3}]", const char* szTitle=NULL,
       int b_percent=0,
       double fit_min_x=-100000, double fit_max_x=-100000,
       int x_col=0, int y_col=1, 

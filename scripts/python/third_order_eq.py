@@ -13,6 +13,7 @@ def solve_cubic_equation(a, b, c, d):
         num_roots = 1
 
     if num_roots == 3:
+        print("3 roots")
         y1 = (((-b**3) / (27*(a**3))) + ((b*c) / (6*(a**2))) - (d / (2*a))) + cmath.sqrt((((-b**3) / (27*(a**3))) + ((b*c) / (6*(a**2))) - (d / (2*a)))**2 + ((c / (3*a)) - ((b**2) / (9*(a**2))))**3)
         y2 = (((-b**3) / (27*(a**3))) + ((b*c) / (6*(a**2))) - (d / (2*a))) - cmath.sqrt((((-b**3) / (27*(a**3))) + ((b*c) / (6*(a**2))) - (d / (2*a)))**2 + ((c / (3*a)) - ((b**2) / (9*(a**2))))**3)
         
@@ -22,11 +23,13 @@ def solve_cubic_equation(a, b, c, d):
         return x1, x2, x3
 
     if num_roots == 2:
+        print("2 roots")
         x1 = ((-b + cmath.sqrt(b**2-(4*a*c))) / (2*a))
         x2 = ((-b - cmath.sqrt(b**2-(4*a*c))) / (2*a))
         return x1, x2
     
     if num_roots == 1:
+        print("1 root")
         x1 = (-d/c)
         return x1
         
@@ -59,25 +62,36 @@ if __name__ == '__main__':
 
    # solve equation : ay^3 + by^2 + cy + d = 0 
    print("a = %.8f , b = %.8f, c = %.8f , d = %.8f" % (a,b,c,d))
-   (x1,x2,x3) = solve_cubic_equation(a, b, c, d)
-   print(f"The roots of the cubic equation are:")
-   print(f"x1 = {x1}")
-   print(f"x2 = {x2}")
-   print(f"x3 = {x3}")
+   list=[]
+   try :
+      (x1,x2,x3) = solve_cubic_equation(a, b, c, d)
+      print(f"The roots of the cubic equation are:")
+      print(f"x1 = {x1}")
+      print(f"x2 = {x2}")
+      print(f"x3 = {x3}")
+      list = (x1,x2,x3)
+   except :       
+      (x1) = solve_cubic_equation(a, b, c, d)
+      list = (x1,)
 
    print("\n\nPhysical solutions:")   
    good=0
    physical_solutions=[]
-   for x in (x1,x2,x3) :   
+   for x in list :   
       x_im = numpy.imag(x)
       x_re = numpy.real(x)   
       d  = 0.00
       if math.fabs(x_im) < 1e-10 and x_re >= 0 :    
          d = x_re*x_re
          x_d = d/(D-d)
+         d_km = d*3.0857*1e13 # km
          good = good + 1
          physical_solutions.append(d)
-         print("Physical solution %d = %.8f pc (x = %.8f)" % (good,d,x_d))
+         
+         theta_arcsec = 0.909545262*math.sqrt(t_ms/d)
+         v_riss = 1731.46779*d*theta_arcsec/t_riss
+         
+         print("Physical solution %d = %.8f pc = %e [mln km] (x = %.8f) -> theta = %.6f [arcsec] , V_riss = %.8f [km/s]" % (good,d,d_km/1e6,x_d,theta_arcsec,v_riss))
       
 
 

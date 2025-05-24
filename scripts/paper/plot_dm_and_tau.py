@@ -98,14 +98,14 @@ def main() :
 
    fig, ax1 = plt.subplots()
 
-   color = 'tab:red'
+   color = 'red'
    ax1.set_xlabel('MJD [days]',fontsize=20)
    ax1.set_ylabel('DM - 56.705825 [pc/cm$^3$]', color=color, fontsize=20)
 #   ax1.plot(t, data1, color=color, marker='+', linestyle='None' )
    ax1.errorbar( x_arr_mjd, y_arr, yerr=y_err, fmt='o', color=color )
 #   if len(jb_mjd) > 0 :
 #   ax1.plot( jb_mjd, jb_dm, fmt='o', color='tab:black' )
-   color2='tab:red'
+   color2='black'
    ax1.plot( jb_mjd, jb_dm, marker='*', color=color2, markersize=12 )
    ax1.tick_params(axis='y', labelcolor=color)
 #   ax1.yaxis.get_label().set_fontsize(40)
@@ -114,7 +114,7 @@ def main() :
 
    ax2 = ax1.twinx()  # instantiate a second Axes that shares the same x-axis
 
-   color = 'tab:blue'
+   color = 'blue'
    ax2.set_ylabel(r'Scattering Time ($\tau$) [ms]', color=color, fontsize=20)  # we already handled the x-label with ax1
 #   ax2.plot(t, data2, color=color)
    ax2.errorbar( tau1_arr_mjd, tau1_arr, yerr=tau1_err, fmt='v', color=color )

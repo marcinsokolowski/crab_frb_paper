@@ -13,7 +13,7 @@ v0=120 # km/s
 if len(sys.argv) > 2:
    v0 = float( sys.argv[2] )
 
-dt = 80 # in days
+dt = 75 # in days
 if len(sys.argv) > 2:
    dt = float( sys.argv[3] )
 
@@ -39,6 +39,7 @@ delta_DM = 0.027
 ne_peak = delta_DM/(math.sqrt(2*math.pi)*sigma_blob)
 
 print("Sigma_blob = %e [pc]" % (sigma_blob))
+print("6*Sigma_blob = %e [pc]" % (6*sigma_blob))
 print("ne_peak    = %e [e-/cm^3]" % (ne_peak))
 
    
