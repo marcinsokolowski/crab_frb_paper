@@ -530,7 +530,7 @@ Double_t tau_vs_mjd( Double_t* x, Double_t* y )
 //   Double_t delta_ne = peak_ne*exp(-(yy*yy)/(2.00*sigma_dm*sigma_dm)); // *sqrt(sigma)
 //   Double_t tau = tau0 + 52542.00*(delta_ne*delta_ne)*(d_pc/a_pc)*d_pc*(1.00/(f*f*f*f));
 
-   Double_t tau = tau0 + 1.20879*(theta_l)*exp(-((t-t_peak)*(t-t_peak))/(sigma_time*sigma_time));
+   Double_t tau = tau0 + 1.20879*(theta_l)*exp(-((t-t_peak)*(t-t_peak))/(2.00*sigma_time*sigma_time));
    return tau;
 }
 
