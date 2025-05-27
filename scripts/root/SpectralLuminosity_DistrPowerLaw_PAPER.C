@@ -393,6 +393,8 @@ void SpectralLuminosity_DistrPowerLaw_PAPER( const char* fname, double TotalTime
       par[0] = 100;
  
       pFitFunc->SetParameters(par);
+      pFitFunc->SetParName(0,"N_{ref}");
+      pFitFunc->SetParName(1,"#alpha");
       histo->Fit("power_law_distrib","E,V","",fit_min_x,fit_max_x);
 //      histo->GetFunction("power_law_distrib")->SetParameters(par);
 //      histo->Fit("power_law_distrib","E,V","",fit_min_x,fit_max_x);
