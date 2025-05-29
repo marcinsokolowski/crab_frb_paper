@@ -10,32 +10,35 @@ path=`pwd`
 for dataset in `ls -d $template`
 do
    cd $dataset
-   mkdir -p scamp
-   cd scamp
+   if [[ -d scamp ]]; then
+      echo "Dataset $dataset already processed -> skipped. Remove directory scamp/ to reprocessed otherwise there will be ERRORS"
+   else   
+      mkdir -p scamp
+      cd scamp
    
-   echo "cp ../*.ar ."
-   cp ../*.ar .
+      echo "cp ../*.ar ."
+      cp ../*.ar .
    
-   arfile=`ls *.ar | tail -1`
-   ln -s /home/msok/github/psrchive/More/python/.libs/_psrchive.so
+      arfile=`ls *.ar | tail -1`
+      ln -s /home/msok/github/psrchive/More/python/.libs/_psrchive.so
    
-   echo "python ~/github/SCAMP_I/create_config_ascii_from_archive.py -f $arfile -d ./"
-   python ~/github/SCAMP_I/create_config_ascii_from_archive.py -f $arfile -d ./
+      echo "python ~/github/SCAMP_I/create_config_ascii_from_archive.py -f $arfile -d ./"
+      python ~/github/SCAMP_I/create_config_ascii_from_archive.py -f $arfile -d ./
    
-   ascii_file=${arfile}.4ch.ascii
-   csv_file=J0534+2200_config_4ch.csv
+      ascii_file=${arfile}.4ch.ascii
+      csv_file=J0534+2200_config_4ch.csv
    
-   echo "~/github/SCAMP_I/run.sh $ascii_file $csv_file"
-   ~/github/SCAMP_I/run.sh $ascii_file $csv_file    
+      echo "~/github/SCAMP_I/run.sh $ascii_file $csv_file"
+      ~/github/SCAMP_I/run.sh $ascii_file $csv_file    
    
-   read -p "Do you want continue  : [y/n] " answer
-   if [[ $answer == "y" || $answer == "Y" ]]; then
-      echo "Continuing to next dataset"
-   else
-      echo "Stopping script now"
-      exit
+      read -p "Do you want continue  : [y/n] " answer
+      if [[ $answer == "y" || $answer == "Y" ]]; then
+         echo "Continuing to next dataset"
+      else
+         echo "Stopping script now"
+         exit
+      fi
    fi
-
    
    cd $path
 done
