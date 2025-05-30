@@ -41,9 +41,9 @@ Double_t Line( Double_t* x, Double_t* y )
 Double_t power_law( Double_t* x, Double_t* y )
 {
     Double_t freq_mhz=x[0];
-    Double_t freq_ref = 200.00;
+    Double_t freq_ref = 250.00;
 
-    Double_t ret = y[0]*TMath::Power( (freq_mhz/freq_ref) , y[1] );
+    Double_t ret = y[0]*TMath::Power( (freq_mhz/freq_ref) , -(y[1]) );
 //    printf("ret = %.8f\n",ret); 
 
     return ret;
@@ -187,7 +187,7 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
 
    Double_t par[4];
    par[0] = 2.00;
-   par[1] = -3.50;
+   par[1] = 3.50;
    par[2] = 0.0;
    par[3] = 0.0;
 
@@ -219,7 +219,7 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
       if( strstr(fit_func_name,"line") || fit_func_name[0]=='l' || fit_func_name[0]=='L'
           || fit_func_name[0]=='h' || fit_func_name[0]=='H' || fit_func_name[0]=='p' ){
 //         line->SetParameters(par);
-         pGraph->Fit("fit_func","R");
+         pGraph->Fit("fit_func","R,F,E,M,V");
       }
 
       if( local_func ){
