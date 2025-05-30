@@ -65,7 +65,7 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
 
     TGraphErrors* pGraph = new TGraphErrors(q);
     for(int i=0;i<numVal;i++){
-        if( gVerb ){
+        if( gVerb || 1 ){
            printf("q=%d %f %f\n",(int)q, x_values[i], y_values[i] );
         }
 
@@ -359,8 +359,10 @@ int ReadResultsFile( const char* fname, Double_t* x_values, Double_t* y_values,
       if(buff[0]=='#')
          continue;      
 // what if nan is in any column that we are not interested in 
-      if(strstr(buff,"nan"))
+      if(strstr(buff,"nan")){
+         printf("WARNING : nan value skipped line = |%s|\n",buff);
          continue;
+      }
 
       //  9.39  377.000000  8.000000 328.757587  77.088256   298.312992 65.223146   44.506926
       // ncols = sscanf(buff,"%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f",&mag,&x,&y,&fval1,&fval2,&fval3,&fval4,&fval5);
@@ -418,6 +420,11 @@ int ReadResultsFile( const char* fname, Double_t* x_values, Double_t* y_values,
      int local_hour = localtm->tm_hour*10000 + localtm->tm_min*100 + localtm->tm_sec;
      if( all == 0 && gStartTime<=0 ){
          gStartTime = x_val;
+     }
+
+     if( y_val < -100 || y_val > 100 ){
+        printf("WARNING : wrong value skipped line = |%s|\n",buff);
+        continue;
      }
 
      
