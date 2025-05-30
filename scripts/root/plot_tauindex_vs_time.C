@@ -358,9 +358,9 @@ int ReadResultsFile( const char* fname, Double_t* x_values, Double_t* y_values,
          break;
       if(buff[0]=='#')
          continue;      
-// what if nan is in the column that we are not interested in 
-//      if(strstr(buff,"nan"))
-//         continue;
+// what if nan is in any column that we are not interested in 
+      if(strstr(buff,"nan"))
+         continue;
 
       //  9.39  377.000000  8.000000 328.757587  77.088256   298.312992 65.223146   44.506926
       // ncols = sscanf(buff,"%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f",&mag,&x,&y,&fval1,&fval2,&fval3,&fval4,&fval5);
@@ -450,7 +450,7 @@ int ReadResultsFile( const char* fname, Double_t* x_values, Double_t* y_values,
    return all;
 }  
 
-void plot_tauindex_vs_dm( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", const char* modelfile=NULL,
+void plot_tauindex_vs_time( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", const char* modelfile=NULL,
                const char* fit_func_name=NULL, double min_y=-10, 
                double max_y=1.0, int bLog=0, const char* szDescX="Date",
       const char* szDescY="#tau scaling index #beta, where (#nu/300)^{#beta}", const char* szTitle=NULL,
