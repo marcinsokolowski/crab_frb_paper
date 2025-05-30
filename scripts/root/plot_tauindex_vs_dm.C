@@ -1,3 +1,5 @@
+#include <time.h>
+
 // always verify line :
 // gROOT->Reset();
 #include <TROOT.h>
@@ -18,9 +20,12 @@
 
 int gLog=0;
 int gVerb=0;
-double gUNIXTIME = -1;
 
 #define MAX_ROWS 10000000
+Double_t gStartTime=0;
+struct tm* gmtime_tm=NULL;
+struct tm* localtime_tm=NULL;
+
 
 Double_t HorizontalLine( Double_t* x, Double_t* y )
 {
@@ -39,25 +44,13 @@ Double_t Line( Double_t* x, Double_t* y )
    // return (x[0]*y[0]);
 }
 
-Double_t power_law( Double_t* x, Double_t* y )
-{
-    Double_t freq_mhz=x[0];
-    Double_t freq_ref = 300.00;
-
-    Double_t ret = y[0]*TMath::Power( (freq_mhz/freq_ref) , (y[1]) );
-//    printf("ret = %.8f\n",ret); 
-
-    return ret;
-}
-
-
 TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal, 
          long q, TPad* pPad, const char* fit_func_name=NULL, 
          double min_y=-10000, double max_y=-10000,
          const char* szStarName="", const char* fname="default",
          int bLog=0, const char* szDescX=NULL, const char* szDescY=NULL,
          double fit_min_x=-100000, double fit_max_x=-100000, Double_t* x_values_err=NULL,  Double_t* y_values_err=NULL,
-         int ColorNum = kRed, const char* szOPT="AP", bool bShowError=true  )
+         int ColorNum = kBlack, const char* szOPT="AP", bool bShowError=true  )
 {
     int MarkerType = 20;
 
@@ -175,24 +168,21 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
          printf("Fitting straight line\n");
          line = new TF1("fit_func",Line,fit_min_x,fit_max_x,2);
          line_draw = new TF1("fit_func2",Line,minX,maxX,2);
-         local_func=1;
-      }
-      if( strcmp( fit_func_name, "powerlaw" )==0 || strcmp( fit_func_name, "power_law" )==0 || fit_func_name[0]=='p' ){
-         printf("Fitting power law\n");
-         line = new TF1("fit_func",power_law,fit_min_x,fit_max_x,2);
-         line_draw = new TF1("fit_func2",power_law,minX,maxX,2);
+
+         line->SetParName(0,"Slope (d#tau/d#DeltaDM)");
+         line->SetParName(1,"Intercept (#Tau_{0})");
+
          local_func=1;
       }
    }
 
 
    Double_t par[4];
-   par[0] = 2.00;
-   par[1] = -3.50;
+   par[0] = 0.1;
+   par[1] = 1.00;
    par[2] = 0.0;
    par[3] = 0.0;
 
-   line->SetParameters(par);
 
    if( local_func ){
       line->SetParameters(par);
@@ -218,9 +208,8 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
                 }
 
       if( strstr(fit_func_name,"line") || fit_func_name[0]=='l' || fit_func_name[0]=='L'
-          || fit_func_name[0]=='h' || fit_func_name[0]=='H' || fit_func_name[0]=='p' ){
-//         line->SetParameters(par);
-         pGraph->Fit("fit_func","R,F,E,M,V");
+          || fit_func_name[0]=='h' || fit_func_name[0]=='H' ){
+         pGraph->Fit("fit_func","R");
       }
 
       if( local_func ){
@@ -228,13 +217,6 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
 //         line->Draw("same");
          line_draw->SetParameters(par);
          line_draw->Draw("same");
- 
-         double par0_err = line->GetParError(0);
-         double par1_err = line->GetParError(1);
-
-         FILE* outf = fopen("FIT.txt","w");
-         fprintf(outf,"%.8f 0.00 %.8f %.8f %.8f %.8f\n",gUNIXTIME,par[1],par1_err,par[0],par0_err);
-         fclose(outf);         
       }
 
 
@@ -248,6 +230,34 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
 //      if( strcmp(fit_func_name,"line")==0 || fit_func_name[0]=='l' || fit_func_name[0]=='L'){
 
 
+
+      szDesc1 = "a = ";
+      szDesc1 += par[0];
+
+      if( strcmp(fit_func_name,"pol2")==0  ){
+             szDesc1 = "y = ";
+            szDesc1 += par[0];
+            szDesc1 += " + (";
+            szDesc1 += par[1];
+            szDesc1 += " *m) + (";
+            szDesc1 += par[2];
+            szDesc1 += " *m^2) i=";
+            // szDesc1 +=  i;                 
+      }
+      if( strcmp(fit_func_name,"pol1")==0  ){
+            szDesc1 = "y = ";
+            szDesc1 += par[0];
+            szDesc1 += " + ("; 
+            szDesc1 += par[1];
+            szDesc1 += " *m) i=";
+            // szDesc1 += i;
+      } 
+
+//        lat.DrawLatex(minX+(maxX-minX)*0.2,minY+(maxY-minY)*0.7,szDesc1.Data());
+
+      szDesc2 = "b = ";
+      szDesc2 += par[1];
+//        lat.DrawLatex(minX+(maxX-minX)*0.2,minY+(maxY-minY)*0.6,szDesc2.Data());
 
 //      }
    }
@@ -271,6 +281,36 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
       pGraph->GetHistogram()->SetYTitle("Power");
    }
    // pGraph->GetHistogram()->SetYTitle("sigmaG1_homeo/SigmaG1");
+
+   time_t ut_start_time = (time_t)gStartTime;
+//   if( !(gmtime_tm = gmtime( &ut_start_time )) ){
+   if( !(gmtime_tm = localtime( &ut_start_time )) ){   
+      printf("ERROR : could not convert unix time %d to ut time\n",ut_start_time);
+      return NULL;
+   }
+   localtime_tm = localtime( &ut_start_time );
+   printf("%.2u%.2u%.2u_%.2u%.2u%.2u\n",gmtime_tm->tm_year+1900,(gmtime_tm->tm_mon+1),gmtime_tm->tm_mday,gmtime_tm->tm_hour,gmtime_tm->tm_min,gmtime_tm->tm_sec);
+
+   char szStartLocalTime[256];   
+   localtime_tm = localtime( &ut_start_time );
+   sprintf(szStartLocalTime,"%.2u%.2u%.2u_%.2u%.2u%.2u\n",localtime_tm->tm_year+1900,(localtime_tm->tm_mon+1),localtime_tm->tm_mday,localtime_tm->tm_hour,localtime_tm->tm_min,localtime_tm->tm_sec);
+   
+
+   pGraph->GetXaxis()->SetTimeDisplay(1);
+   TDatime da(gmtime_tm->tm_year+1900,gmtime_tm->tm_mon+1,gmtime_tm->tm_mday,gmtime_tm->tm_hour,gmtime_tm->tm_min,gmtime_tm->tm_sec);
+//   pGraph->GetXaxis()->SetTimeOffset((time_t)gStartTime+3600);
+//   pGraph->GetXaxis()->SetTimeOffset(da.Convert(kFALSE)+3600);
+//   pGraph->GetXaxis()->SetTimeOffset(da.Convert(kTRUE)+3600*8);
+   pGraph->GetXaxis()->SetTimeOffset(da.Convert(kFALSE),"local");
+        printf("DEBUG : %s from ux=%d\n",da.AsString(),da.Convert(kFALSE));
+
+   char szTmp[128];
+   strftime(szTmp,128,"%y/%m/%d %H:%M",gmtime_tm);
+   printf("strftime = %s\n",szTmp);
+   
+   pGraph->GetXaxis()->SetTimeFormat("%y%m%d");
+//   pGraph->GetXaxis()->SetTimeFormat("%H:%M%F2012-05-17 04:00:00");
+
 
    TLatex lat;
    lat.SetTextAlign(23);
@@ -372,16 +412,21 @@ int ReadResultsFile( const char* fname, Double_t* x_values, Double_t* y_values,
             continue;                                        
      }
 //     printf("%s\n",buff);
-     
-     // sec -> ms
-     y_val = y_val*1000.00;
 
-     x_values[all] = x_val;
-     y_values[all] = y_val; // *1000.00;
+     time_t ux = x_val;
+     struct tm* localtm = localtime(&ux);
+     int local_hour = localtm->tm_hour*10000 + localtm->tm_min*100 + localtm->tm_sec;
+     if( all == 0 && gStartTime<=0 ){
+         gStartTime = x_val;
+     }
+
+     
+     x_values[all] = x_val - gStartTime;
+     y_values[all] = y_val;
      if( y_val > max_val ){
        max_val = y_val;
      }
-     if( gVerb || 1 ){
+     if( gVerb || 0 ){
            printf("values : %f %f\n",x_val,y_val);
           }
 
@@ -405,10 +450,10 @@ int ReadResultsFile( const char* fname, Double_t* x_values, Double_t* y_values,
    return all;
 }  
 
-void plot_power_law( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", const char* modelfile=NULL, double unixtime=-1,
-               const char* fit_func_name="powerlaw", double min_y=1.00, 
-               double max_y=3, int bLog=0, const char* szDescX="Frequency [MHz]",
-      const char* szDescY="Scattering Time #tau [ms]", const char* szTitle=NULL,
+void plot_tauindex_vs_dm( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", const char* modelfile=NULL,
+               const char* fit_func_name=NULL, double min_y=-10, 
+               double max_y=1.0, int bLog=0, const char* szDescX="Date",
+      const char* szDescY="#tau scaling index #beta, where (#nu/300)^{#beta}", const char* szTitle=NULL,
       double fit_min_x=-100000, double fit_max_x=-100000,
       int x_col=0, int y_col=2, const char* outpngfile=NULL )
 {
@@ -416,7 +461,6 @@ void plot_power_law( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", cons
       szTitle = basename;
    }
    gLog = bLog;
-   gUNIXTIME = unixtime;
    
    // gROOT->Reset();
    // const char* basename = "s_vs_sigma_g_sqr";

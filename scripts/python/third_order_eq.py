@@ -46,10 +46,12 @@ if __name__ == '__main__':
    if len(sys.argv) > 3:
       v_sc = float( sys.argv[3] )
 
+   D=2000 # pc
+   if len(sys.argv) > 4:
+      D = float( sys.argv[4] )
    
    v_psr = 120
    v_e = 30
-   D=2000 # pc
 
    alpha = 1574.848324697*math.sqrt(t_ms)/t_riss
    delta1 = v_psr - v_sc

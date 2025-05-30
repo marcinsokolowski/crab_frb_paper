@@ -31,13 +31,14 @@ do
       echo "~/github/SCAMP_I/run.sh $ascii_file $csv_file"
       ~/github/SCAMP_I/run.sh $ascii_file $csv_file    
    
-      read -p "Do you want continue  : [y/n] " answer
-      if [[ $answer == "y" || $answer == "Y" ]]; then
-         echo "Continuing to next dataset"
-      else
-         echo "Stopping script now"
-         exit
-      fi
+   fi
+
+   read -p "Do you want continue with next dataset : [y/n] " answer
+   if [[ $answer == "y" || $answer == "Y" ]]; then
+      echo "Continuing to next dataset"
+   else
+      echo "Stopping script now"
+      exit
    fi
    
    cd $path
