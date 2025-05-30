@@ -422,7 +422,7 @@ int ReadResultsFile( const char* fname, Double_t* x_values, Double_t* y_values,
          gStartTime = x_val;
      }
 
-     if( y_val < -100 || y_val > 100 ){
+     if( y_val < -50 || y_val > 50 ){
         printf("WARNING : wrong value skipped line = |%s|\n",buff);
         continue;
      }
@@ -458,7 +458,7 @@ int ReadResultsFile( const char* fname, Double_t* x_values, Double_t* y_values,
 }  
 
 void plot_tauindex_vs_time( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", const char* modelfile=NULL,
-               const char* fit_func_name=NULL, double min_y=-10, 
+               const char* fit_func_name="horline", double min_y=-10, 
                double max_y=1.0, int bLog=0, const char* szDescX="Date",
       const char* szDescY="#tau scaling index #beta, where (#nu/300)^{#beta}", const char* szTitle=NULL,
       double fit_min_x=-100000, double fit_max_x=-100000,

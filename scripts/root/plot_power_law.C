@@ -461,6 +461,15 @@ void plot_power_law( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", cons
    lq1 = ReadResultsFile( basename, x_value1, y_value1, -1, -1, x_col, y_col ); 
    int lq1_err = ReadResultsFile( basename, x_value1_err, y_value1_err, -1, -1, x_col+1, y_col+1 );
 
+   for(int i=0;i<lq1;i++){
+      if( y_value1[i] > maxY ){
+         maxY = y_value1[i];
+      }
+   }
+   if( maxY > max_y ){
+      max_y = maxY + 0.5;
+   }
+
    
    // drawing background graphs here :
    TGraphErrors* pGraph1 = DrawGraph( x_value1, y_value1, lq1, 1, NULL, 

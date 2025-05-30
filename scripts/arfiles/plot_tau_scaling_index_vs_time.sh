@@ -15,13 +15,20 @@ do
       unixtime=`cat ../UNIXTIME.txt`
       cd output/results/
       cp ../../../UNIXTIME.txt .
-      awk -F "," '{if(NR>1){print $9" 3.90625 "$20" "$21;}}' pulse_*_sum.ar.4ch.ascii_output.csv | awk '{if(NF>2){print $0;}}' > tau_vs_freq.txt
-
-      echo "cp ~/github/crab_frb_paper/scripts/root/plot_power_law.C ."   
-      cp ~/github/crab_frb_paper/scripts/root/plot_power_law.C .
+      csv_file=`ls pulse*output.csv | tail -1`
+      if [[ -s ${csv_file} ]]; then
+         awk -F "," '{if(NR>1){print $9" 3.90625 "$20" "$21;}}' ${csv_file} | awk '{if(NF>2){print $0;}}' > tau_vs_freq.txt
+         
+         if [[ -s tau_vs_freq.txt ]]; then
+            echo "cp ~/github/crab_frb_paper/scripts/root/plot_power_law.C ."   
+            cp ~/github/crab_frb_paper/scripts/root/plot_power_law.C .
    
    
-      root -l "plot_power_law.C(\"tau_vs_freq.txt\",NULL,${unixtime})"
+            root -l "plot_power_law.C(\"tau_vs_freq.txt\",NULL,${unixtime})"
+         else
+            echo "WARNING : tau_vs_freq.txt is empty (not good fit)"
+         fi
+      fi
       cd $path
    else
       echo "WARNING : output/results/ subdirectory does not exist -> ignored"
@@ -34,4 +41,4 @@ cat ${template}/output/results/FIT.txt > tau_index_vs_time.txt
 
 cp ~/github/crab_frb_paper/scripts/root/plot_tauindex_vs_dm.C .
 
-root -l "plot_tauindex_vs_dm.C(\"tau_index_vs_time.txt\")"
+root -l "plot_tauindex_vs_time.C(\"tau_index_vs_time.txt\")"
