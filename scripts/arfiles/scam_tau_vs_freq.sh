@@ -6,11 +6,15 @@ if [[ -n "$1" && "$1" != "-" ]]; then
 fi
 
 model="iso"
+outdir="scamp"
 if [[ -n "$2" && "$2" != "-" ]]; then
    model="$2"
+   
+   # only overwritten when model is provided otherwise default outdir is scamp to be consistent
+   outdir="scamp_${model}"
 fi
 
-outdir="scamp_${model}"
+# DEFULAT is above : only overwritten when model is provided otherwise default outdir is scamp to be consistent
 if [[ -n "$3" && "$3" != "-" ]]; then
    outdir="$3"
 fi
@@ -26,6 +30,7 @@ do
    else   
       mkdir -p ${outdir}
       cd ${outdir}
+      pwd
    
       echo "cp ../*.ar ."
       cp ../*.ar .
