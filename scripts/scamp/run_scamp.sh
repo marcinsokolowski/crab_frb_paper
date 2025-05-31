@@ -15,6 +15,7 @@ if [[ -n "$2" && "$2" != "-" ]]; then
    configfile="$2"
 fi
 
+# models can be iso (for ISOTROPIC) or onedim (for ANISOTROPIC)
 model=iso
 if [[ -n "$3" && "$3" != "-" ]]; then
    model="$3"

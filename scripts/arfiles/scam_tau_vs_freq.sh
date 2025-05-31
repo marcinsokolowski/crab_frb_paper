@@ -5,16 +5,22 @@ if [[ -n "$1" && "$1" != "-" ]]; then
    template="$1"
 fi
 
+outdir="scamp"
+if [[ -n "$2" && "$2" != "-" ]]; then
+   outdir="$2"
+fi
+
+
 path=`pwd`
 
 for dataset in `ls -d $template`
 do
    cd $dataset
-   if [[ -d scamp ]]; then
-      echo "Dataset $dataset already processed -> skipped. Remove directory scamp/ to reprocessed otherwise there will be ERRORS"
+   if [[ -d ${outdir} ]]; then
+      echo "Dataset $dataset already processed -> skipped. Remove directory ${outdir} to reprocessed otherwise there will be ERRORS"
    else   
-      mkdir -p scamp
-      cd scamp
+      mkdir -p ${outdir}
+      cd ${outdir}
    
       echo "cp ../*.ar ."
       cp ../*.ar .
