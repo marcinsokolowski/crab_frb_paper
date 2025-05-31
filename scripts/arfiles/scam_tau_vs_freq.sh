@@ -5,9 +5,14 @@ if [[ -n "$1" && "$1" != "-" ]]; then
    template="$1"
 fi
 
-outdir="scamp"
+model="iso"
 if [[ -n "$2" && "$2" != "-" ]]; then
-   outdir="$2"
+   model="$2"
+fi
+
+outdir="scamp_${model}"
+if [[ -n "$3" && "$3" != "-" ]]; then
+   outdir="$3"
 fi
 
 
@@ -34,8 +39,8 @@ do
       ascii_file=${arfile}.4ch.ascii
       csv_file=J0534+2200_config_4ch.csv
    
-      echo "~/github/SCAMP_I/run.sh $ascii_file $csv_file"
-      ~/github/SCAMP_I/run.sh $ascii_file $csv_file    
+      echo "~/github/SCAMP_I/run.sh $ascii_file $csv_file $model"
+      ~/github/SCAMP_I/run.sh $ascii_file $csv_file $model
    
    fi
 
