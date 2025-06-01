@@ -59,10 +59,12 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
          double min_y=-10000, double max_y=-10000,
          const char* szStarName="", const char* fname="default",
          int bLog=0, const char* szDescX=NULL, const char* szDescY=NULL,
-         double fit_min_x=-100000, double fit_max_x=-100000, Double_t* x_values_err=NULL,  Double_t* y_values_err=NULL,
+         double fit_min_x=2.278753601, double fit_max_x=2.380211242, Double_t* x_values_err=NULL,  Double_t* y_values_err=NULL,
          int ColorNum = kRed, const char* szOPT="AP", bool bShowError=true  )
 {
     int MarkerType = 20;
+//    fit_min_x=0.00;
+//    fit_max_x=1000.00;
 
     Double_t z,sigma_z,const_part;
     TF1 *line = NULL;
@@ -75,8 +77,8 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
 
     TGraphErrors* pGraph = new TGraphErrors(q);
     for(int i=0;i<numVal;i++){
-        if( gVerb ){
-           printf("q=%d %f %f\n",(int)q, x_values[i], y_values[i] );
+        if( gVerb || 1 ){
+           printf("q=%d %f %f\n",i, x_values[i], y_values[i] );
         }
 
         pGraph->SetPoint( i, x_values[i], y_values[i] );
@@ -91,12 +93,10 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
         if(y_values[i]<minY)
             minY = y_values[i];
 
-        if( x_values_err && y_values_err ){
-           double x_err = x_values_err[i];
-           if( gFreqErrorsZero > 0 ){
-              x_err = 0.01;
-           }
+        if( y_values_err ){
+           double x_err = 0.00;
            pGraph->SetPointError( i, x_err, y_values_err[i] ); 
+           printf("\terror = %.8f\n",y_values_err[i]);
         }
     }
     printf("Found min_x=%.2f , max_x=%.2f\n",minX,maxX);
@@ -105,68 +105,15 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
     Double_t stepY = (maxY-minY)/10.00;
     printf("Found  stepX=%.2f , stepY=%.2f\n",stepX,stepY);
 
-    // pPad->DrawFrame(minX-stepX,minY-stepY,maxX+stepX,maxY+stepY);
-   if( min_y!=-1 && max_y!=-1 ){
-      // pPad->DrawFrame(minX-stepX,min_y,maxX+stepX,max_y);
-   }else{
-      // pPad->DrawFrame(minX-stepX,0,maxX+stepX,maxY+stepY);
-   }
-  //    pPad->SetGrid();   
-
-
    double r=1.00;
    double norm = 1;
    double mean = 1;
    double sigma = 1;
-/*
-   TH1F*  histo = new TH1F("adu_histo","adu_histo",50,minY,maxY);
-   for(int i=0;i<numVal;i++){
-      histo->Fill( y_values[i] );
-   }
-   histo->Fit("gaus","0");
-   norm = histo->GetFunction("gaus")->GetParameter(0);
-   mean = histo->GetFunction("gaus")->GetParameter(1);
-   sigma = histo->GetFunction("gaus")->GetParameter(2);
-   r = (sigma/mean);
-                                                                                
-   printf("Gauss_norm = %.8f\n",norm);
-   printf("Gauss_sigma = %.8f\n",sigma);
-   printf("Gauss_mean = %.8f\n",mean);
-   printf("sigma/mean = %8f\n",(sigma/mean));
-*/
-
 
     pGraph->SetMarkerStyle(MarkerType);
     pGraph->SetMarkerColor(ColorNum);
-    if( min_y>-10000 && max_y>-10000 ){
-       pGraph->SetMinimum( min_y );
-       pGraph->SetMaximum( max_y );
-       printf("Set Min/Max = (%.2f,%.2f)\n",min_y,max_y);
-    }else{      
-       double minVal = minY-stepY;
-       if( bLog ){
-          if( minVal<0 ){
-             minVal = 1;
-          }
-       }
-
-       pGraph->SetMinimum( minVal );
-       pGraph->SetMaximum( maxY+stepY );
-       printf("Set Min/Max = (%.2f,%.2f)\n",minVal,(maxY+stepY));
-    }
-//    pGraph->SetMinimum( -90 );
-//    pGraph->SetMaximum( 90 );
     pGraph->SetTitle( szStarName );
-// WORKS 
-//    pGraph->GetXaxis()->SetLimits(0,1);
     pGraph->Draw( szOPT );
-
-   if( fit_min_x<=-100000 ){
-      fit_min_x = minX;
-   }
-   if( fit_max_x<=-100000 ){
-      fit_max_x = maxX;
-   }
 
    printf("fitting in x range (%.2f,%.2f)\n",fit_min_x,fit_max_x);
 
@@ -181,13 +128,13 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
       if( strcmp( fit_func_name, "line" )==0 || fit_func_name[0]=='l' ){
          printf("Fitting straight line\n");
          line = new TF1("fit_func",Line,fit_min_x,fit_max_x,2);
-         line_draw = new TF1("fit_func2",Line,minX,maxX,2);
+         line_draw = new TF1("fit_func2",Line,fit_min_x,fit_max_x,2);
          local_func=1;
       }
       if( strcmp( fit_func_name, "powerlaw" )==0 || strcmp( fit_func_name, "power_law" )==0 || fit_func_name[0]=='p' ){
          printf("Fitting power law\n");
          line = new TF1("fit_func",power_law,fit_min_x,fit_max_x,2);
-         line_draw = new TF1("fit_func2",power_law,minX,maxX,2);
+         line_draw = new TF1("fit_func2",power_law,fit_min_x,fit_max_x,2);
          local_func=1;
       }
    }
@@ -195,7 +142,7 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
 
    Double_t par[4];
    par[0] = 2.0;
-   par[1] = -2.00; // -3.50;
+   par[1] = -3.00; // -3.50;
    par[2] = 0.0;
    par[3] = 0.0;
 
@@ -203,44 +150,18 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
       line->SetParameters(par);
    }
 
-   if( strcmp( fit_func_name, "powerlaw" )==0 || strcmp( fit_func_name, "power_law" )==0 || fit_func_name[0]=='p' ){
-      par[0] = TMath::Power( 10, gFitParams[1])*TMath::Power( gFreqRef , gFitParams[0] );
-      par[1] = gFitParams[0]; // ok 
-
-      printf("Power law fit start parameters = %.8f , %.8f\n",par[0],par[1]);
-      line->SetParameters(par);
-
-      line->FixParameter( 0, par[0] );
-      line->FixParameter( 1, par[1] );
-
-      line->SetParLimits(0, 0.00, 10.00 );
-      line->SetParLimits(1, -10, 10 );
-   }
-
    if( fit_func_name && strlen(fit_func_name) ){
-      printf("fitting function : %s",fit_func_name);
+      printf("fitting function : %s\n",fit_func_name);
 
       if( strcmp(fit_func_name,"gaus")==0 || fit_func_name[0]=='g' || fit_func_name[0]=='G' ){
          pGraph->Fit("gaus");
       }
-               if( strcmp(fit_func_name,"pol1")==0  ){
-                   pGraph->Fit("pol1");
-              // par[0]=pol1->GetParameter(0);
-              // par[1]=pol1->GetParameter(1);   
-                }
-
-              if( strcmp(fit_func_name,"pol2")==0  ){
-                   pGraph->Fit("pol2");
-                   // par[0]=pol2->GetParameter(0);
-                   // par[1]=pol2->GetParameter(1);
-                   // par[2]=pol2->GetParameter(2);
-
-                }
 
       if( strstr(fit_func_name,"line") || fit_func_name[0]=='l' || fit_func_name[0]=='L'
           || fit_func_name[0]=='h' || fit_func_name[0]=='H' || fit_func_name[0]=='p' ){
-//         line->SetParameters(par);
-         pGraph->Fit("fit_func","R,F,E,M,V");           
+         printf("DEBUG : fitting here ???\n");
+         pGraph->Fit("fit_func","R,F,E,M,V");                
+//         pGraph->Fit("fit_func","R");
 
          line->GetParameters(par);
          gFitParams[0] = par[0];
@@ -427,10 +348,10 @@ int ReadResultsFile( const char* fname, Double_t* x_values, Double_t* y_values,
 
 void plot_power_law_loglog( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", const char* modelfile=NULL, double unixtime=-1,
                int set_zero_freq_errors=1,
-               const char* fit_func_name="powerlaw", double min_y=1.00, 
-               double max_y=3, int bLog=0, const char* szDescX="Frequency [MHz]",
+               const char* fit_func_name="powerlaw", double min_y=0.00, 
+               double max_y=1.00, int bLog=0, const char* szDescX="Frequency [MHz]",
       const char* szDescY="Scattering Time #tau [ms]", const char* szTitle=NULL,
-      double fit_min_x=-100000, double fit_max_x=-100000,
+      double fit_min_x=2.278753601, double fit_max_x=2.380211242,
       int x_col=0, int y_col=2, const char* outpngfile=NULL )
 {
    if( !szTitle){
@@ -487,14 +408,14 @@ void plot_power_law_loglog( const char* basename="sigmaG1_vs_lapSigmaG1_for_root
    for(int i=0;i<lq1;i++){
       x_value1_log[i] = TMath::Log10( x_value1[i] );
       y_value1_log[i] = TMath::Log10( y_value1[i] );
-      y_value1_err_log[i] = TMath::Log10( y_value1_err[i] );
+      y_value1_err_log[i] = fabs((1.00/TMath::Log(10.00))*(1.00/y_value1[i])*y_value1_err[i]);
    }
 
    c1_log->cd();
    // drawing background graphs here :
    TGraphErrors* pGraphLogLog = DrawGraph( x_value1_log, y_value1_log, lq1, 1, NULL, 
-              "line", TMath::Log10(min_y), TMath::Log10(max_y), szTitle,
-            basename, 0, szDescX, szDescY, TMath::Log10( fit_min_x ), TMath::Log10( fit_max_x ), NULL, y_value1_err_log );
+              "line", min_y, max_y, szTitle,
+            basename, 0, szDescX, szDescY, fit_min_x, fit_max_x, NULL, y_value1_err_log );
 
   c1_log->Update();
 
