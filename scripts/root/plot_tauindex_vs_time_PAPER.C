@@ -432,7 +432,12 @@ int ReadResultsFile( const char* fname, Double_t* x_values, Double_t* y_values,
      if( bValues ){     
         x_values[all] = x_val - gStartTime;
      }
+     if( !bValues ){
+        // just set all Y errors to 0.5
+        y_val = 0.50;
+     }
      y_values[all] = y_val;
+
      if( y_val > max_val ){
        max_val = y_val;
      }
