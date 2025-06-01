@@ -93,8 +93,12 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
         if(y_values[i]<minY)
             minY = y_values[i];
 
-        if( y_values_err ){
-           double x_err = 0.00;
+        if( x_values_err && y_values_err ){
+           double x_err = x_values_err[i];
+           if( gFreqErrorsZero ){
+              x_err = 0.00;
+           }
+
            pGraph->SetPointError( i, x_err, y_values_err[i] ); 
            printf("\terror = %.8f\n",y_values_err[i]);
         }
@@ -160,8 +164,8 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
       if( strstr(fit_func_name,"line") || fit_func_name[0]=='l' || fit_func_name[0]=='L'
           || fit_func_name[0]=='h' || fit_func_name[0]=='H' || fit_func_name[0]=='p' ){
          printf("DEBUG : fitting here ???\n");
-         pGraph->Fit("fit_func","R,F,E,M,V");                
-//         pGraph->Fit("fit_func","R");
+//         pGraph->Fit("fit_func","R,F,E,M,V");                
+         pGraph->Fit("fit_func","R,E,M,V");
 
          line->GetParameters(par);
          gFitParams[0] = par[0];
@@ -182,9 +186,12 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
          double power_law_index = par[0];
          double power_law_index_err = par0_err;
          
+         double chi2 = line->GetChisquare();
+         double ndf = line->GetNDF();
+         double chi2_ndf = chi2/ndf;
 
          FILE* outf = fopen("FIT.txt","w");
-         fprintf(outf,"%.8f 0.00 %.8f %.8f %.8f %.8f\n",gUNIXTIME,power_law_index,power_law_index_err,power_law_norm,power_law_norm_err);
+         fprintf(outf,"%.8f 0.00 %.8f %.8f %.8f %.8f %.8f\n",gUNIXTIME,power_law_index,power_law_index_err,power_law_norm,power_law_norm_err,chi2_ndf);
          fclose(outf);         
       }
 
@@ -404,18 +411,20 @@ void plot_power_law_loglog( const char* basename="sigmaG1_vs_lapSigmaG1_for_root
    Double_t* x_value1_log = new Double_t[MAX_ROWS];
    Double_t* y_value1_log = new Double_t[MAX_ROWS];
    Double_t* y_value1_err_log = new Double_t[MAX_ROWS];
+   Double_t* x_value1_err_log = new Double_t[MAX_ROWS];
 
    for(int i=0;i<lq1;i++){
       x_value1_log[i] = TMath::Log10( x_value1[i] );
       y_value1_log[i] = TMath::Log10( y_value1[i] );
       y_value1_err_log[i] = fabs((1.00/TMath::Log(10.00))*(1.00/y_value1[i])*y_value1_err[i]);
+      x_value1_err_log[i] = fabs((1.00/TMath::Log(10.00))*(1.00/x_value1[i])*x_value1_err[i]);
    }
 
    c1_log->cd();
    // drawing background graphs here :
    TGraphErrors* pGraphLogLog = DrawGraph( x_value1_log, y_value1_log, lq1, 1, NULL, 
               "line", min_y, max_y, szTitle,
-            basename, 0, szDescX, szDescY, fit_min_x, fit_max_x, NULL, y_value1_err_log );
+            basename, 0, szDescX, szDescY, fit_min_x, fit_max_x, x_value1_err_log, y_value1_err_log );
 
   c1_log->Update();
 
@@ -431,4 +440,6 @@ void plot_power_law_loglog( const char* basename="sigmaG1_vs_lapSigmaG1_for_root
       szPngName1 += ".png";
    }
    c1_log->Print(szPngName1.Data());
+
+   printf("PWD : %s\n",gSystem->pwd());
 }
