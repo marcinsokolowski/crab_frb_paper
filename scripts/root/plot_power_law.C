@@ -19,6 +19,7 @@
 int gLog=0;
 int gVerb=0;
 double gUNIXTIME = -1;
+int gFreqErrorsZero=0;
 
 #define MAX_ROWS 10000000
 
@@ -89,7 +90,11 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
             minY = y_values[i];
 
         if( x_values_err && y_values_err ){
-           pGraph->SetPointError( i, x_values_err[i], y_values_err[i] ); 
+           double x_err = x_values_err[i];
+           if( gFreqErrorsZero > 0 ){
+              x_err = 0.00;
+           }
+           pGraph->SetPointError( i, x_err, y_values_err[i] ); 
         }
     }
     printf("Found min_x=%.2f , max_x=%.2f\n",minX,maxX);
@@ -188,7 +193,7 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
 
    Double_t par[4];
    par[0] = 2.00;
-   par[1] = -3.50;
+   par[1] = 0.00; // -3.50;
    par[2] = 0.0;
    par[3] = 0.0;
 
@@ -406,6 +411,7 @@ int ReadResultsFile( const char* fname, Double_t* x_values, Double_t* y_values,
 }  
 
 void plot_power_law( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", const char* modelfile=NULL, double unixtime=-1,
+               int set_zero_freq_errors=0,
                const char* fit_func_name="powerlaw", double min_y=1.00, 
                double max_y=3, int bLog=0, const char* szDescX="Frequency [MHz]",
       const char* szDescY="Scattering Time #tau [ms]", const char* szTitle=NULL,
@@ -417,6 +423,7 @@ void plot_power_law( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", cons
    }
    gLog = bLog;
    gUNIXTIME = unixtime;
+   gFreqErrorsZero = set_zero_freq_errors;
    
    // gROOT->Reset();
    // const char* basename = "s_vs_sigma_g_sqr";

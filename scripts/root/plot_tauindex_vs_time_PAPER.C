@@ -50,10 +50,8 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
          const char* szStarName="", const char* fname="default",
          int bLog=0, const char* szDescX=NULL, const char* szDescY=NULL,
          double fit_min_x=-100000, double fit_max_x=-100000, Double_t* x_values_err=NULL,  Double_t* y_values_err=NULL,
-         int ColorNum = kBlack, const char* szOPT="AP", bool bShowError=true  )
+         int ColorNum = kRed, const char* szOPT="AP", bool bShowError=true, int MarkerType=20  )
 {
-    int MarkerType = 20;
-
     Double_t z,sigma_z,const_part;
     TF1 *line = NULL;
     TF1 *line_draw = NULL;
@@ -333,7 +331,7 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
 }
 
 int ReadResultsFile( const char* fname, Double_t* x_values, Double_t* y_values,
-                     int CondCol=-1, int CondValue=-1, int x_col=0, int y_col=0 )
+                     int CondCol=-1, int CondValue=-1, int x_col=0, int y_col=0, bool bValues=true )
 {
    const int lSize=1000;
    char buff[1000];
@@ -422,13 +420,18 @@ int ReadResultsFile( const char* fname, Double_t* x_values, Double_t* y_values,
          gStartTime = x_val - 86400.0;
      }
 
-     if( y_val < -50 || y_val >= 0 ){
-        printf("WARNING : wrong value skipped line = |%s|\n",buff);
-        continue;
-     }
+/*     if( bValues ){
+        if( y_val < -50 || y_val >= 0 ){
+           printf("WARNING : wrong value skipped line = |%s|\n",buff);
+           continue;
+        }
+     }*/
 
-     
-     x_values[all] = x_val - gStartTime;
+
+     x_values[all] = x_val;
+     if( bValues ){     
+        x_values[all] = x_val - gStartTime;
+     }
      y_values[all] = y_val;
      if( y_val > max_val ){
        max_val = y_val;
@@ -457,7 +460,50 @@ int ReadResultsFile( const char* fname, Double_t* x_values, Double_t* y_values,
    return all;
 }  
 
-void plot_tauindex_vs_time( const char* basename="sigmaG1_vs_lapSigmaG1_for_root", const char* modelfile=NULL,
+int clean_data( Double_t* x_value1, Double_t* y_value1, int& lq1, Double_t* x_value1_err, Double_t* y_value1_err, int& lq1_err )
+{
+   int lq_out = 0;
+   Double_t* tmp_x = new Double_t[lq1];
+   Double_t* tmp_y = new Double_t[lq1];
+   Double_t* tmp_x_err = new Double_t[lq1];
+   Double_t* tmp_y_err = new Double_t[lq1];
+
+   for(int i=0;i<lq1;i++){
+      double y_val = y_value1[i];
+      bool good = true;
+      printf("CLEAN DATA CHECKING POINT : %.8f %.8f %.8f %.8f\n",x_value1[i],y_value1[i],x_value1_err[i],y_value1_err[i]);
+
+      if( y_val < -10 || y_val >= 0 ){
+         good = false;
+      }
+
+      if( good ){
+         tmp_x[lq_out] = x_value1[i];
+         tmp_y[lq_out] = y_value1[i];
+         tmp_x_err[lq_out] = x_value1_err[i];
+         tmp_y_err[lq_out] = y_value1_err[i];
+         lq_out++;
+      }else{
+         printf("CLEAN DATA SKIPPED POINT : %.8f %.8f %.8f %.8f\n",x_value1[i],y_value1[i],x_value1_err[i],y_value1_err[i]);
+      }
+   }
+
+   lq1 = lq_out;
+   lq1_err = lq_out;
+   for(int i=0;i<lq_out;i++){
+      x_value1[i] = tmp_x[i];
+      y_value1[i] = tmp_y[i];
+      x_value1_err[i] = tmp_x_err[i];
+      y_value1_err[i] = tmp_y_err[i];
+   }
+
+   return lq_out;
+}
+
+
+// tau_index_vs_time_chi2ndfLT3.txt
+// tau_index_vs_time.txt
+void plot_tauindex_vs_time_PAPER( const char* basename="tau_index_vs_time.txt", const char* allpoints=NULL, // tau_index_vs_time_chi2ndfLT3.txt
                const char* fit_func_name="horline", double min_y=-10, 
                double max_y=1.0, int bLog=0, const char* szDescX="Date",
       const char* szDescY="#tau scaling index #beta, where (#nu/215)^{#beta}", const char* szTitle=NULL,
@@ -510,25 +556,32 @@ void plot_tauindex_vs_time( const char* basename="sigmaG1_vs_lapSigmaG1_for_root
 
 
    lq1 = ReadResultsFile( basename, x_value1, y_value1, -1, -1, x_col, y_col ); 
-   int lq1_err = ReadResultsFile( basename, x_value1_err, y_value1_err, -1, -1, x_col+1, y_col+1 );
+   int lq1_err = ReadResultsFile( basename, x_value1_err, y_value1_err, -1, -1, x_col+1, y_col+1, false );
+   lq1 = clean_data( x_value1, y_value1, lq1, x_value1_err, y_value1_err, lq1_err );
+   printf("READ %d points and %d errors from file %s\n",lq1,lq1_err,basename);
 
+   
    
    // drawing background graphs here :
    TGraphErrors* pGraph1 = DrawGraph( x_value1, y_value1, lq1, 1, NULL, 
               fit_func_name, min_y, max_y, szTitle,
             basename, bLog, szDescX, szDescY, fit_min_x,
-            fit_max_x, x_value1_err, y_value1_err );
+            fit_max_x, x_value1_err, y_value1_err ); // , kRed, "PA", false, 107 );
    
-   if( modelfile ){
+   if( allpoints ){
       Double_t* x_value2 = new Double_t[MAX_ROWS];
       Double_t* y_value2 = new Double_t[MAX_ROWS];
+      Double_t* x_value2_err = new Double_t[MAX_ROWS];
+      Double_t* y_value2_err = new Double_t[MAX_ROWS];
 
-      lq2 = ReadResultsFile( modelfile, x_value2, y_value2, -1, -1, 0, 1 );
+      lq2 = ReadResultsFile( allpoints, x_value2, y_value2, -1, -1, x_col, y_col );      
+      int lq2_err = ReadResultsFile( basename, x_value2_err, y_value2_err, -1, -1, x_col+1, y_col+1, false );
+      printf("READ %d points and %d errors from file %s\n",lq2,lq2_err,allpoints);
 
       TGraphErrors* pGraph2 = DrawGraph( x_value2, y_value2, lq2, 1, NULL, 
-              fit_func_name, min_y, max_y, szTitle,
+              NULL, min_y, max_y, szTitle,
             basename, bLog, szDescX, szDescY, fit_min_x,
-            fit_max_x, NULL, NULL, kBlack, "L,same", false );
+            fit_max_x, x_value2_err, y_value2_err, kBlack, "P,same", false, 20 );
  
    }
 

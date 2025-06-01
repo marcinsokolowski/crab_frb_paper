@@ -145,14 +145,17 @@ TGraphErrors* DrawGraph( Double_t* x_values, Double_t* y_values, int numVal,
 
 
    Double_t par[4];
-   par[0] = 2.0;
-   par[1] = -3.00; // -3.50;
+   par[0] = gFitParams[0];
+   par[1] = gFitParams[1]; // -3.50;
    par[2] = 0.0;
    par[3] = 0.0;
 
    if( local_func ){
       line->SetParameters(par);
    }
+
+   line->SetParLimits(0,-100,10);
+   line->SetParLimits(1,0,10000000.00);
 
    if( fit_func_name && strlen(fit_func_name) ){
       printf("fitting function : %s\n",fit_func_name);
@@ -367,6 +370,9 @@ void plot_power_law_loglog( const char* basename="sigmaG1_vs_lapSigmaG1_for_root
    gLog = bLog;
    gUNIXTIME = unixtime;
    gFreqErrorsZero = set_zero_freq_errors;
+
+   gFitParams[0] = -3;
+   gFitParams[1] = 6.00;
    
    // gROOT->Reset();
    // const char* basename = "s_vs_sigma_g_sqr";
@@ -417,12 +423,22 @@ void plot_power_law_loglog( const char* basename="sigmaG1_vs_lapSigmaG1_for_root
       x_value1_log[i] = TMath::Log10( x_value1[i] );
       y_value1_log[i] = TMath::Log10( y_value1[i] );
       y_value1_err_log[i] = fabs((1.00/TMath::Log(10.00))*(1.00/y_value1[i])*y_value1_err[i]);
+
+      // overwrite errors with 1sigma = (BW/4)/6 ~= 1.3 MHz 
+      x_value1_err[i] = 1.30;
       x_value1_err_log[i] = fabs((1.00/TMath::Log(10.00))*(1.00/x_value1[i])*x_value1_err[i]);
    }
 
    c1_log->cd();
    // drawing background graphs here :
-   TGraphErrors* pGraphLogLog = DrawGraph( x_value1_log, y_value1_log, lq1, 1, NULL, 
+   TGraphErrors* pGraphLogLog0 = DrawGraph( x_value1_log, y_value1_log, lq1, 1, NULL, 
+              "line", min_y, max_y, szTitle,
+            basename, 0, szDescX, szDescY, fit_min_x, fit_max_x, NULL, NULL );
+
+   c1_log->Update();
+//   sleep(10);
+ 
+   TGraphErrors* pGraphLogLog1 = DrawGraph( x_value1_log, y_value1_log, lq1, 1, NULL, 
               "line", min_y, max_y, szTitle,
             basename, 0, szDescX, szDescY, fit_min_x, fit_max_x, x_value1_err_log, y_value1_err_log );
 

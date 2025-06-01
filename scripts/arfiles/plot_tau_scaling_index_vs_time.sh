@@ -5,7 +5,7 @@ if [[ -n "$1" && "$1" != "-" ]]; then
    template="$1"
 fi
 
-set_zero_freq_errors=1
+set_zero_freq_errors=0
 if [[ -n "$2" && "$2" != "-" ]]; then
    set_zero_freq_errors=$2
 fi
@@ -75,5 +75,9 @@ cp ~/github/crab_frb_paper/scripts/root/plot_tauindex_vs_dm.C .
 
 root -l "plot_tauindex_vs_time.C(\"tau_index_vs_time.txt\")"
 
-awk '{if($7<=5){print $0;}}' tau_index_vs_time.txt > tau_index_vs_time_chi2ndfLT5.txt
-root -l "plot_tauindex_vs_time.C(\"tau_index_vs_time_chi2ndfLT5.txt\")"
+# awk '{if($7<=5){print $0;}}' tau_index_vs_time.txt > tau_index_vs_time_chi2ndfLT5.txt
+# root -l "plot_tauindex_vs_time.C(\"tau_index_vs_time_chi2ndfLT5.txt\")"
+
+awk '{if($7<=3 && $7>0.5 && $3<0){print $0;}}' tau_index_vs_time.txt > tau_index_vs_time_chi2ndfLT3.txt
+root -l "plot_tauindex_vs_time.C(\"tau_index_vs_time_chi2ndfLT3.txt\")"
+
