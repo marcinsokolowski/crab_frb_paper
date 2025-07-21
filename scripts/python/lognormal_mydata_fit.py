@@ -3,6 +3,7 @@ from scipy.stats import lognorm
 import matplotlib.pyplot as plt
 import math
 from scipy.optimize import curve_fit
+from scipy.stats import norm, chisquare
 
 def gaussian(x, amplitude, mean, sigma):
    return amplitude * np.exp(-(x - mean)**2 / (2 * sigma**2))
@@ -102,7 +103,38 @@ if dofit :
    params, covariance = curve_fit(gaussian, bin_centers, counts, p0=p0)
    params_err = np.sqrt(np.diag(covariance)) # Standard errors of the parameters
    amplitude_fit, mean_fit, sigma_fit = params
-   plt.plot(bin_centers, gaussian(bin_centers, *params), color='red', label='Gaussian Fit')
+   expected_counts = gaussian(bin_centers, *params)
+   plt.plot(bin_centers, expected_counts, color='red', label='Gaussian Fit')
+   
+   # Calculate expected counts by integrating the PDF over each bin
+   min_fit = params[1]
+   std_fit = params[2]
+   expected_counts2 = np.diff(norm.cdf(bin_edges, loc=mean_fit, scale=std_fit)) # * len(log_data)
+   # 4. Perform Chi-Squared Test
+#   chi2_statistic, p_value = chisquare(f_obs=counts, f_exp=expected_counts)
+    # ddof = number of parameters estimated from the data (e.g., 3 for a Gaussian: A, mu, sigma)
+#   chi2_statistic, p_value = chisquare(counts, f_exp=expected_counts, ddof=len(params))
+   print("DEBUG : %d vs. %d vs. %d" % (len(counts),len(expected_counts),len(expected_counts2)))
+#   chi2_sum = np.sum(((counts - expected_counts) ** 2) / (errors ** 2))
+   l = len(counts)
+   non_zero=0
+   chi2_sum = 0   
+   for i in range(0,l):
+      err = errors[i]
+
+      if err != 0 :
+         chi2_sum += ((counts[i] - expected_counts[i]) ** 2) / (err**2)
+         
+      if counts[i] > 0 :
+         non_zero += 1
+
+   # ndf - number of non zero bins - number of fit parameterss         
+   ndf = non_zero - 3 - 1
+   chi2_ndf = chi2_sum/ndf
+   print("Chi2 = %.8f, ndf = %d, Chi2/NDF = %.8f" % (chi2_sum,ndf,chi2_ndf))
+   
+#   print(f"Chi-squared statistic: {chi2_statistic:.2f}")
+#   print(f"P-value: {p_value:.3f}")
    
    a=10
    param_text = f"Normalisation = {params[0]:.2f} ± {params_err[0]:.2f}\n" \
