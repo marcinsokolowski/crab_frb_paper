@@ -438,9 +438,9 @@ void histo_time_between_pulses_log_normal( const char* fname,
 
 //      histo->GetFunction("power_law_distrib")->SetParameters(par);
 //      histo->Fit("power_law_distrib","E,V","",fit_min_x,fit_max_x);
-      histo->GetFunction("weibull_distrib")->GetParameters(par);
+//      histo->GetFunction("weibull_distrib")->GetParameters(par);
 //      parerrors=histo->GetFunction("power_law_distrib")->GetParErrors();
-      fit_lambda_err = histo->GetFunction("weibull_distrib")->GetParError(0);
+//      fit_lambda_err = histo->GetFunction("weibull_distrib")->GetParError(0);
 
       Double_t x_test[1],y_test[1];
       x_test[0] = 10.00;

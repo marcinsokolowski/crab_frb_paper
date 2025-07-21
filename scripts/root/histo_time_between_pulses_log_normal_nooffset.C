@@ -185,7 +185,7 @@ void histo_time_between_pulses_log_normal_nooffset( const char* fname,
                 int dofit=1, int dDbm2DbmPerHz=1,
                 double low=-5, double up=5, int bin_no=1000, double unixtime=-1,
                 const char* szExtDesc=NULL, int shift_text=0, int channel=0,
-                int bLog=0, const char* szTitleX="Log10(wait times [seconds])", const char* szTitleY="Occurance ", 
+                int bLog=0, const char* szTitleX="Wait Times [Log_{10}(seconds)]", const char* szTitleY="Counts", 
                 int DoBorder=1, const char* szTitle=NULL, const char* szOutFile=NULL,
                 const char* szOutPostfix="_histo", int unix_time=0, const char* flag=NULL,
                 int bNormalise=1, int bPrintHeader=1 )
@@ -277,7 +277,8 @@ void histo_time_between_pulses_log_normal_nooffset( const char* fname,
 
   
    char szHistoTitle[256];
-   sprintf(szHistoTitle,"Histo_%s",fname);
+//   sprintf(szHistoTitle,"Histo_%s",fname);
+   sprintf(szHistoTitle,"Log_{10}( WaitTimes )");
    int rejected=0;
 
 //   double border=(up-low)/10.00;
@@ -416,7 +417,7 @@ void histo_time_between_pulses_log_normal_nooffset( const char* fname,
       par[2] = 0.5;
  
       pFitFunc->SetParameters(par);
-      pFitFunc->SetParName(0,"log10(T_{0})");
+      pFitFunc->SetParName(0,"<log_{10}(T_{0})>");
       pFitFunc->SetParName(1,"Norm");
       pFitFunc->SetParName(2,"#sigma");
 //      pFitFunc->FixParameter(1,1.00);
@@ -430,13 +431,16 @@ void histo_time_between_pulses_log_normal_nooffset( const char* fname,
       gMinuit->mnemat(matrix0.GetMatrixArray(),n_par);
       matrix0.Print();
 
- 
+// printf("HERE ???\n"); 
 
 //      histo->GetFunction("power_law_distrib")->SetParameters(par);
 //      histo->Fit("power_law_distrib","E,V","",fit_min_x,fit_max_x);
-      histo->GetFunction("weibull_distrib")->GetParameters(par);
+      histo->GetFunction("Gaussian")->GetParameters(par);
 //      parerrors=histo->GetFunction("power_law_distrib")->GetParErrors();
-      fit_lambda_err = histo->GetFunction("weibull_distrib")->GetParError(0);
+//      fit_lambda_err = histo->GetFunction("weibull_distrib")->GetParError(0);
+
+// printf("HERE ???\n"); 
+
 
       Double_t x_test[1],y_test[1];
       x_test[0] = 10.00;
@@ -504,14 +508,14 @@ void histo_time_between_pulses_log_normal_nooffset( const char* fname,
 
    if( szTitleX && strlen(szTitleX) ){
       histo->SetXTitle( szTitleX );
-      histo->GetXaxis()->SetTitleSize(0.07);
-      histo->GetXaxis()->SetTitleOffset(0.60);
+      histo->GetXaxis()->SetTitleSize(0.05);
+      histo->GetXaxis()->SetTitleOffset(1.0);
       histo->GetXaxis()->SetLabelSize(0.05);
    }
    if( szTitleY && strlen(szTitleY) ){
       histo->SetYTitle( szTitleY );   
-      histo->GetYaxis()->SetTitleSize(0.07);
-      histo->GetYaxis()->SetTitleOffset(0.6);
+      histo->GetYaxis()->SetTitleSize(0.05);
+      histo->GetYaxis()->SetTitleOffset(1.5);
       histo->GetYaxis()->SetLabelSize(0.05);
    }
    
