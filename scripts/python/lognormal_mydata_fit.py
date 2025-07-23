@@ -2,8 +2,11 @@ import numpy as np
 from scipy.stats import lognorm
 import matplotlib.pyplot as plt
 import math
+import sys
 from scipy.optimize import curve_fit
 from scipy.stats import norm, chisquare
+
+debug=False
 
 def gaussian(x, amplitude, mean, sigma):
    return amplitude * np.exp(-(x - mean)**2 / (2 * sigma**2))
@@ -41,107 +44,120 @@ def read_data_file( filename="all_time_diff_snr10.txt", errors=True ) :
          if x < min_x :
             min_x = x
 
-         print("DEBUG : %.4f" % (x))   
+         if debug:
+            print("DEBUG : %.4f" % (x))   
 
 #   print("DEBUG : returning with errors : len() = %d, %d, %d, %d" % (len(x_arr),len(x_err_arr),len(y_arr),len(y_err_arr)))
    print("DEBUG : returning array of %d values min = %.8f , max = %.8f" % (len(x_arr),min_x,max_x))
    return (np.array(x_arr),min_x,max_x)
 
-(data,min_x,max_x) = read_data_file("all_time_diff_snr10.txt")
+if __name__ == '__main__':
+  infile="all_time_diff_snr10.txt"
+  if len(sys.argv) > 1:
+     infile = sys.argv[1] 
 
-# Generate log-normally distributed data
-# s = 0.5  # Shape parameter
-# scale = np.exp(2) # Scale parameter (e^mu)
-# data = lognorm.rvs(s, scale=scale, size=1000)
+  (data,min_x,max_x) = read_data_file( filename=infile )
 
-# Option 1: Equal-width bins
-num_bins = 50
-bins_equal = np.linspace(data.min(), data.max(), num_bins + 1)
+  # Generate log-normally distributed data
+  # s = 0.5  # Shape parameter
+  # scale = np.exp(2) # Scale parameter (e^mu)
+  # data = lognorm.rvs(s, scale=scale, size=1000)
 
-# Option 2: Logarithmically spaced bins (useful for log-normal data)
-# Transform data to log-scale first
-log_data = np.log10(data)
-num_log_bins = 30
-# bins_log = np.exp(np.linspace(log_data.min(), log_data.max(), num_log_bins + 1))
-# bins_log = np.linspace(log_data.min(), log_data.max(), num_log_bins + 1)
-bins_log = np.linspace(-2,3,num_log_bins + 1)
+  # Option 1: Equal-width bins
+  num_bins = 50
+  bins_equal = np.linspace(data.min(), data.max(), num_bins + 1)
+
+  # Option 2: Logarithmically spaced bins (useful for log-normal data)
+  # Transform data to log-scale first
+  log_data = np.log10(data)
+  num_log_bins = 30
+  # bins_log = np.exp(np.linspace(log_data.min(), log_data.max(), num_log_bins + 1))
+  # bins_log = np.linspace(log_data.min(), log_data.max(), num_log_bins + 1)
+  bins_log = np.linspace(-2,5,num_log_bins + 1)
 
 
-plt.figure(figsize=(10, 10))
-plt.hist(log_data, bins=bins_equal, edgecolor='black', alpha=0.7)
-plt.title('Histogram of Log-Normal Data (Equal-Width Bins)')
-plt.xlabel('Wait Times [sec]')
-plt.ylabel('Count')
-# plt.xscale('log')
-# plt.yscale('log')
-plt.grid(True)
-plt.show()
+#  plt.figure(figsize=(10, 10))
+#  plt.hist(log_data, bins=bins_equal, edgecolor='black', alpha=0.7)
+#  plt.title('Histogram of Log-Normal Data (Equal-Width Bins)')
+#  plt.xlabel('Wait Times [sec]')
+#  plt.ylabel('Count')
+  # plt.xscale('log')
+  # plt.yscale('log')
+#  plt.grid(True)
+#  plt.show()
 
-plt.figure(figsize=(10, 10))
-counts, bin_edges, _ = plt.hist(log_data, bins=bins_log, edgecolor='black', alpha=0.7)
-# 3. Calculate bin centers
-bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2
-# 4. Calculate error values (e.g., Poisson error for counts)
-# For unweighted histograms, statistical error is often sqrt(counts)
-errors = np.sqrt(counts)
+  plt.figure(figsize=(10, 10))
+  counts, bin_edges, _ = plt.hist(log_data, bins=bins_log, edgecolor='black', alpha=0.7)
+  # 3. Calculate bin centers
+  bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2
+  # 4. Calculate error values (e.g., Poisson error for counts)
+  # For unweighted histograms, statistical error is often sqrt(counts)
+  errors = np.sqrt(counts)
 
-# 5. Plot error bars
-plt.errorbar(bin_centers, counts, yerr=errors, fmt='o', color='black', capsize=3, label='Error Bars')
+  # 5. Plot error bars
+  plt.errorbar(bin_centers, counts, yerr=errors, fmt='o', color='black', capsize=3, label='Error Bars')
 
-# plt.title('Histogram of Log-Normal Data (Logarithmically Spaced Bins)')
-plt.title('Histogram of $Log_{10}$( Wait times $\Delta$T )')
-plt.xlabel('Wait Times [$Log_{10}$(seconds)]')
-plt.ylabel('Count')
+  # plt.title('Histogram of Log-Normal Data (Logarithmically Spaced Bins)')
+  title='Histogram of $Log_{10}$( Wait times $\Delta$T ) : %s' %  infile
+  plt.title(title)
+  plt.xlabel('Wait Times [$Log_{10}$(seconds)]')
+  plt.ylabel('Count')
 
-dofit=True
-# Perform the fit
-if dofit :
-   # Initial guesses for amplitude, mean, and sigma
-   # max(counts) as amplitude, mean of data as mean, std of data as sigma
-   p0 = [np.max(counts), np.mean(log_data), np.std(log_data)]
-
-   params, covariance = curve_fit(gaussian, bin_centers, counts, p0=p0)
-   params_err = np.sqrt(np.diag(covariance)) # Standard errors of the parameters
-   amplitude_fit, mean_fit, sigma_fit = params
-   expected_counts = gaussian(bin_centers, *params)
-   plt.plot(bin_centers, expected_counts, color='red', label='Gaussian Fit')
+  dofit=True
+  # Perform the fit
+  if dofit :
+     outf = open("sigma_vs_snr.txt","a")
+  
+     # Initial guesses for amplitude, mean, and sigma
+     # max(counts) as amplitude, mean of data as mean, std of data as sigma
+     p0 = [np.max(counts), np.mean(log_data), np.std(log_data)]
+ 
+     params, covariance = curve_fit(gaussian, bin_centers, counts, p0=p0)
+     params_err = np.sqrt(np.diag(covariance)) # Standard errors of the parameters
+     amplitude_fit, mean_fit, sigma_fit = params
+     expected_counts = gaussian(bin_centers, *params)
+     plt.plot(bin_centers, expected_counts, color='red', label='Gaussian Fit')
    
-   # Calculate expected counts by integrating the PDF over each bin
-   min_fit = params[1]
-   std_fit = params[2]
-   expected_counts2 = np.diff(norm.cdf(bin_edges, loc=mean_fit, scale=std_fit)) # * len(log_data)
-   # 4. Perform Chi-Squared Test
-#   chi2_statistic, p_value = chisquare(f_obs=counts, f_exp=expected_counts)
-    # ddof = number of parameters estimated from the data (e.g., 3 for a Gaussian: A, mu, sigma)
-#   chi2_statistic, p_value = chisquare(counts, f_exp=expected_counts, ddof=len(params))
-   print("DEBUG : %d vs. %d vs. %d" % (len(counts),len(expected_counts),len(expected_counts2)))
-#   chi2_sum = np.sum(((counts - expected_counts) ** 2) / (errors ** 2))
-   l = len(counts)
-   non_zero=0
-   chi2_sum = 0   
-   for i in range(0,l):
-      err = errors[i]
+     # Calculate expected counts by integrating the PDF over each bin
+     min_fit = params[1]
+     std_fit = params[2]
+     expected_counts2 = np.diff(norm.cdf(bin_edges, loc=mean_fit, scale=std_fit)) # * len(log_data)
+     # 4. Perform Chi-Squared Test
+#     chi2_statistic, p_value = chisquare(f_obs=counts, f_exp=expected_counts)
+      # ddof = number of parameters estimated from the data (e.g., 3 for a Gaussian: A, mu, sigma)
+#     chi2_statistic, p_value = chisquare(counts, f_exp=expected_counts, ddof=len(params))
+     print("DEBUG : %d vs. %d vs. %d" % (len(counts),len(expected_counts),len(expected_counts2)))
+#     chi2_sum = np.sum(((counts - expected_counts) ** 2) / (errors ** 2))
+     l = len(counts)
+     non_zero=0
+     chi2_sum = 0   
+     for i in range(0,l):
+        err = errors[i]
 
-      if err != 0 :
-         chi2_sum += ((counts[i] - expected_counts[i]) ** 2) / (err**2)
+        if err != 0 :
+           chi2_sum += ((counts[i] - expected_counts[i]) ** 2) / (err**2)
          
-      if counts[i] > 0 :
-         non_zero += 1
+        if counts[i] > 0 :
+           non_zero += 1
 
-   # ndf - number of non zero bins - number of fit parameterss         
-   ndf = non_zero - 3 - 1
-   chi2_ndf = chi2_sum/ndf
-   print("Chi2 = %.8f, ndf = %d, Chi2/NDF = %.8f" % (chi2_sum,ndf,chi2_ndf))
+     # ndf - number of non zero bins - number of fit parameterss         
+     ndf = non_zero - 3 - 1
+     chi2_ndf = chi2_sum/ndf
+     print("Chi2 = %.8f, ndf = %d, Chi2/NDF = %.8f" % (chi2_sum,ndf,chi2_ndf))
    
 #   print(f"Chi-squared statistic: {chi2_statistic:.2f}")
 #   print(f"P-value: {p_value:.3f}")
    
-   a=10
-   param_text = f"Normalisation = {params[0]:.2f} ± {params_err[0]:.2f}\n" \
-                f"Mean($Log_{{10}}$( $\Delta$ T ) = {params[1]:.2f} ± {params_err[1]:.2f}\n" \
-                f"$\sigma$ = {params[2]:.2f} ± {params_err[2]:.2f}"
-   plt.text(0.05, 0.95, param_text, transform=plt.gca().transAxes, fontsize=15, verticalalignment='top', bbox=dict(boxstyle='round,pad=0.5', fc='wheat', alpha=0.5))
+     a=10
+     param_text = f"Normalisation = {params[0]:.2f} ± {params_err[0]:.2f}\n" \
+                  f"Mean($Log_{{10}}$( $\Delta$ T ) = {params[1]:.2f} ± {params_err[1]:.2f}\n" \
+                  f"$\sigma$ = {params[2]:.2f} ± {params_err[2]:.2f}"
+     plt.text(0.05, 0.95, param_text, transform=plt.gca().transAxes, fontsize=15, verticalalignment='top', bbox=dict(boxstyle='round,pad=0.5', fc='wheat', alpha=0.5))
+     
+     line="%s %.8f %.8f\n" % (infile,params[2],params_err[2])
+     outf.write(line)
+     outf.close()
    
 # plt.xscale('log') # Set x-axis to log scale for better visualization with log bins
-plt.grid(True)
-plt.show()
+  plt.grid(True)
+  plt.show()
