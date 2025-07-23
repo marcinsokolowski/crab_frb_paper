@@ -404,8 +404,8 @@ int ReadResultsFile( const char* fname, Double_t* x_values, Double_t* y_values,
 
 void plot_width_vs_snr( const char* basename="sigma_vs_snr_SORTED.txt", const char* modelfile=NULL,
                const char* fit_func_name="line", double min_y=0.00, 
-               double max_y=1.00, int bLog=0, const char* szDescX="DM [pc cm^{-3}]",
-      const char* szDescY="SNR pulse threshold", const char* szTitle="Log-normal sigma",
+               double max_y=1.00, int bLog=0, const char* szDescX="SNR pulse threshold",
+      const char* szDescY="Log-normal sigma", const char* szTitle="Log-normal sigma vs. SNR-threshold (~CONSTANT !?)",
       double fit_min_x=-100000, double fit_max_x=-100000,
       int x_col=0, int y_col=2, const char* outpngfile=NULL )
 {
